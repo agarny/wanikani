@@ -1,0 +1,12 @@
+build
+
+*.o
+.qmake.stash
+Makefile
+moc_dialog.cpp
+qrc_resources.cpp
+ui_dialog.h
+WaniKani
+WaniKani.app
+WaniKani.jpg
+WaniKani.pro.user
