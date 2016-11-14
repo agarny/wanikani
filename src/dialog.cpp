@@ -32,6 +32,7 @@ limitations under the License.
 #include <QNetworkReply>
 #include <QPainter>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -297,8 +298,7 @@ void Dialog::updateWallpaper()
     if (error || (kanjiState != oldKanjiState)) {
         // Default wallpaper
 
-        QString wallpaperFileName = QDir::toNativeSeparators(qApp->applicationDirPath()+"/WaniKani.jpg");
-
+        QString wallpaperFileName = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator()+"WaniKani.jpg");
         QPixmap pixmap;
 
         pixmap.load(":/wallpaper.jpg");
