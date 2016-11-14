@@ -9,10 +9,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 win32: LIBS += -lUser32
 mac: LIBS += -framework AppKit
 
-SOURCES = src/main.cpp \
-          src/dialog.cpp
+INCLUDEPATH += src/3rdparty/QtSingleApplication
 
-HEADERS = src/dialog.h
+SOURCES = src/main.cpp \
+          src/dialog.cpp \
+          src/3rdparty/QtSingleApplication/qtlocalpeer.cpp \
+          src/3rdparty/QtSingleApplication/qtsingleapplication.cpp
+
+HEADERS = src/dialog.h \
+          src/3rdparty/QtSingleApplication/qtlocalpeer.h \
+          src/3rdparty/QtSingleApplication/qtsingleapplication.h
 
 FORMS = src/dialog.ui
 

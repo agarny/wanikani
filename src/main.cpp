@@ -24,15 +24,24 @@ limitations under the License.
 
 //==============================================================================
 
-#include <QApplication>
+#include <QFileInfo>
+
+//==============================================================================
+
+#include <QtSingleApplication>
 
 //==============================================================================
 
 int main(int pArgC, char *pArgV[])
 {
-    // Create and customise our application
+    // Create our application and make sure that it's not already running
 
-    QApplication app(pArgC, pArgV);
+    QtSingleApplication app(QFileInfo(pArgV[0]).baseName(), pArgC, pArgV);
+
+    if (app.isRunning())
+        return 0;
+
+    // Customise our application
 
     app.setApplicationName("WaniKani");
     app.setOrganizationName("Hellix");
