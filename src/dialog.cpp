@@ -178,8 +178,9 @@ void Dialog::on_buttonBox_clicked(QAbstractButton *pButton)
 
     QDialogButtonBox::StandardButton standardButton = mGui->buttonBox->standardButton(pButton);
 
-    if (standardButton != QDialogButtonBox::Cancel) {
-        // Keep track of the API key
+    if (   (standardButton == QDialogButtonBox::Ok)
+        || (standardButton == QDialogButtonBox::Apply)) {
+        // Keep track of the API key and update our wallpaper
 
         mApiKey = mGui->apiKeyValue->text();
 
@@ -410,7 +411,7 @@ void Dialog::updateWallpaper()
 
 void Dialog::setWallpaper(const QString &pWallpaperFileName)
 {
-    // Set the wallpaper
+    // Set the given wallpaper
 
 #if defined(Q_OS_WIN)
     SystemParametersInfo(SPI_SETDESKWALLPAPER, 0,
@@ -426,7 +427,6 @@ void Dialog::setWallpaper(const QString &pWallpaperFileName)
                                 << "picture-options"
                                 << "stretched");
     process.waitForFinished();
-
 
     process.start("gsettings",
                   QStringList() << "set"
