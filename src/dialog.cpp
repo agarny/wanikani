@@ -96,7 +96,7 @@ Dialog::Dialog() :
     mTrayIcon = new QSystemTrayIcon(this);
 
     mTrayIcon->setContextMenu(mTrayIconMenu);
-    mTrayIcon->setIcon(QIcon(":/icon.png"));
+    mTrayIcon->setIcon(QIcon(":/icon"));
 
     connect(mTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayIconActivated(const QSystemTrayIcon::ActivationReason &)));
@@ -301,7 +301,7 @@ void Dialog::updateWallpaper()
         QString wallpaperFileName = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator()+"WaniKani.jpg");
         QPixmap pixmap;
 
-        pixmap.load(":/wallpaper.jpg");
+        pixmap.load(":/wallpaper");
 
         if (!error) {
             // Keep track of our Kanji/state map

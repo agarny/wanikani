@@ -1,7 +1,6 @@
-<!DOCTYPE RCC>
-<RCC version="1.0">
-    <qresource>
-        <file>icon.png</file>
-        <file>wallpaper.jpg</file>
+<RCC>
+    <qresource prefix="/">
+        <file alias="icon">icon.png</file>
+        <file alias="wallpaper">wallpaper.jpg</file>
     </qresource>
 </RCC>
