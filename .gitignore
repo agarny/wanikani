@@ -3,9 +3,9 @@ build
 *.o
 .qmake.stash
 Makefile
-moc_dialog.cpp
-qrc_resources.cpp
-ui_dialog.h
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
 WaniKani
 WaniKani.app
 WaniKani.jpg
