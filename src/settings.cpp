@@ -16,7 +16,7 @@ limitations under the License.
 
 *******************************************************************************/
 
-#include "dialog.h"
+#include "settings.h"
 
 //==============================================================================
 
@@ -38,7 +38,7 @@ limitations under the License.
 
 //==============================================================================
 
-#include "ui_dialog.h"
+#include "ui_settings.h"
 
 //==============================================================================
 
@@ -56,12 +56,15 @@ limitations under the License.
 
 //==============================================================================
 
-static const auto SettingsApiKey = QStringLiteral("ApiKey");
+static const auto SettingsApiKey     = QStringLiteral("ApiKey");
+static const auto SettingsFontName   = QStringLiteral("FontName");
+static const auto SettingsBoldFont   = QStringLiteral("BoldFont");
+static const auto SettingsItalicFont = QStringLiteral("ItalicFont");
 
 //==============================================================================
 
-Dialog::Dialog() :
-    mGui(new Ui::Dialog)
+Settings::Settings() :
+    mGui(new Ui::Settings)
 {
     // Set up our GUI
 
@@ -69,9 +72,13 @@ Dialog::Dialog() :
 
     QSettings settings;
 
-    mApiKey = settings.value(SettingsApiKey).toString();
+    mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
+    mGui->fontComboBox->setCurrentText(settings.value(SettingsFontName).toString());
+    mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
+    mGui->italicFontCheckBox->setChecked(settings.value(SettingsItalicFont).toBool());
 
-    mGui->apiKeyValue->setText(mApiKey);
+    if (mGui->fontComboBox->currentText().isEmpty())
+        mGui->fontComboBox->setCurrentIndex(0);
 
     // Create some actions
 
@@ -79,7 +86,7 @@ Dialog::Dialog() :
     mQuitAction = new QAction(tr("Quit"), this);
 
     connect(mWaniKaniAction, SIGNAL(triggered(bool)),
-            this, SLOT(showDialog()));
+            this, SLOT(showSettings()));
     connect(mQuitAction, SIGNAL(triggered(bool)),
             qApp, SLOT(quit()));
 
@@ -117,18 +124,21 @@ Dialog::Dialog() :
 
 //==============================================================================
 
-Dialog::~Dialog()
+Settings::~Settings()
 {
     // Keep track of some settings
 
     QSettings settings;
 
     settings.setValue(SettingsApiKey, mGui->apiKeyValue->text());
+    settings.setValue(SettingsFontName, mGui->fontComboBox->currentText());
+    settings.setValue(SettingsBoldFont, mGui->boldFontCheckBox->isChecked());
+    settings.setValue(SettingsItalicFont, mGui->italicFontCheckBox->isChecked());
 }
 
 //==============================================================================
 
-void Dialog::closeEvent(QCloseEvent *pEvent)
+void Settings::closeEvent(QCloseEvent *pEvent)
 {
     // Hide ourselves rather than closing ourselves
 
@@ -146,13 +156,22 @@ void Dialog::closeEvent(QCloseEvent *pEvent)
 
 //==============================================================================
 
-void Dialog::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
+void Settings::on_updateButton_clicked()
+{
+    // Update our wallpaper
+
+    updateWallpaper();
+}
+
+//==============================================================================
+
+void Settings::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
 {
     // Show ourselves or our menu, depending on the platofmr on which we are
 
     if (pReason == QSystemTrayIcon::Trigger) {
 #ifdef Q_OS_WIN
-        showDialog();
+        showSettings();
 #else
         mTrayIcon->show();
 #endif
@@ -161,7 +180,7 @@ void Dialog::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
 
 //==============================================================================
 
-void Dialog::showDialog()
+void Settings::showSettings()
 {
     // Show ourselves
 
@@ -173,30 +192,7 @@ void Dialog::showDialog()
 
 //==============================================================================
 
-void Dialog::on_buttonBox_clicked(QAbstractButton *pButton)
-{
-    // Apply the changes made by the user, if requested
-
-    QDialogButtonBox::StandardButton standardButton = mGui->buttonBox->standardButton(pButton);
-
-    if (   (standardButton == QDialogButtonBox::Ok)
-        || (standardButton == QDialogButtonBox::Apply)) {
-        // Keep track of the API key and update our wallpaper
-
-        mApiKey = mGui->apiKeyValue->text();
-
-        updateWallpaper();
-    }
-
-    if (standardButton == QDialogButtonBox::Ok)
-        accept();
-    else if (standardButton == QDialogButtonBox::Cancel)
-        reject();
-}
-
-//==============================================================================
-
-void Dialog::updateWallpaper()
+void Settings::updateWallpaper()
 {
     // Full list of Kanjis
 
@@ -254,7 +250,7 @@ void Dialog::updateWallpaper()
     // Retrieve the list of Kanjis (and their state) the user has already
     // studied
 
-    QString url = "https://www.wanikani.com/api/v1/user/"+mApiKey+"/kanji";
+    QString url = "https://www.wanikani.com/api/v1/user/"+mGui->apiKeyValue->text()+"/kanji";
     QNetworkAccessManager networkAccessManager;
     QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(url));
     QEventLoop eventLoop;
@@ -317,7 +313,11 @@ void Dialog::updateWallpaper()
             int areaWidth = pixmap.width()-xStart-2*shift;
             int areaHeight = pixmap.height()-2*shift;
 
-            QFont font = QFont("MS Mincho");
+            QFont font = QFont(mGui->fontComboBox->currentText());
+
+            font.setBold(mGui->boldFontCheckBox->isChecked());
+            font.setItalic(mGui->italicFontCheckBox->isChecked());
+
             int fontPixelSize = 1;
             int charWidth = 0;
             int charHeight = 0;
@@ -409,7 +409,7 @@ void Dialog::updateWallpaper()
 
 //==============================================================================
 
-void Dialog::setWallpaper(const QString &pWallpaperFileName)
+void Settings::setWallpaper(const QString &pWallpaperFileName)
 {
     // Set the given wallpaper
 

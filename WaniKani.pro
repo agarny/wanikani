@@ -12,15 +12,15 @@ mac: LIBS += -framework AppKit
 INCLUDEPATH += src/3rdparty/QtSingleApplication
 
 SOURCES = src/main.cpp \
-          src/dialog.cpp \
+          src/settings.cpp \
           src/3rdparty/QtSingleApplication/qtlocalpeer.cpp \
           src/3rdparty/QtSingleApplication/qtsingleapplication.cpp
 
-HEADERS = src/dialog.h \
+HEADERS = src/settings.h \
           src/3rdparty/QtSingleApplication/qtlocalpeer.h \
           src/3rdparty/QtSingleApplication/qtsingleapplication.h
 
-FORMS = src/dialog.ui
+FORMS = src/settings.ui
 
 mac: OBJECTIVE_SOURCES = src/macos.mm
 

@@ -20,7 +20,7 @@ limitations under the License.
 // Main
 //==============================================================================
 
-#include "dialog.h"
+#include "settings.h"
 
 //==============================================================================
 
@@ -47,11 +47,11 @@ int main(int pArgC, char *pArgV[])
     app.setOrganizationName("Hellix");
     app.setQuitOnLastWindowClosed(false);
 
-    // Create and (initially) hide our dialog
+    // Create and (initially) hide our settings
 
-    Dialog dialog;
+    Settings settings;
 
-    dialog.hide();
+    settings.hide();
 
     return app.exec();
 }

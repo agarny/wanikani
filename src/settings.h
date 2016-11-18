@@ -30,7 +30,7 @@ limitations under the License.
 //==============================================================================
 
 namespace Ui {
-    class Dialog;
+    class Settings;
 }
 
 //==============================================================================
@@ -39,19 +39,19 @@ class QAbstractButton;
 
 //==============================================================================
 
-class Dialog : public QDialog
+class Settings : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit Dialog();
-    ~Dialog();
+    explicit Settings();
+    ~Settings();
 
 protected:
     virtual void closeEvent(QCloseEvent *pEvent);
 
 private:
-    Ui::Dialog *mGui;
+    Ui::Settings *mGui;
 
     QSystemTrayIcon *mTrayIcon;
     QMenu *mTrayIconMenu;
@@ -61,14 +61,12 @@ private:
 
     QTimer *mTimer;
 
-    QString mApiKey;
-
 private slots:
+    void on_updateButton_clicked();
+
     void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
 
-    void showDialog();
-
-    void on_buttonBox_clicked(QAbstractButton *pButton);
+    void showSettings();
 
     void updateWallpaper();
     void setWallpaper(const QString &pWallpaperFileName);
