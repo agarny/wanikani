@@ -32,6 +32,7 @@ limitations under the License.
 
 //==============================================================================
 
+static const auto SettingsPosition    = QStringLiteral("Position");
 static const auto SettingsApiKey      = QStringLiteral("ApiKey");
 static const auto SettingsInterval    = QStringLiteral("Interval");
 static const auto SettingsFontName    = QStringLiteral("FontName");
@@ -97,6 +98,7 @@ Settings::~Settings()
 
     QSettings settings;
 
+    settings.setValue(SettingsPosition, mPosition);
     settings.setValue(SettingsApiKey, mGui->apiKeyValue->text());
     settings.setValue(SettingsInterval, mGui->intervalSpinBox->value());
     settings.setValue(SettingsFontName, mGui->fontComboBox->currentText());
@@ -170,7 +172,7 @@ QColor Settings::color(const int &pRow, const int &pColumn) const
 
 void Settings::closeEvent(QCloseEvent *pEvent)
 {
-    // Hide ourselves rather than closing ourselves
+    // Hide ourselves rather than close ourselves
 
 #ifdef Q_OS_OSX
     if (!pEvent->spontaneous() || !isVisible())
@@ -182,6 +184,19 @@ void Settings::closeEvent(QCloseEvent *pEvent)
 
         pEvent->ignore();
     }
+}
+
+//==============================================================================
+
+void Settings::moveEvent(QMoveEvent *pEvent)
+{
+    // Default handling of the event
+
+    QDialog::moveEvent(pEvent);
+
+    // Keep track of our position
+
+    mPosition = pos();
 }
 
 //==============================================================================
@@ -271,10 +286,13 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
     // Retrieve all of our settings after having reset some of them, if
     // requested
 
+    QSettings settings;
+
+    if (mInitializing)
+        mPosition = settings.value(SettingsPosition).toPoint();
+
     if (!pRetrieveSettingsOnly)
         mInitializing = true;
-
-    QSettings settings;
 
     if (pRetrieveSettingsOnly)
         mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
@@ -380,6 +398,9 @@ void Settings::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReaso
 void Settings::showSettings()
 {
     // Show ourselves
+
+    if (!mPosition.isNull())
+        move(mPosition);
 
     show();
 
