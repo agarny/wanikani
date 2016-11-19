@@ -51,6 +51,8 @@ public:
 
     int exec();
 
+    void updateInterval(const int &pInterval);
+
     void updateWallpaper(const bool &pForceUpdate = false);
 
 private:

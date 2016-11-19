@@ -32,6 +32,7 @@ limitations under the License.
 //==============================================================================
 
 static const auto SettingsApiKey      = QStringLiteral("ApiKey");
+static const auto SettingsInterval    = QStringLiteral("Interval");
 static const auto SettingsFontName    = QStringLiteral("FontName");
 static const auto SettingsBoldFont    = QStringLiteral("BoldFont");
 static const auto SettingsItalicsFont = QStringLiteral("ItalicsFont");
@@ -47,9 +48,12 @@ Settings::Settings(WaniKani *pWaniKani) :
 
     mGui->setupUi(this);
 
+    // Retrieve our settings
+
     QSettings settings;
 
     mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
+    mGui->intervalSpinBox->setValue(settings.value(SettingsInterval).toInt());
     mGui->fontComboBox->setCurrentText(settings.value(SettingsFontName).toString());
     mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
     mGui->italicsFontCheckBox->setChecked(settings.value(SettingsItalicsFont).toBool());
@@ -99,6 +103,7 @@ Settings::~Settings()
     QSettings settings;
 
     settings.setValue(SettingsApiKey, mGui->apiKeyValue->text());
+    settings.setValue(SettingsInterval, mGui->intervalSpinBox->value());
     settings.setValue(SettingsFontName, mGui->fontComboBox->currentText());
     settings.setValue(SettingsBoldFont, mGui->boldFontCheckBox->isChecked());
     settings.setValue(SettingsItalicsFont, mGui->italicsFontCheckBox->isChecked());
@@ -111,6 +116,15 @@ QString Settings::apiKey() const
     // Return our API key
 
     return mGui->apiKeyValue->text();
+}
+
+//==============================================================================
+
+int Settings::interval() const
+{
+    // Return our interval
+
+    return mGui->intervalSpinBox->value();
 }
 
 //==============================================================================
@@ -160,7 +174,17 @@ void Settings::closeEvent(QCloseEvent *pEvent)
 
 //==============================================================================
 
-void Settings::on_updateButton_clicked()
+void Settings::on_intervalSpinBox_valueChanged(int pInterval)
+{
+    // Update our timer's interval
+
+    if (!mInitializing)
+        mWaniKani->updateInterval(pInterval);
+}
+
+//==============================================================================
+
+void Settings::on_forceUpdateButton_clicked()
 {
     // Update our Kanjis (and therefore our wallpaper)
 

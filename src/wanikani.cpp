@@ -106,11 +106,20 @@ int WaniKani::exec()
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(updateKanjis()));
 
-    mTimer->start(60000);
+    updateInterval(mSettings->interval());
 
     QTimer::singleShot(0, this, SLOT(updateKanjis()));
 
     return mApplication->exec();
+}
+
+//==============================================================================
+
+void WaniKani::updateInterval(const int &pInterval)
+{
+    // Update our timer's interval
+
+    mTimer->start(60000*pInterval);
 }
 
 //==============================================================================

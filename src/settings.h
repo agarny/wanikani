@@ -53,6 +53,8 @@ public:
 
     QString apiKey() const;
 
+    int interval() const;
+
     QString fontName() const;
     bool boldFont() const;
     bool italicsFont() const;
@@ -74,7 +76,9 @@ private:
     QAction *mQuitAction;
 
 private slots:
-    void on_updateButton_clicked();
+    void on_intervalSpinBox_valueChanged(int pInterval);
+    void on_forceUpdateButton_clicked();
+
     void on_fontComboBox_currentTextChanged(const QString &pFontName);
     void on_boldFontCheckBox_clicked();
     void on_italicsFontCheckBox_clicked();
