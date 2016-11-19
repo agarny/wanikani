@@ -173,12 +173,15 @@ static const QString Kanjis =
 
 //==============================================================================
 
-void WaniKani::updateKanjis()
+void WaniKani::updateKanjis(const bool &pForceUpdate)
 {
     // Reset some internal properties
 
     mKanjisError = true;
     mKanjiState = QMap<QString, QString>();
+
+    if (pForceUpdate)
+        mOldKanjiState = QMap<QString, QString>();
 
     // Retrieve the list of Kanjis (and their state) the user has already
     // studied

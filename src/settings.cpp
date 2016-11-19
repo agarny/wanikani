@@ -186,6 +186,15 @@ void Settings::closeEvent(QCloseEvent *pEvent)
 
 //==============================================================================
 
+void Settings::on_apiKeyValue_returnPressed()
+{
+    // Update our Kanjis (and therefore our wallpaper)
+
+    mWaniKani->updateKanjis(true);
+}
+
+//==============================================================================
+
 void Settings::on_intervalSpinBox_valueChanged(int pInterval)
 {
     // Update our timer's interval
@@ -200,7 +209,7 @@ void Settings::on_forceUpdateButton_clicked()
 {
     // Update our Kanjis (and therefore our wallpaper)
 
-    mWaniKani->updateKanjis();
+    mWaniKani->updateKanjis(true);
 }
 
 //==============================================================================

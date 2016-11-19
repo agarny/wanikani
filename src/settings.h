@@ -83,6 +83,8 @@ private:
     void setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor);
 
 private slots:
+    void on_apiKeyValue_returnPressed();
+
     void on_intervalSpinBox_valueChanged(int pInterval);
     void on_forceUpdateButton_clicked();
 

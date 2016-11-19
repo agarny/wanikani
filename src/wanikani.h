@@ -67,7 +67,7 @@ private:
     QMap<QString, QString> mOldKanjiState;
 
 public slots:
-    void updateKanjis();
+    void updateKanjis(const bool &pForceUpdate = false);
 };
 
 //==============================================================================
