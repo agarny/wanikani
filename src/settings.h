@@ -35,6 +35,10 @@ namespace Ui {
 
 //==============================================================================
 
+class WaniKani;
+
+//==============================================================================
+
 class QAbstractButton;
 
 //==============================================================================
@@ -44,8 +48,14 @@ class Settings : public QDialog
     Q_OBJECT
 
 public:
-    explicit Settings();
+    explicit Settings(WaniKani *pWaniKani);
     ~Settings();
+
+    QString apiKey() const;
+
+    QString fontName() const;
+    bool boldFont() const;
+    bool italicsFont() const;
 
 protected:
     virtual void closeEvent(QCloseEvent *pEvent);
@@ -53,23 +63,25 @@ protected:
 private:
     Ui::Settings *mGui;
 
+    bool mInitializing;
+
+    WaniKani *mWaniKani;
+
     QSystemTrayIcon *mTrayIcon;
     QMenu *mTrayIconMenu;
 
     QAction *mWaniKaniAction;
     QAction *mQuitAction;
 
-    QTimer *mTimer;
-
 private slots:
     void on_updateButton_clicked();
+    void on_fontComboBox_currentTextChanged(const QString &pFontName);
+    void on_boldFontCheckBox_clicked();
+    void on_italicsFontCheckBox_clicked();
 
     void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
 
     void showSettings();
-
-    void updateWallpaper();
-    void setWallpaper(const QString &pWallpaperFileName);
 };
 
 //==============================================================================

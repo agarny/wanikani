@@ -17,21 +17,56 @@ limitations under the License.
 *******************************************************************************/
 
 //==============================================================================
-// Main
+// WaniKani
 //==============================================================================
 
-#include "wanikani.h"
+#pragma once
 
 //==============================================================================
 
-int main(int pArgC, char *pArgV[])
+#include <QMap>
+#include <QObject>
+
+//==============================================================================
+
+class Settings;
+
+//==============================================================================
+
+class QTimer;
+
+//==============================================================================
+
+class QtSingleApplication;
+
+//==============================================================================
+
+class WaniKani : public QObject
 {
-    // Create and execute our WaniKani application
+    Q_OBJECT
 
-    WaniKani waniKani(pArgC, pArgV);
+public:
+    WaniKani(int pArgC, char *pArgV[]);
+    ~WaniKani();
 
-    return waniKani.exec();
-}
+    int exec();
+
+    void updateWallpaper(const bool &pForceUpdate = false);
+
+private:
+    QtSingleApplication *mApplication;
+
+    Settings *mSettings;
+
+    QTimer *mTimer;
+
+    bool mKanjisError;
+    QMap<QString, QString> mKanjiState;
+    QMap<QString, QString> mOldKanjiState;
+
+public slots:
+    void updateKanjis();
+};
 
 //==============================================================================
 // End of file

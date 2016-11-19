@@ -101,9 +101,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="italicFontCheckBox">
+        <widget class="QCheckBox" name="italicsFontCheckBox">
          <property name="text">
-          <string>Italic</string>
+          <string>Italics</string>
          </property>
         </widget>
        </item>
