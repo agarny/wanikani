@@ -237,6 +237,26 @@ void Settings::on_italicsFontCheckBox_clicked()
 
 //==============================================================================
 
+void Settings::on_swapPushButton_clicked()
+{
+    // Swap the foreground and background colours, but leaving the alpha values
+    // untouched
+
+    for (int i = 1; i < 7; ++i) {
+        QPushButton *fgPushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, 1)->widget());
+        QPushButton *bgPushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, 2)->widget());
+        QRgb fgColor = mColors.value(fgPushButton);
+        QRgb bgColor = mColors.value(bgPushButton);
+
+        setPushButtonColor(fgPushButton, qRgba(qRed(bgColor), qGreen(bgColor), qBlue(bgColor), qAlpha(fgColor)));
+        setPushButtonColor(bgPushButton, qRgba(qRed(fgColor), qGreen(fgColor), qBlue(fgColor), qAlpha(bgColor)));
+    }
+
+    mWaniKani->updateWallpaper(true);
+}
+
+//==============================================================================
+
 void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
 {
     // Retrieve all of our settings after having reset some of them, if

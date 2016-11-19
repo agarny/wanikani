@@ -90,6 +90,8 @@ private slots:
     void on_boldFontCheckBox_clicked();
     void on_italicsFontCheckBox_clicked();
 
+    void on_swapPushButton_clicked();
+
     void on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly = true);
 
     void updatePushButtonColor();

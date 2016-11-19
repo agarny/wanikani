@@ -132,6 +132,13 @@
       <string>Colors</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="7" column="1" colspan="2">
+       <widget class="QPushButton" name="swapPushButton">
+        <property name="text">
+         <string>Swap</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="pendingLabel">
         <property name="text">
@@ -153,20 +160,20 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="backgroundLabel">
+      <item row="0" column="1">
+       <widget class="QLabel" name="foregroundLabel">
         <property name="text">
-         <string>Background</string>
+         <string>Foreground</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="foregroundLabel">
+      <item row="0" column="2">
+       <widget class="QLabel" name="backgroundLabel">
         <property name="text">
-         <string>Foreground</string>
+         <string>Background</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -182,6 +189,13 @@
       </item>
       <item row="2" column="2">
        <widget class="QPushButton" name="apprenticeBackgroundPushButton">
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QPushButton" name="masterBackgroundPushButton">
         <property name="autoDefault">
          <bool>false</bool>
         </property>
@@ -204,13 +218,6 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="2">
-       <widget class="QPushButton" name="masterBackgroundPushButton">
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
       <item row="4" column="0">
        <widget class="QLabel" name="masterLabel">
         <property name="text">
@@ -225,17 +232,10 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
-       <widget class="QPushButton" name="guruBackgroundPushButton">
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="burnedLabel">
+      <item row="5" column="0">
+       <widget class="QLabel" name="enlightenedLabel">
         <property name="text">
-         <string>Burned</string>
+         <string>Enlightened</string>
         </property>
        </widget>
       </item>
@@ -246,10 +246,10 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="enlightenedLabel">
-        <property name="text">
-         <string>Enlightened</string>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="guruBackgroundPushButton">
+        <property name="autoDefault">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -267,6 +267,13 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="guruLabel">
+        <property name="text">
+         <string>Guru</string>
+        </property>
+       </widget>
+      </item>
       <item row="6" column="2">
        <widget class="QPushButton" name="burnedBackgroundPushButton">
         <property name="autoDefault">
@@ -274,10 +281,10 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="guruLabel">
+      <item row="6" column="0">
+       <widget class="QLabel" name="burnedLabel">
         <property name="text">
-         <string>Guru</string>
+         <string>Burned</string>
         </property>
        </widget>
       </item>
