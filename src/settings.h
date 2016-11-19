@@ -75,7 +75,7 @@ private:
     QSystemTrayIcon *mTrayIcon;
     QMenu *mTrayIconMenu;
 
-    QAction *mWaniKaniAction;
+    QAction *mSettingsAction;
     QAction *mQuitAction;
 
     QMap<QPushButton *, QRgb> mColors;

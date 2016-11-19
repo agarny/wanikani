@@ -10,11 +10,11 @@
     <x>0</x>
     <y>0</y>
     <width>320</width>
-    <height>585</height>
+    <height>507</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>WaniKani</string>
+   <string>Settings</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../res/resources.qrc">

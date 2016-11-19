@@ -58,10 +58,10 @@ Settings::Settings(WaniKani *pWaniKani) :
 
     // Create some actions
 
-    mWaniKaniAction = new QAction(tr("WaniKani"), this);
+    mSettingsAction = new QAction(tr("Settings"), this);
     mQuitAction = new QAction(tr("Quit"), this);
 
-    connect(mWaniKaniAction, SIGNAL(triggered(bool)),
+    connect(mSettingsAction, SIGNAL(triggered(bool)),
             this, SLOT(showSettings()));
     connect(mQuitAction, SIGNAL(triggered(bool)),
             qApp, SLOT(quit()));
@@ -70,7 +70,7 @@ Settings::Settings(WaniKani *pWaniKani) :
 
     mTrayIconMenu = new QMenu(this);
 
-    mTrayIconMenu->addAction(mWaniKaniAction);
+    mTrayIconMenu->addAction(mSettingsAction);
     mTrayIconMenu->addSeparator();
     mTrayIconMenu->addAction(mQuitAction);
 
@@ -272,12 +272,12 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
     else
         settings.clear();
 
-    static const QColor Colors[6][2] = { { "#808080", "#40434343"},
-                                         { "#dd0093", "#40434343"},
-                                         { "#882d9e", "#40434343"},
-                                         { "#294ddb", "#40434343"},
-                                         { "#0093dd", "#40434343"},
-                                         { "#fbc042", "#80434343"} };
+    static const QColor Colors[6][2] = { { "#808080", "#60606060"},
+                                         { "#dd0093", "#60606060"},
+                                         { "#882d9e", "#60606060"},
+                                         { "#294ddb", "#60606060"},
+                                         { "#0093dd", "#60606060"},
+                                         { "#fbc042", "#60606060"} };
 
     QString fontName = settings.value(SettingsFontName).toString();
 
