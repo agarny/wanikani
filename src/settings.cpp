@@ -281,12 +281,12 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
     else
         settings.clear();
 
-    static const QColor Colors[6][2] = { { "#808080", "#60606060"},
-                                         { "#dd0093", "#60606060"},
-                                         { "#882d9e", "#60606060"},
-                                         { "#294ddb", "#60606060"},
-                                         { "#0093dd", "#60606060"},
-                                         { "#fbc042", "#60606060"} };
+    static const QColor Colors[6][2] = { { "#606060", "#60808080"},
+                                         { "#606060", "#60dd0093"},
+                                         { "#606060", "#60882d9e"},
+                                         { "#606060", "#60294ddb"},
+                                         { "#606060", "#600093dd"},
+                                         { "#606060", "#60fbc042"} };
 
     QString fontName = settings.value(SettingsFontName).toString();
 
