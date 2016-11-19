@@ -327,10 +327,14 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
     }
 
     if (fontName.isEmpty()) {
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN)
         mGui->fontComboBox->setCurrentText("MS Mincho");
+#elif defined(Q_OS_LINUX)
+        mGui->fontComboBox->setCurrentText("Droid Sans Fallback");
+#elif defined(Q_OS_MAC)
+        mGui->fontComboBox->setCurrentText("Hiragino Mincho Pro");
 #else
-        mGui->fontComboBox->setCurrentIndex(0);
+    #error Unsupported platform
 #endif
     }
 
