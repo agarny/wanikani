@@ -175,6 +175,11 @@ static const QString Kanjis =
 
 void WaniKani::updateKanjis()
 {
+    // Reset some internal properties
+
+    mKanjisError = true;
+    mKanjiState = QMap<QString, QString>();
+
     // Retrieve the list of Kanjis (and their state) the user has already
     // studied
 
@@ -195,26 +200,23 @@ void WaniKani::updateKanjis()
 
     networkReply->deleteLater();
 
-    if (response.isEmpty())
-        return;
+    if (!response.isEmpty()) {
+        QJsonDocument json = QJsonDocument::fromJson(response);
 
-    QJsonDocument json = QJsonDocument::fromJson(response);
+        if (!json.isNull()) {
+            mKanjisError = json.object().contains("error");
 
-    if (json.isNull())
-        return;
+            QVariantMap requestedInformationMap;
 
-    mKanjisError = json.object().contains("error");
-    mKanjiState = QMap<QString, QString>();
+            if (!mKanjisError) {
+                foreach (const QVariant &requestedInformation,
+                         json.object().toVariantMap()["requested_information"].toList()) {
+                    requestedInformationMap = requestedInformation.toMap();
 
-    QVariantMap requestedInformationMap;
-
-    if (!mKanjisError) {
-        foreach (const QVariant &requestedInformation,
-                 json.object().toVariantMap()["requested_information"].toList()) {
-            requestedInformationMap = requestedInformation.toMap();
-
-            mKanjiState.insert(requestedInformationMap["character"].toString(),
-                               requestedInformationMap["stats"].toMap()["srs"].toString());
+                    mKanjiState.insert(requestedInformationMap["character"].toString(),
+                                       requestedInformationMap["stats"].toMap()["srs"].toString());
+                }
+            }
         }
     }
 
