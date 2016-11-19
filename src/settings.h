@@ -25,6 +25,7 @@ limitations under the License.
 //==============================================================================
 
 #include <QDialog>
+#include <QMap>
 #include <QSystemTrayIcon>
 
 //==============================================================================
@@ -59,6 +60,8 @@ public:
     bool boldFont() const;
     bool italicsFont() const;
 
+    QColor color(const int &pRow, const int &pColumn) const;
+
 protected:
     virtual void closeEvent(QCloseEvent *pEvent);
 
@@ -75,6 +78,10 @@ private:
     QAction *mWaniKaniAction;
     QAction *mQuitAction;
 
+    QMap<QPushButton *, QRgb> mColors;
+
+    void setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor);
+
 private slots:
     void on_intervalSpinBox_valueChanged(int pInterval);
     void on_forceUpdateButton_clicked();
@@ -82,6 +89,10 @@ private slots:
     void on_fontComboBox_currentTextChanged(const QString &pFontName);
     void on_boldFontCheckBox_clicked();
     void on_italicsFontCheckBox_clicked();
+
+    void on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly = true);
+
+    void updatePushButtonColor();
 
     void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
 

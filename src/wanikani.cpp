@@ -306,28 +306,37 @@ void WaniKani::updateWallpaper(const bool &pForceUpdate)
                     }
 
                     QString state = mKanjiState.value(Kanjis.at(i));
+                    QColor foregroundColor;
+                    QColor backgroundColor;
 
-                    if (!state.compare("apprentice"))
-                        painter.setPen("#dd0093");
-                    else if (!state.compare("guru"))
-                        painter.setPen("#882d9e");
-                    else if (!state.compare("master"))
-                        painter.setPen("#294ddb");
-                    else if (!state.compare("enlighten"))
-                        painter.setPen("#0093dd");
-                    else if (!state.compare("burned"))
-                        painter.setPen("#fbc042");
-                    else
-                        painter.setPen("#808080");
+                    if (!state.compare("apprentice")) {
+                        foregroundColor = mSettings->color(2, 1);
+                        backgroundColor = mSettings->color(2, 2);
+                    } else if (!state.compare("guru")) {
+                        foregroundColor = mSettings->color(3, 1);
+                        backgroundColor = mSettings->color(3, 2);
+                    } else if (!state.compare("master")) {
+                        foregroundColor = mSettings->color(4, 1);
+                        backgroundColor = mSettings->color(4, 2);
+                    } else if (!state.compare("enlighten")) {
+                        foregroundColor = mSettings->color(5, 1);
+                        backgroundColor = mSettings->color(5, 2);
+                    } else if (!state.compare("burned")) {
+                        foregroundColor = mSettings->color(6, 1);
+                        backgroundColor = mSettings->color(6, 2);
+                    } else {
+                        foregroundColor = mSettings->color(1, 1);
+                        backgroundColor = mSettings->color(1, 2);
+                    }
+
+                    painter.setPen(foregroundColor);
 
                     QPainterPath path;
 
                     path.addRoundedRect(QRectF(x, y-charHeight+descent, charWidth, charHeight),
                                         radius, radius);
 
-                    painter.fillPath(path, state.compare("burned")?
-                                               QColor("#40434343"):
-                                               QColor("#80434343"));
+                    painter.fillPath(path, QColor(backgroundColor));
                     painter.drawText(x, y, Kanjis.at(i));
 
                     x += charWidth+smallShift;

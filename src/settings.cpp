@@ -22,6 +22,7 @@ limitations under the License.
 //==============================================================================
 
 #include <QCloseEvent>
+#include <QColorDialog>
 #include <QMenu>
 #include <QSettings>
 
@@ -36,30 +37,24 @@ static const auto SettingsInterval    = QStringLiteral("Interval");
 static const auto SettingsFontName    = QStringLiteral("FontName");
 static const auto SettingsBoldFont    = QStringLiteral("BoldFont");
 static const auto SettingsItalicsFont = QStringLiteral("ItalicsFont");
+static const auto SettingsColor       = QStringLiteral("Color%1%2");
 
 //==============================================================================
 
 Settings::Settings(WaniKani *pWaniKani) :
     mGui(new Ui::Settings),
     mInitializing(true),
-    mWaniKani(pWaniKani)
+    mWaniKani(pWaniKani),
+    mColors(QMap<QPushButton *, QRgb>())
 {
     // Set up our GUI
 
     mGui->setupUi(this);
 
-    // Retrieve our settings
+    // Retrieve our settings and handle a click on our foreground/background
+    // push buttons
 
-    QSettings settings;
-
-    mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
-    mGui->intervalSpinBox->setValue(settings.value(SettingsInterval).toInt());
-    mGui->fontComboBox->setCurrentText(settings.value(SettingsFontName).toString());
-    mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
-    mGui->italicsFontCheckBox->setChecked(settings.value(SettingsItalicsFont).toBool());
-
-    if (mGui->fontComboBox->currentText().isEmpty())
-        mGui->fontComboBox->setCurrentIndex(0);
+    on_resetAllPushButton_clicked();
 
     // Create some actions
 
@@ -107,6 +102,12 @@ Settings::~Settings()
     settings.setValue(SettingsFontName, mGui->fontComboBox->currentText());
     settings.setValue(SettingsBoldFont, mGui->boldFontCheckBox->isChecked());
     settings.setValue(SettingsItalicsFont, mGui->italicsFontCheckBox->isChecked());
+
+    for (int i = 1; i < 7; ++i) {
+        for (int j = 1; j < 3; ++j) {
+            settings.setValue(SettingsColor.arg(i).arg(j), mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, j)->widget())));
+        }
+    }
 }
 
 //==============================================================================
@@ -152,6 +153,17 @@ bool Settings::italicsFont() const
     // Return whether our font is to be in italics
 
     return mGui->italicsFontCheckBox->isChecked();
+}
+
+//==============================================================================
+
+QColor Settings::color(const int &pRow, const int &pColumn) const
+{
+    // Return whether our font is to be in italics
+
+    QRgb rgba = mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(pRow, pColumn)->widget()));
+
+    return QColor(qRed(rgba), qGreen(rgba), qBlue(rgba), qAlpha(rgba));
 }
 
 //==============================================================================
@@ -221,6 +233,102 @@ void Settings::on_italicsFontCheckBox_clicked()
 
     if (!mInitializing)
         mWaniKani->updateWallpaper(true);
+}
+
+//==============================================================================
+
+void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
+{
+    // Retrieve all of our settings after having reset some of them, if
+    // requested
+
+    if (!pRetrieveSettingsOnly)
+        mInitializing = true;
+
+    QSettings settings;
+
+    if (pRetrieveSettingsOnly)
+        mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
+    else
+        settings.clear();
+
+    static const QColor Colors[6][2] = { { "#808080", "#40434343"},
+                                         { "#dd0093", "#40434343"},
+                                         { "#882d9e", "#40434343"},
+                                         { "#294ddb", "#40434343"},
+                                         { "#0093dd", "#40434343"},
+                                         { "#fbc042", "#80434343"} };
+
+    QString fontName = settings.value(SettingsFontName).toString();
+
+    mGui->intervalSpinBox->setValue(settings.value(SettingsInterval).toInt());
+    mGui->fontComboBox->setCurrentText(fontName);
+    mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
+    mGui->italicsFontCheckBox->setChecked(settings.value(SettingsItalicsFont).toBool());
+
+    for (int i = 1; i < 7; ++i) {
+        for (int j = 1; j < 3; ++j) {
+            QPushButton *pushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, j)->widget());
+            QRgb color = settings.value(SettingsColor.arg(i).arg(j), Colors[i-1][j-1].rgba()).toUInt();
+
+            setPushButtonColor(pushButton, color);
+
+            connect(pushButton, SIGNAL(clicked()),
+                    this, SLOT(updatePushButtonColor()),
+                    Qt::UniqueConnection);
+        }
+    }
+
+    if (fontName.isEmpty()) {
+#ifdef Q_OS_WIN
+        mGui->fontComboBox->setCurrentText("MS Mincho");
+#else
+        mGui->fontComboBox->setCurrentIndex(0);
+#endif
+    }
+
+    if (!pRetrieveSettingsOnly) {
+        mInitializing = false;
+
+        mWaniKani->updateWallpaper(true);
+    }
+}
+
+//==============================================================================
+
+void Settings::updatePushButtonColor()
+{
+    // Update the background colour of the given push button
+
+    QPushButton *pushButton = qobject_cast<QPushButton *>(sender());
+    QColorDialog  colorDialog;
+
+    colorDialog.setCurrentColor(pushButton->palette().color(QPalette::Button));
+    colorDialog.setOption(QColorDialog::ShowAlphaChannel);
+
+    if (colorDialog.exec() == QDialog::Accepted) {
+        setPushButtonColor(pushButton, colorDialog.currentColor().rgba());
+
+        mWaniKani->updateWallpaper(true);
+    }
+}
+
+//==============================================================================
+
+void Settings::setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor)
+{
+    // Set the background of the given push button to the given colour
+
+    mColors.insert(pPushButton, pColor);
+
+    pPushButton->setStyleSheet(QString("QPushButton#%1 {"
+                                       "    border: 1px solid gray;"
+                                       "    background-color: rgba(%2, %3, %4, %5);"
+                                       "}").arg(pPushButton->objectName())
+                                           .arg(qRed(pColor))
+                                           .arg(qGreen(pColor))
+                                           .arg(qBlue(pColor))
+                                           .arg(qAlpha(pColor)));
 }
 
 //==============================================================================
