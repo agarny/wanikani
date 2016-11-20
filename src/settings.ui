@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>320</width>
-    <height>507</height>
+    <height>534</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,11 +42,40 @@
    <item>
     <widget class="QGroupBox" name="apiKeyGroupBox">
      <property name="title">
-      <string>API Key</string>
+      <string>WaniKani</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QLineEdit" name="apiKeyValue"/>
+       <layout class="QHBoxLayout" name="apiKeyLayout">
+        <item>
+         <widget class="QLabel" name="apiKeyLabel">
+          <property name="text">
+           <string>API key:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="apiKeyValue"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="kanjisLayout">
+        <item>
+         <widget class="QRadioButton" name="currentKanjisRadioButton">
+          <property name="text">
+           <string>Current Kanjis</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="allKanjisRadioButton">
+          <property name="text">
+           <string>All Kanjis</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -106,7 +135,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="fontLayout">
         <item>
          <widget class="QCheckBox" name="boldFontCheckBox">
           <property name="text">

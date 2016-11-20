@@ -188,6 +188,14 @@ void WaniKani::updateKanjis(const bool &pForceUpdate)
 
     QString url = "https://www.wanikani.com/api/v1/user/"+mSettings->apiKey()+"/kanji";
     QNetworkAccessManager networkAccessManager;
+
+    if (!mSettings->currentKanjis()) {
+        url += "/1";
+
+        for (int i = 2; i <= 60; ++i)
+            url += ","+QString::number(i);
+    }
+
     QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(url));
     QEventLoop eventLoop;
 
@@ -352,7 +360,8 @@ void WaniKani::updateWallpaper(const bool &pForceUpdate)
 
         // Delete our olf wallpaper and save our new one
 
-        QFile(mSettings->fileName()).remove();
+        if (!mSettings->fileName().isEmpty())
+            QFile(mSettings->fileName()).remove();
 
         mSettings->setFileName(QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator()+QString("WaniKani%1.jpg").arg(QDateTime::currentMSecsSinceEpoch())));
 

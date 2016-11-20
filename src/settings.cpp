@@ -32,14 +32,15 @@ limitations under the License.
 
 //==============================================================================
 
-static const auto SettingsPosition    = QStringLiteral("Position");
-static const auto SettingsFileName    = QStringLiteral("FileName");
-static const auto SettingsApiKey      = QStringLiteral("ApiKey");
-static const auto SettingsInterval    = QStringLiteral("Interval");
-static const auto SettingsFontName    = QStringLiteral("FontName");
-static const auto SettingsBoldFont    = QStringLiteral("BoldFont");
-static const auto SettingsItalicsFont = QStringLiteral("ItalicsFont");
-static const auto SettingsColor       = QStringLiteral("Color%1%2");
+static const auto SettingsPosition      = QStringLiteral("Position");
+static const auto SettingsFileName      = QStringLiteral("FileName");
+static const auto SettingsApiKey        = QStringLiteral("ApiKey");
+static const auto SettingsCurrentKanjis = QStringLiteral("CurrentKanjis");
+static const auto SettingsInterval      = QStringLiteral("Interval");
+static const auto SettingsFontName      = QStringLiteral("FontName");
+static const auto SettingsBoldFont      = QStringLiteral("BoldFont");
+static const auto SettingsItalicsFont   = QStringLiteral("ItalicsFont");
+static const auto SettingsColor         = QStringLiteral("Color%1%2");
 
 //==============================================================================
 
@@ -53,6 +54,18 @@ Settings::Settings(WaniKani *pWaniKani) :
     // Set up our GUI
 
     mGui->setupUi(this);
+
+    connect(mGui->currentKanjisRadioButton, SIGNAL(clicked()),
+            this, SLOT(updateLevels()));
+    connect(mGui->allKanjisRadioButton, SIGNAL(clicked()),
+            this, SLOT(updateLevels()));
+
+    for (int i = 1; i <= 6; ++i) {
+        for (int j = 1; j <= 2; ++j) {
+            connect(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, j)->widget()), SIGNAL(clicked()),
+                    this, SLOT(updatePushButtonColor()));
+        }
+    }
 
     // Retrieve our settings and handle a click on our foreground/background
     // push buttons
@@ -103,13 +116,14 @@ Settings::~Settings()
     settings.setValue(SettingsPosition, mPosition);
     settings.setValue(SettingsFileName, mFileName);
     settings.setValue(SettingsApiKey, mGui->apiKeyValue->text());
+    settings.setValue(SettingsCurrentKanjis, mGui->currentKanjisRadioButton->isChecked());
     settings.setValue(SettingsInterval, mGui->intervalSpinBox->value());
     settings.setValue(SettingsFontName, mGui->fontComboBox->currentText());
     settings.setValue(SettingsBoldFont, mGui->boldFontCheckBox->isChecked());
     settings.setValue(SettingsItalicsFont, mGui->italicsFontCheckBox->isChecked());
 
-    for (int i = 1; i < 7; ++i) {
-        for (int j = 1; j < 3; ++j) {
+    for (int i = 1; i <= 6; ++i) {
+        for (int j = 1; j <= 2; ++j) {
             settings.setValue(SettingsColor.arg(i).arg(j), mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, j)->widget())));
         }
     }
@@ -149,6 +163,15 @@ int Settings::interval() const
     // Return our interval
 
     return mGui->intervalSpinBox->value();
+}
+
+//==============================================================================
+
+bool Settings::currentKanjis() const
+{
+    // Return whether we are to display only our current levels
+
+    return mGui->currentKanjisRadioButton->isChecked();
 }
 
 //==============================================================================
@@ -287,7 +310,7 @@ void Settings::on_swapPushButton_clicked()
     // Swap the foreground and background colours, but leaving the alpha values
     // untouched
 
-    for (int i = 1; i < 7; ++i) {
+    for (int i = 1; i <= 6; ++i) {
         QPushButton *fgPushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, 1)->widget());
         QPushButton *bgPushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, 2)->widget());
         QRgb fgColor = mColors.value(fgPushButton);
@@ -322,6 +345,13 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
     else
         settings.clear();
 
+    if (settings.value(SettingsCurrentKanjis, true).toBool())
+        mGui->currentKanjisRadioButton->setChecked(true);
+    else
+        mGui->allKanjisRadioButton->setChecked(true);
+
+    mGui->intervalSpinBox->setValue(settings.value(SettingsInterval).toInt());
+
     static const QColor Colors[6][2] = { { "#606060", "#60808080"},
                                          { "#606060", "#60dd0093"},
                                          { "#606060", "#60882d9e"},
@@ -331,21 +361,16 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
 
     QString fontName = settings.value(SettingsFontName).toString();
 
-    mGui->intervalSpinBox->setValue(settings.value(SettingsInterval).toInt());
     mGui->fontComboBox->setCurrentText(fontName);
     mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
     mGui->italicsFontCheckBox->setChecked(settings.value(SettingsItalicsFont).toBool());
 
-    for (int i = 1; i < 7; ++i) {
-        for (int j = 1; j < 3; ++j) {
+    for (int i = 1; i <= 6; ++i) {
+        for (int j = 1; j <= 2; ++j) {
             QPushButton *pushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, j)->widget());
             QRgb color = settings.value(SettingsColor.arg(i).arg(j), Colors[i-1][j-1].rgba()).toUInt();
 
             setPushButtonColor(pushButton, color);
-
-            connect(pushButton, SIGNAL(clicked()),
-                    this, SLOT(updatePushButtonColor()),
-                    Qt::UniqueConnection);
         }
     }
 
@@ -364,8 +389,18 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
     if (!pRetrieveSettingsOnly) {
         mInitializing = false;
 
-        mWaniKani->updateWallpaper(true);
+        mWaniKani->updateKanjis(true);
     }
+}
+
+//==============================================================================
+
+void Settings::updateLevels()
+{
+    // Update the levels to display
+
+    if (!mInitializing)
+        mWaniKani->updateKanjis(true);
 }
 
 //==============================================================================

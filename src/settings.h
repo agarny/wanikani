@@ -59,6 +59,8 @@ public:
 
     int interval() const;
 
+    bool currentKanjis() const;
+
     QString fontName() const;
     bool boldFont() const;
     bool italicsFont() const;
@@ -103,6 +105,8 @@ private slots:
     void on_swapPushButton_clicked();
 
     void on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly = true);
+
+    void updateLevels();
 
     void updatePushButtonColor();
 
