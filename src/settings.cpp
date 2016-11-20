@@ -113,7 +113,7 @@ Settings::~Settings()
 
     QSettings settings;
 
-    settings.setValue(SettingsPosition, mPosition);
+    settings.setValue(SettingsPosition, pos());
     settings.setValue(SettingsFileName, mFileName);
     settings.setValue(SettingsApiKey, mGui->apiKeyValue->text());
     settings.setValue(SettingsCurrentKanjis, mGui->currentKanjisRadioButton->isChecked());
@@ -232,19 +232,6 @@ void Settings::closeEvent(QCloseEvent *pEvent)
 
 //==============================================================================
 
-void Settings::moveEvent(QMoveEvent *pEvent)
-{
-    // Default handling of the event
-
-    QDialog::moveEvent(pEvent);
-
-    // Keep track of our position
-
-    mPosition = pos();
-}
-
-//==============================================================================
-
 void Settings::on_apiKeyValue_returnPressed()
 {
     // Update our Kanjis (and therefore our wallpaper)
@@ -333,7 +320,11 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
     QSettings settings;
 
     if (mInitializing) {
-        mPosition = settings.value(SettingsPosition).toPoint();
+        QPoint position = settings.value(SettingsPosition).toPoint();
+
+        if (!position.isNull())
+            move(position);
+
         mFileName = settings.value(SettingsFileName).toString();
     }
 
@@ -460,9 +451,6 @@ void Settings::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReaso
 void Settings::showSettings()
 {
     // Show ourselves
-
-    if (!mPosition.isNull())
-        move(mPosition);
 
     show();
 

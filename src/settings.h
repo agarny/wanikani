@@ -69,14 +69,11 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *pEvent);
-    virtual void moveEvent(QMoveEvent *pEvent);
 
 private:
     Ui::Settings *mGui;
 
     bool mInitializing;
-
-    QPoint mPosition;
 
     QString mFileName;
 
