@@ -326,15 +326,15 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
             move(position);
 
         mFileName = settings.value(SettingsFileName).toString();
+
+        mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
     }
 
-    if (!pRetrieveSettingsOnly)
+    if (!pRetrieveSettingsOnly) {
         mInitializing = true;
 
-    if (pRetrieveSettingsOnly)
-        mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
-    else
         settings.clear();
+    }
 
     if (settings.value(SettingsCurrentKanjis, true).toBool())
         mGui->currentKanjisRadioButton->setChecked(true);
