@@ -237,7 +237,6 @@ void WaniKani::updateWallpaper(const bool &pForceUpdate)
     if (pForceUpdate || mKanjisError || (mKanjiState != mOldKanjiState)) {
         // Default wallpaper
 
-        QString wallpaperFileName = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator()+"WaniKani.jpg");
         QPixmap pixmap;
 
         pixmap.load(":/wallpaper");
@@ -351,17 +350,21 @@ void WaniKani::updateWallpaper(const bool &pForceUpdate)
             }
         }
 
-        // Save and set our wallpaper
+        // Delete our olf wallpaper and save our new one
 
-        pixmap.save(wallpaperFileName);
+        QFile(mSettings->fileName()).remove();
 
-        // Set the given wallpaper
+        mSettings->setFileName(QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator()+QString("WaniKani%1.jpg").arg(QDateTime::currentMSecsSinceEpoch())));
+
+        pixmap.save(mSettings->fileName());
+
+        // Set the new wallpaper
 
 #if defined(Q_OS_WIN)
         SystemParametersInfo(SPI_SETDESKWALLPAPER, 0,
-                             (PVOID) wallpaperFileName.utf16(), SPIF_UPDATEINIFILE);
+                             (PVOID) mSettings->fileName().utf16(), SPIF_UPDATEINIFILE);
 #elif defined(Q_OS_MAC)
-        setMacosWallpaper(qPrintable(wallpaperFileName));
+        setMacosWallpaper(qPrintable(mSettings->fileName()));
 #else
         QProcess process;
 
@@ -376,7 +379,7 @@ void WaniKani::updateWallpaper(const bool &pForceUpdate)
                       QStringList() << "set"
                                     << "org.gnome.desktop.background"
                                     << "picture-uri"
-                                    << QUrl::fromLocalFile(wallpaperFileName).toString());
+                                    << QUrl::fromLocalFile(mSettings->fileName()).toString());
         process.waitForFinished();
 #endif
     }

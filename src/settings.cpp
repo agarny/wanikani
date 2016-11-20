@@ -33,6 +33,7 @@ limitations under the License.
 //==============================================================================
 
 static const auto SettingsPosition    = QStringLiteral("Position");
+static const auto SettingsFileName    = QStringLiteral("FileName");
 static const auto SettingsApiKey      = QStringLiteral("ApiKey");
 static const auto SettingsInterval    = QStringLiteral("Interval");
 static const auto SettingsFontName    = QStringLiteral("FontName");
@@ -45,6 +46,7 @@ static const auto SettingsColor       = QStringLiteral("Color%1%2");
 Settings::Settings(WaniKani *pWaniKani) :
     mGui(new Ui::Settings),
     mInitializing(true),
+    mFileName(QString()),
     mWaniKani(pWaniKani),
     mColors(QMap<QPushButton *, QRgb>())
 {
@@ -99,6 +101,7 @@ Settings::~Settings()
     QSettings settings;
 
     settings.setValue(SettingsPosition, mPosition);
+    settings.setValue(SettingsFileName, mFileName);
     settings.setValue(SettingsApiKey, mGui->apiKeyValue->text());
     settings.setValue(SettingsInterval, mGui->intervalSpinBox->value());
     settings.setValue(SettingsFontName, mGui->fontComboBox->currentText());
@@ -110,6 +113,24 @@ Settings::~Settings()
             settings.setValue(SettingsColor.arg(i).arg(j), mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, j)->widget())));
         }
     }
+}
+
+//==============================================================================
+
+QString Settings::fileName() const
+{
+    // Return our file name
+
+    return mFileName;
+}
+
+//==============================================================================
+
+void Settings::setFileName(const QString &pFileName)
+{
+    // Set our file name
+
+    mFileName = pFileName;
 }
 
 //==============================================================================
@@ -288,8 +309,10 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
 
     QSettings settings;
 
-    if (mInitializing)
+    if (mInitializing) {
         mPosition = settings.value(SettingsPosition).toPoint();
+        mFileName = settings.value(SettingsFileName).toString();
+    }
 
     if (!pRetrieveSettingsOnly)
         mInitializing = true;

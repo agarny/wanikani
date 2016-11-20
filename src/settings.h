@@ -52,6 +52,9 @@ public:
     explicit Settings(WaniKani *pWaniKani);
     ~Settings();
 
+    QString fileName() const;
+    void setFileName(const QString &pFileName);
+
     QString apiKey() const;
 
     int interval() const;
@@ -72,6 +75,8 @@ private:
     bool mInitializing;
 
     QPoint mPosition;
+
+    QString mFileName;
 
     WaniKani *mWaniKani;
 
