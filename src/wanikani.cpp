@@ -25,6 +25,7 @@ limitations under the License.
 
 //==============================================================================
 
+#include <QDesktopWidget>
 #include <QDir>
 #include <QFileInfo>
 #include <QJsonDocument>
@@ -244,12 +245,16 @@ void WaniKani::updateWallpaper()
     if (!mKanjisError) {
         // Generate the wallpaper
 
-        static const int xStart = 1240;
-        static const int shift = 32;
-        static const int smallShift = 1;
+        static const int LeftBorder = 1240;
+        static const int Shift = 32;
+        static const int SmallShift = 1;
 
-        int areaWidth = pixmap.width()-xStart-2*shift;
-        int areaHeight = pixmap.height()-2*shift;
+        QDesktopWidget desktopWidget;
+        QRect availableGeometry = desktopWidget.availableGeometry();
+        QRect geometry = desktopWidget.geometry();
+
+        int areaWidth = pixmap.width()-LeftBorder-2*Shift;
+        int areaHeight = double(availableGeometry.height())/geometry.height()*pixmap.height()-2*Shift;
 
         QFont font = QFont(mSettings->fontName());
 
@@ -269,11 +274,11 @@ void WaniKani::updateWallpaper()
             QFontMetrics fontMetrics(font);
             int crtCharWidth = fontMetrics.width(Kanjis.at(0));
             int crtCharHeight = fontMetrics.height();
-            int crtNbOfCols = areaWidth/(crtCharWidth+smallShift);
+            int crtNbOfCols = areaWidth/(crtCharWidth+SmallShift);
             int crtNbOfRows =  floor(mKanjiState.size()/crtNbOfCols)
                               +((mKanjiState.size() % crtNbOfCols)?1:0);
 
-            if (crtNbOfRows*crtCharHeight+(crtNbOfRows-1)*smallShift+fontMetrics.descent() <= areaHeight) {
+            if (crtNbOfRows*crtCharHeight+(crtNbOfRows-1)*SmallShift+fontMetrics.descent() <= areaHeight) {
                 charWidth = crtCharWidth;
                 charHeight = crtCharHeight;
 
@@ -294,15 +299,17 @@ void WaniKani::updateWallpaper()
 
         painter.setFont(font);
 
+        int xStart = LeftBorder+Shift+((areaWidth-nbOfCols*charWidth) >> 1);
         int x = 0;
-        int y = shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*smallShift) >> 1)-descent;
+        int y =  double(availableGeometry.top())/geometry.height()*pixmap.height()
+                +Shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*SmallShift) >> 1)-descent;
         int radius = ceil(0.75*(qMax(charWidth, charHeight) >> 3));
 
         for (int i = 0, j = 0, iMax = Kanjis.size(); i < iMax; ++i) {
             if (mKanjiState.keys().contains(Kanjis.at(i))) {
                 if (!(j % nbOfCols)) {
-                    x = xStart+shift;
-                    y += charHeight+(j?smallShift:0);
+                    x = xStart;
+                    y += charHeight+(j?SmallShift:0);
                 }
 
                 QString state = mKanjiState.value(Kanjis.at(i));
@@ -339,7 +346,7 @@ void WaniKani::updateWallpaper()
                 painter.fillPath(path, QColor(backgroundColor));
                 painter.drawText(x, y, Kanjis.at(i));
 
-                x += charWidth+smallShift;
+                x += charWidth+SmallShift;
 
                 ++j;
             }
