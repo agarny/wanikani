@@ -59,9 +59,7 @@ limitations under the License.
 WaniKani::WaniKani(int pArgC, char *pArgV[]) :
     mSettings(0),
     mKanjisError(false),
-    mKanjiState(QMap<QString, QString>()),
-    mOldKanjiState(QMap<QString, QString>())
-
+    mKanjiState(QMap<QString, QString>())
 {
     // Create our application
 
@@ -173,15 +171,12 @@ static const QString Kanjis =
 
 //==============================================================================
 
-void WaniKani::updateKanjis(const bool &pForceUpdate)
+void WaniKani::updateKanjis()
 {
     // Reset some internal properties
 
     mKanjisError = true;
     mKanjiState = QMap<QString, QString>();
-
-    if (pForceUpdate)
-        mOldKanjiState = QMap<QString, QString>();
 
     // Retrieve the list of Kanjis (and their state) the user has already
     // studied
@@ -238,160 +233,152 @@ void WaniKani::updateKanjis(const bool &pForceUpdate)
 
 //==============================================================================
 
-void WaniKani::updateWallpaper(const bool &pForceUpdate)
+void WaniKani::updateWallpaper()
 {
-    // Generate and set the wallpaper, if needed
+    // Generate and set the wallpaper
 
-    if (pForceUpdate || mKanjisError || (mKanjiState != mOldKanjiState)) {
-        // Default wallpaper
+    QPixmap pixmap;
 
-        QPixmap pixmap;
+    pixmap.load(":/wallpaper");
 
-        pixmap.load(":/wallpaper");
+    if (!mKanjisError) {
+        // Generate the wallpaper
 
-        if (!mKanjisError) {
-            // Keep track of our Kanji/state map
+        static const int xStart = 1240;
+        static const int shift = 32;
+        static const int smallShift = 1;
 
-            mOldKanjiState = mKanjiState;
+        int areaWidth = pixmap.width()-xStart-2*shift;
+        int areaHeight = pixmap.height()-2*shift;
 
-            // Generate the wallpaper
+        QFont font = QFont(mSettings->fontName());
 
-            static const int xStart = 1240;
-            static const int shift = 32;
-            static const int smallShift = 1;
+        font.setBold(mSettings->boldFont());
+        font.setItalic(mSettings->italicsFont());
 
-            int areaWidth = pixmap.width()-xStart-2*shift;
-            int areaHeight = pixmap.height()-2*shift;
+        int fontPixelSize = 1;
+        int charWidth = 0;
+        int charHeight = 0;
+        int nbOfRows = 0;
+        int nbOfCols = 0;
+        int descent = 0;
 
-            QFont font = QFont(mSettings->fontName());
+        forever {
+            font.setPixelSize(fontPixelSize);
 
-            font.setBold(mSettings->boldFont());
-            font.setItalic(mSettings->italicsFont());
+            QFontMetrics fontMetrics(font);
+            int crtCharWidth = fontMetrics.width(Kanjis.at(0));
+            int crtCharHeight = fontMetrics.height();
+            int crtNbOfCols = areaWidth/(crtCharWidth+smallShift);
+            int crtNbOfRows =  floor(mKanjiState.size()/crtNbOfCols)
+                              +((mKanjiState.size() % crtNbOfCols)?1:0);
 
-            int fontPixelSize = 1;
-            int charWidth = 0;
-            int charHeight = 0;
-            int nbOfRows = 0;
-            int nbOfCols = 0;
-            int descent = 0;
+            if (crtNbOfRows*crtCharHeight+(crtNbOfRows-1)*smallShift+fontMetrics.descent() <= areaHeight) {
+                charWidth = crtCharWidth;
+                charHeight = crtCharHeight;
 
-            forever {
-                font.setPixelSize(fontPixelSize);
+                nbOfRows = crtNbOfRows;
+                nbOfCols = crtNbOfCols;
 
-                QFontMetrics fontMetrics(font);
-                int crtCharWidth = fontMetrics.width(Kanjis.at(0));
-                int crtCharHeight = fontMetrics.height();
-                int crtNbOfCols = areaWidth/(crtCharWidth+smallShift);
-                int crtNbOfRows =  floor(mKanjiState.size()/crtNbOfCols)
-                                  +((mKanjiState.size() % crtNbOfCols)?1:0);
+                descent = fontMetrics.descent();
 
-                if (crtNbOfRows*crtCharHeight+(crtNbOfRows-1)*smallShift+fontMetrics.descent() <= areaHeight) {
-                    charWidth = crtCharWidth;
-                    charHeight = crtCharHeight;
+                ++fontPixelSize;
+            } else {
+                font.setPixelSize(fontPixelSize-1);
 
-                    nbOfRows = crtNbOfRows;
-                    nbOfCols = crtNbOfCols;
-
-                    descent = fontMetrics.descent();
-
-                    ++fontPixelSize;
-                } else {
-                    font.setPixelSize(fontPixelSize-1);
-
-                    break;
-                }
-            }
-
-            QPainter painter(&pixmap);
-
-            painter.setFont(font);
-
-            int x = 0;
-            int y = shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*smallShift) >> 1)-descent;
-            int radius = ceil(0.75*(qMax(charWidth, charHeight) >> 3));
-
-            for (int i = 0, j = 0, iMax = Kanjis.size(); i < iMax; ++i) {
-                if (mKanjiState.keys().contains(Kanjis.at(i))) {
-                    if (!(j % nbOfCols)) {
-                        x = xStart+shift;
-                        y += charHeight+(j?smallShift:0);
-                    }
-
-                    QString state = mKanjiState.value(Kanjis.at(i));
-                    QColor foregroundColor;
-                    QColor backgroundColor;
-
-                    if (!state.compare("apprentice")) {
-                        foregroundColor = mSettings->color(2, 1);
-                        backgroundColor = mSettings->color(2, 2);
-                    } else if (!state.compare("guru")) {
-                        foregroundColor = mSettings->color(3, 1);
-                        backgroundColor = mSettings->color(3, 2);
-                    } else if (!state.compare("master")) {
-                        foregroundColor = mSettings->color(4, 1);
-                        backgroundColor = mSettings->color(4, 2);
-                    } else if (!state.compare("enlighten")) {
-                        foregroundColor = mSettings->color(5, 1);
-                        backgroundColor = mSettings->color(5, 2);
-                    } else if (!state.compare("burned")) {
-                        foregroundColor = mSettings->color(6, 1);
-                        backgroundColor = mSettings->color(6, 2);
-                    } else {
-                        foregroundColor = mSettings->color(1, 1);
-                        backgroundColor = mSettings->color(1, 2);
-                    }
-
-                    painter.setPen(foregroundColor);
-
-                    QPainterPath path;
-
-                    path.addRoundedRect(QRectF(x, y-charHeight+descent, charWidth, charHeight),
-                                        radius, radius);
-
-                    painter.fillPath(path, QColor(backgroundColor));
-                    painter.drawText(x, y, Kanjis.at(i));
-
-                    x += charWidth+smallShift;
-
-                    ++j;
-                }
+                break;
             }
         }
 
-        // Delete our olf wallpaper and save our new one
+        QPainter painter(&pixmap);
 
-        if (!mSettings->fileName().isEmpty())
-            QFile(mSettings->fileName()).remove();
+        painter.setFont(font);
 
-        mSettings->setFileName(QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator()+QString("WaniKani%1.jpg").arg(QDateTime::currentMSecsSinceEpoch())));
+        int x = 0;
+        int y = shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*smallShift) >> 1)-descent;
+        int radius = ceil(0.75*(qMax(charWidth, charHeight) >> 3));
 
-        pixmap.save(mSettings->fileName());
+        for (int i = 0, j = 0, iMax = Kanjis.size(); i < iMax; ++i) {
+            if (mKanjiState.keys().contains(Kanjis.at(i))) {
+                if (!(j % nbOfCols)) {
+                    x = xStart+shift;
+                    y += charHeight+(j?smallShift:0);
+                }
 
-        // Set the new wallpaper
+                QString state = mKanjiState.value(Kanjis.at(i));
+                QColor foregroundColor;
+                QColor backgroundColor;
+
+                if (!state.compare("apprentice")) {
+                    foregroundColor = mSettings->color(2, 1);
+                    backgroundColor = mSettings->color(2, 2);
+                } else if (!state.compare("guru")) {
+                    foregroundColor = mSettings->color(3, 1);
+                    backgroundColor = mSettings->color(3, 2);
+                } else if (!state.compare("master")) {
+                    foregroundColor = mSettings->color(4, 1);
+                    backgroundColor = mSettings->color(4, 2);
+                } else if (!state.compare("enlighten")) {
+                    foregroundColor = mSettings->color(5, 1);
+                    backgroundColor = mSettings->color(5, 2);
+                } else if (!state.compare("burned")) {
+                    foregroundColor = mSettings->color(6, 1);
+                    backgroundColor = mSettings->color(6, 2);
+                } else {
+                    foregroundColor = mSettings->color(1, 1);
+                    backgroundColor = mSettings->color(1, 2);
+                }
+
+                painter.setPen(foregroundColor);
+
+                QPainterPath path;
+
+                path.addRoundedRect(QRectF(x, y-charHeight+descent, charWidth, charHeight),
+                                    radius, radius);
+
+                painter.fillPath(path, QColor(backgroundColor));
+                painter.drawText(x, y, Kanjis.at(i));
+
+                x += charWidth+smallShift;
+
+                ++j;
+            }
+        }
+    }
+
+    // Delete our olf wallpaper and save our new one
+
+    if (!mSettings->fileName().isEmpty())
+        QFile(mSettings->fileName()).remove();
+
+    mSettings->setFileName(QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator()+QString("WaniKani%1.jpg").arg(QDateTime::currentMSecsSinceEpoch())));
+
+    pixmap.save(mSettings->fileName());
+
+    // Set the new wallpaper
 
 #if defined(Q_OS_WIN)
-        SystemParametersInfo(SPI_SETDESKWALLPAPER, 0,
-                             (PVOID) mSettings->fileName().utf16(), SPIF_UPDATEINIFILE);
+    SystemParametersInfo(SPI_SETDESKWALLPAPER, 0,
+                         (PVOID) mSettings->fileName().utf16(), SPIF_UPDATEINIFILE);
 #elif defined(Q_OS_MAC)
-        setMacosWallpaper(qPrintable(mSettings->fileName()));
+    setMacosWallpaper(qPrintable(mSettings->fileName()));
 #else
-        QProcess process;
+    QProcess process;
 
-        process.start("gsettings",
-                      QStringList() << "set"
-                                    << "org.gnome.desktop.background"
-                                    << "picture-options"
-                                    << "stretched");
-        process.waitForFinished();
+    process.start("gsettings",
+                  QStringList() << "set"
+                                << "org.gnome.desktop.background"
+                                << "picture-options"
+                                << "stretched");
+    process.waitForFinished();
 
-        process.start("gsettings",
-                      QStringList() << "set"
-                                    << "org.gnome.desktop.background"
-                                    << "picture-uri"
-                                    << QUrl::fromLocalFile(mSettings->fileName()).toString());
-        process.waitForFinished();
+    process.start("gsettings",
+                  QStringList() << "set"
+                                << "org.gnome.desktop.background"
+                                << "picture-uri"
+                                << QUrl::fromLocalFile(mSettings->fileName()).toString());
+    process.waitForFinished();
 #endif
-    }
 }
 
 //==============================================================================
