@@ -350,7 +350,7 @@ void WaniKani::updateWallpaper(const bool &pForceUpdate)
 
             painter.setFont(font);
 
-            int xStart = LeftBorder+Shift+((areaWidth-nbOfCols*charWidth) >> 1);
+            int xStart = LeftBorder+Shift+((areaWidth-nbOfCols*charWidth-(nbOfCols-1)*SmallShift) >> 1);
             int x = 0;
             int y =  double(availableGeometry.top())/geometry.height()*pixmap.height()
                     +Shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*SmallShift) >> 1)-descent;
