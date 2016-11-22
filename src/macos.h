@@ -20,6 +20,7 @@ limitations under the License.
 // macOS
 //==============================================================================
 
+const char *macosWallpaper();
 void setMacosWallpaper(const char *pWallpaperFileName);
 
 //==============================================================================

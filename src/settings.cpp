@@ -236,7 +236,7 @@ void Settings::on_apiKeyValue_returnPressed()
 {
     // Update our Kanjis (and therefore our wallpaper)
 
-    mWaniKani->updateKanjis();
+    mWaniKani->updateKanjis(true);
 }
 
 //==============================================================================
@@ -255,7 +255,7 @@ void Settings::on_forceUpdateButton_clicked()
 {
     // Update our Kanjis (and therefore our wallpaper)
 
-    mWaniKani->updateKanjis();
+    mWaniKani->updateKanjis(true);
 }
 
 //==============================================================================
@@ -267,7 +267,7 @@ void Settings::on_fontComboBox_currentTextChanged(const QString &pFontName)
     // Force the update our wallpaper
 
     if (!mInitializing)
-        mWaniKani->updateWallpaper();
+        mWaniKani->updateWallpaper(true);
 }
 
 //==============================================================================
@@ -277,7 +277,7 @@ void Settings::on_boldFontCheckBox_clicked()
     // Force the update our wallpaper
 
     if (!mInitializing)
-        mWaniKani->updateWallpaper();
+        mWaniKani->updateWallpaper(true);
 }
 
 //==============================================================================
@@ -287,7 +287,7 @@ void Settings::on_italicsFontCheckBox_clicked()
     // Force the update our wallpaper
 
     if (!mInitializing)
-        mWaniKani->updateWallpaper();
+        mWaniKani->updateWallpaper(true);
 }
 
 //==============================================================================
@@ -307,7 +307,7 @@ void Settings::on_swapPushButton_clicked()
         setPushButtonColor(bgPushButton, qRgba(qRed(fgColor), qGreen(fgColor), qBlue(fgColor), qAlpha(bgColor)));
     }
 
-    mWaniKani->updateWallpaper();
+    mWaniKani->updateWallpaper(true);
 }
 
 //==============================================================================
@@ -380,7 +380,7 @@ void Settings::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
     if (!pRetrieveSettingsOnly) {
         mInitializing = false;
 
-        mWaniKani->updateKanjis();
+        mWaniKani->updateKanjis(true);
     }
 }
 
@@ -391,7 +391,7 @@ void Settings::updateLevels()
     // Update the levels to display
 
     if (!mInitializing)
-        mWaniKani->updateKanjis();
+        mWaniKani->updateKanjis(true);
 }
 
 //==============================================================================
@@ -409,7 +409,7 @@ void Settings::updatePushButtonColor()
     if (colorDialog.exec() == QDialog::Accepted) {
         setPushButtonColor(pushButton, colorDialog.currentColor().rgba());
 
-        mWaniKani->updateWallpaper();
+        mWaniKani->updateWallpaper(true);
     }
 }
 

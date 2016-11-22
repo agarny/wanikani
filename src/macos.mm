@@ -33,6 +33,20 @@ limitations under the License.
 
 //==============================================================================
 
+const char * macosWallpaper()
+{
+    // Set the given wallpaper on all our screens
+    // Note: this doesn't account for the fact that a user may have several
+    //       desktops...
+
+    NSURL *url = [[NSWorkspace sharedWorkspace] desktopImageURLForScreen:[NSScreen mainScreen]];
+    NSString *urlString = [url absoluteString];
+
+    return [urlString UTF8String];
+}
+
+//==============================================================================
+
 void setMacosWallpaper(const char *pWallpaperFileName)
 {
     // Set the given wallpaper on all our screens

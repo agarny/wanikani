@@ -53,7 +53,7 @@ public:
 
     void updateInterval(const int &pInterval);
 
-    void updateWallpaper();
+    void updateWallpaper(const bool &pForceUpdate = false);
 
 private:
     QtSingleApplication *mApplication;
@@ -63,11 +63,16 @@ private:
     QTimer *mTimer;
 
     bool mKanjisError;
-    QMap<QString, QString> mKanjiState;
-    QMap<QString, QString> mOldKanjiState;
+    QMap<QString, QString> mKanjisState;
+    QMap<QString, QString> mOldKanjisState;
+
+    void setWallpaper();
 
 public slots:
-    void updateKanjis();
+    void updateKanjis(const bool &pForceUpdate = false);
+
+private slots:
+    void checkWallpaper();
 };
 
 //==============================================================================
