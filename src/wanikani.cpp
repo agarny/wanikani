@@ -58,6 +58,7 @@ limitations under the License.
 //==============================================================================
 
 WaniKani::WaniKani(int pArgC, char *pArgV[]) :
+    mNeedToCheckWallpaper(true),
     mSettings(0),
     mKanjisError(false),
     mKanjisState(QMap<QString, QString>()),
@@ -109,10 +110,6 @@ int WaniKani::exec()
     updateInterval(mSettings->interval());
 
     QTimer::singleShot(0, this, SLOT(updateKanjis()));
-
-    // Ask for a wallpaper to be checked in about one second
-
-    QTimer::singleShot(1000, this, SLOT(checkWallpaper()));
 
     return mApplication->exec();
 }
@@ -414,6 +411,14 @@ void WaniKani::updateWallpaper(const bool &pForceUpdate)
         pixmap.save(mSettings->fileName());
 
         setWallpaper();
+    }
+
+    // Ask for a wallpaper to be checked in about one second, if necessary
+
+    if (mNeedToCheckWallpaper) {
+        mNeedToCheckWallpaper = false;
+
+        QTimer::singleShot(1000, this, SLOT(checkWallpaper()));
     }
 }
 

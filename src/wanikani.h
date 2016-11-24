@@ -58,6 +58,8 @@ public:
 private:
     QtSingleApplication *mApplication;
 
+    bool mNeedToCheckWallpaper;
+
     Settings *mSettings;
 
     QTimer *mTimer;
