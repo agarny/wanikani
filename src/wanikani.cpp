@@ -25,6 +25,7 @@ limitations under the License.
 
 //==============================================================================
 
+#include <QDateTime>
 #include <QDesktopWidget>
 #include <QDir>
 #include <QFileInfo>
