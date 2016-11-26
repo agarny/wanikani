@@ -101,7 +101,7 @@ private slots:
 
     void on_swapPushButton_clicked();
 
-    void on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly = true);
+    void on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly = false);
 
     void updateLevels();
 

@@ -70,7 +70,7 @@ Settings::Settings(WaniKani *pWaniKani) :
     // Retrieve our settings and handle a click on our foreground/background
     // push buttons
 
-    on_resetAllPushButton_clicked();
+    on_resetAllPushButton_clicked(true);
 
     // Create some actions
 
