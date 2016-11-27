@@ -68,6 +68,8 @@ private:
     QMap<QString, QString> mKanjisState;
     QMap<QString, QString> mOldKanjisState;
 
+    QJsonDocument waniKaniRequest(const QString &pUrl);
+
     void setWallpaper();
 
 public slots:

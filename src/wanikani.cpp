@@ -166,6 +166,35 @@ void WaniKani::updateInterval(const int &pInterval)
 
 //==============================================================================
 
+QJsonDocument WaniKani::waniKaniRequest(const QString &pUrl)
+{
+    // Send a request to WaniKani and convert its response a JSON document, if
+    // possible
+
+    QNetworkAccessManager networkAccessManager;
+    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(pUrl));
+    QEventLoop eventLoop;
+
+    QObject::connect(networkReply, SIGNAL(finished()),
+                     &eventLoop, SLOT(quit()));
+
+    eventLoop.exec();
+
+    QByteArray response = QByteArray();
+
+    if (networkReply->error() == QNetworkReply::NoError)
+        response = networkReply->readAll();
+
+    networkReply->deleteLater();
+
+    if (response.isEmpty())
+        return QJsonDocument();
+    else
+        return QJsonDocument::fromJson(response);
+}
+
+//==============================================================================
+
 static const QString Kanjis =
 "一二三四五六七八九十口日月田目古吾冒朋明唱晶品呂昌早旭世胃旦胆亘凹凸旧自白百中千舌升昇丸寸専博"
 "占上下卓朝只貝貞員見児元頁頑凡負万句肌旬勺的首乙乱直具真工左右有賄貢項刀刃切召昭則副別丁町可頂"
@@ -229,7 +258,6 @@ void WaniKani::updateKanjis(const bool &pForceUpdate)
     // studied
 
     QString url = "https://www.wanikani.com/api/v1/user/"+mSettings->apiKey()+"/kanji";
-    QNetworkAccessManager networkAccessManager;
 
     if (!mSettings->currentKanjis()) {
         url += "/1";
@@ -238,37 +266,20 @@ void WaniKani::updateKanjis(const bool &pForceUpdate)
             url += ","+QString::number(i);
     }
 
-    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(url));
-    QEventLoop eventLoop;
+    QJsonDocument json = waniKaniRequest(url);
 
-    QObject::connect(networkReply, SIGNAL(finished()),
-                     &eventLoop, SLOT(quit()));
+    if (!json.isNull()) {
+        mKanjisError = json.object().contains("error");
 
-    eventLoop.exec();
+        QVariantMap requestedInformationMap;
 
-    QByteArray response = QByteArray();
+        if (!mKanjisError) {
+            foreach (const QVariant &requestedInformation,
+                     json.object().toVariantMap()["requested_information"].toList()) {
+                requestedInformationMap = requestedInformation.toMap();
 
-    if (networkReply->error() == QNetworkReply::NoError)
-        response = networkReply->readAll();
-
-    networkReply->deleteLater();
-
-    if (!response.isEmpty()) {
-        QJsonDocument json = QJsonDocument::fromJson(response);
-
-        if (!json.isNull()) {
-            mKanjisError = json.object().contains("error");
-
-            QVariantMap requestedInformationMap;
-
-            if (!mKanjisError) {
-                foreach (const QVariant &requestedInformation,
-                         json.object().toVariantMap()["requested_information"].toList()) {
-                    requestedInformationMap = requestedInformation.toMap();
-
-                    mKanjisState.insert(requestedInformationMap["character"].toString(),
-                                       requestedInformationMap["stats"].toMap()["srs"].toString());
-                }
+                mKanjisState.insert(requestedInformationMap["character"].toString(),
+                                   requestedInformationMap["stats"].toMap()["srs"].toString());
             }
         }
     }
