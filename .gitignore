@@ -1,14 +1,15 @@
 build
+debug
+release
 
 .DS_Store
 *.o
 *_plugin_import.cpp
 .qmake.stash
-Makefile
+Makefile*
 moc_*.cpp
 qrc_*.cpp
 ui_*.h
 WaniKani
 WaniKani.app
-WaniKani.jpg
 WaniKani.pro.user
