@@ -31,7 +31,7 @@ limitations under the License.
 //==============================================================================
 
 namespace Ui {
-    class Settings;
+    class WaniKaniDialog;
 }
 
 //==============================================================================
@@ -44,13 +44,13 @@ class QAbstractButton;
 
 //==============================================================================
 
-class Settings : public QDialog
+class WaniKaniDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit Settings(WaniKani *pWaniKani);
-    ~Settings();
+    explicit WaniKaniDialog(WaniKani *pWaniKani);
+    ~WaniKaniDialog();
 
     QString fileName() const;
     void setFileName(const QString &pFileName);
@@ -71,7 +71,7 @@ protected:
     virtual void closeEvent(QCloseEvent *pEvent);
 
 private:
-    Ui::Settings *mGui;
+    Ui::WaniKaniDialog *mGui;
 
     bool mInitializing;
 
@@ -82,7 +82,7 @@ private:
     QSystemTrayIcon *mTrayIcon;
     QMenu *mTrayIconMenu;
 
-    QAction *mSettingsAction;
+    QAction *mWaniKaniAction;
     QAction *mQuitAction;
 
     QMap<QPushButton *, QRgb> mColors;
@@ -109,7 +109,7 @@ private slots:
 
     void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
 
-    void showSettings();
+    void showWaniKaniDialog();
 };
 
 //==============================================================================

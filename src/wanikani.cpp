@@ -20,8 +20,8 @@ limitations under the License.
 // WaniKani
 //==============================================================================
 
-#include "settings.h"
 #include "wanikani.h"
+#include "wanikanidialog.h"
 
 //==============================================================================
 
@@ -60,7 +60,7 @@ limitations under the License.
 
 WaniKani::WaniKani(int pArgC, char *pArgV[]) :
     mNeedToCheckWallpaper(true),
-    mSettings(0),
+    mWaniKaniDialog(0),
     mKanjisError(false),
     mKanjisState(QMap<QString, QString>()),
     mOldKanjisState(QMap<QString, QString>())
@@ -76,7 +76,7 @@ WaniKani::~WaniKani()
 {
     // Delete some internal objects
 
-    delete mSettings;
+    delete mWaniKaniDialog;
     delete mApplication;
 }
 
@@ -95,11 +95,11 @@ int WaniKani::exec()
     mApplication->setOrganizationName("Hellix");
     mApplication->setQuitOnLastWindowClosed(false);
 
-    // Create and (initially) hide our settings
+    // Create and (initially) hide our WaniKani dialog
 
-    mSettings = new Settings(this);
+    mWaniKaniDialog = new WaniKaniDialog(this);
 
-    mSettings->hide();
+    mWaniKaniDialog->hide();
 
     // Create a timer to generate and set our wallpaper
 
@@ -108,7 +108,7 @@ int WaniKani::exec()
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(updateKanjis()));
 
-    updateInterval(mSettings->interval());
+    updateInterval(mWaniKaniDialog->interval());
 
     QTimer::singleShot(0, this, SLOT(updateKanjis()));
 
@@ -147,7 +147,7 @@ void WaniKani::checkWallpaper()
     // as the one in our settings (which might happen if we switch virtual
     // desktops, for example)
 
-    if (wallpaperFileName.compare(mSettings->fileName()))
+    if (wallpaperFileName.compare(mWaniKaniDialog->fileName()))
         setWallpaper();
 
     // Check again in about one second
@@ -257,9 +257,9 @@ void WaniKani::updateKanjis(const bool &pForceUpdate)
     // Retrieve the list of Kanjis (and their state) the user has already
     // studied
 
-    QString url = "https://www.wanikani.com/api/v1/user/"+mSettings->apiKey()+"/kanji";
+    QString url = "https://www.wanikani.com/api/v1/user/"+mWaniKaniDialog->apiKey()+"/kanji";
 
-    if (!mSettings->currentKanjis()) {
+    if (!mWaniKaniDialog->currentKanjis()) {
         url += "/1";
 
         for (int i = 2; i <= 60; ++i)
@@ -316,10 +316,10 @@ void WaniKani::updateWallpaper(const bool &pForceUpdate)
             int areaWidth = pixmap.width()-LeftBorder-2*Shift;
             int areaHeight = double(availableGeometry.height())/geometry.height()*pixmap.height()-2*Shift;
 
-            QFont font = QFont(mSettings->fontName());
+            QFont font = QFont(mWaniKaniDialog->fontName());
 
-            font.setBold(mSettings->boldFont());
-            font.setItalic(mSettings->italicsFont());
+            font.setBold(mWaniKaniDialog->boldFont());
+            font.setItalic(mWaniKaniDialog->italicsFont());
 
             int fontPixelSize = 1;
             int charWidth = 0;
@@ -377,23 +377,23 @@ void WaniKani::updateWallpaper(const bool &pForceUpdate)
                     QColor backgroundColor;
 
                     if (!state.compare("apprentice")) {
-                        foregroundColor = mSettings->color(2, 1);
-                        backgroundColor = mSettings->color(2, 2);
+                        foregroundColor = mWaniKaniDialog->color(2, 1);
+                        backgroundColor = mWaniKaniDialog->color(2, 2);
                     } else if (!state.compare("guru")) {
-                        foregroundColor = mSettings->color(3, 1);
-                        backgroundColor = mSettings->color(3, 2);
+                        foregroundColor = mWaniKaniDialog->color(3, 1);
+                        backgroundColor = mWaniKaniDialog->color(3, 2);
                     } else if (!state.compare("master")) {
-                        foregroundColor = mSettings->color(4, 1);
-                        backgroundColor = mSettings->color(4, 2);
+                        foregroundColor = mWaniKaniDialog->color(4, 1);
+                        backgroundColor = mWaniKaniDialog->color(4, 2);
                     } else if (!state.compare("enlighten")) {
-                        foregroundColor = mSettings->color(5, 1);
-                        backgroundColor = mSettings->color(5, 2);
+                        foregroundColor = mWaniKaniDialog->color(5, 1);
+                        backgroundColor = mWaniKaniDialog->color(5, 2);
                     } else if (!state.compare("burned")) {
-                        foregroundColor = mSettings->color(6, 1);
-                        backgroundColor = mSettings->color(6, 2);
+                        foregroundColor = mWaniKaniDialog->color(6, 1);
+                        backgroundColor = mWaniKaniDialog->color(6, 2);
                     } else {
-                        foregroundColor = mSettings->color(1, 1);
-                        backgroundColor = mSettings->color(1, 2);
+                        foregroundColor = mWaniKaniDialog->color(1, 1);
+                        backgroundColor = mWaniKaniDialog->color(1, 2);
                     }
 
                     painter.setPen(foregroundColor);
@@ -415,12 +415,12 @@ void WaniKani::updateWallpaper(const bool &pForceUpdate)
 
         // Delete our old wallpaper and save our new one before setting it
 
-        if (!mSettings->fileName().isEmpty())
-            QFile(mSettings->fileName()).remove();
+        if (!mWaniKaniDialog->fileName().isEmpty())
+            QFile(mWaniKaniDialog->fileName()).remove();
 
-        mSettings->setFileName(QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator()+QString("WaniKani%1.jpg").arg(QDateTime::currentMSecsSinceEpoch())));
+        mWaniKaniDialog->setFileName(QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator()+QString("WaniKani%1.jpg").arg(QDateTime::currentMSecsSinceEpoch())));
 
-        pixmap.save(mSettings->fileName());
+        pixmap.save(mWaniKaniDialog->fileName());
 
         setWallpaper();
     }
@@ -442,9 +442,9 @@ void WaniKani::setWallpaper()
 
 #if defined(Q_OS_WIN)
     SystemParametersInfo(SPI_SETDESKWALLPAPER, 0,
-                         PVOID(mSettings->fileName().utf16()), SPIF_UPDATEINIFILE);
+                         PVOID(mWaniKaniDialog->fileName().utf16()), SPIF_UPDATEINIFILE);
 #elif defined(Q_OS_MAC)
-    setMacosWallpaper(qPrintable(mSettings->fileName()));
+    setMacosWallpaper(qPrintable(mWaniKaniDialog->fileName()));
 #else
     QProcess process;
 
@@ -459,7 +459,7 @@ void WaniKani::setWallpaper()
                   QStringList() << "set"
                                 << "org.gnome.desktop.background"
                                 << "picture-uri"
-                                << QUrl::fromLocalFile(mSettings->fileName()).toString());
+                                << QUrl::fromLocalFile(mWaniKaniDialog->fileName()).toString());
     process.waitForFinished();
 #endif
 }

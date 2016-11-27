@@ -29,7 +29,7 @@ limitations under the License.
 
 //==============================================================================
 
-class Settings;
+class WaniKaniDialog;
 
 //==============================================================================
 
@@ -60,7 +60,7 @@ private:
 
     bool mNeedToCheckWallpaper;
 
-    Settings *mSettings;
+    WaniKaniDialog *mWaniKaniDialog;
 
     QTimer *mTimer;
 

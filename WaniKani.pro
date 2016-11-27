@@ -12,17 +12,17 @@ mac: LIBS += -framework AppKit
 INCLUDEPATH += src/3rdparty/QtSingleApplication
 
 SOURCES = src/main.cpp \
-          src/settings.cpp \
           src/wanikani.cpp \
+          src/wanikanidialog.cpp \
           src/3rdparty/QtSingleApplication/qtlocalpeer.cpp \
           src/3rdparty/QtSingleApplication/qtsingleapplication.cpp
 
-HEADERS = src/settings.h \
-          src/wanikani.h \
+HEADERS = src/wanikani.h \
+          src/wanikanidialog.h \
           src/3rdparty/QtSingleApplication/qtlocalpeer.h \
           src/3rdparty/QtSingleApplication/qtsingleapplication.h
 
-FORMS = src/settings.ui
+FORMS = src/wanikanidialog.ui
 
 mac: OBJECTIVE_SOURCES = src/macos.mm
 
