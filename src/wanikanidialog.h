@@ -75,6 +75,8 @@ private:
 
     bool mInitializing;
 
+    QString mVersion;
+
     QString mFileName;
 
     WaniKani *mWaniKani;
@@ -83,6 +85,7 @@ private:
     QMenu *mTrayIconMenu;
 
     QAction *mWaniKaniAction;
+    QAction *mAboutAction;
     QAction *mQuitAction;
 
     QMap<QPushButton *, QRgb> mColors;
@@ -110,6 +113,8 @@ private slots:
     void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
 
     void showWaniKaniDialog();
+
+    void about();
 };
 
 //==============================================================================
