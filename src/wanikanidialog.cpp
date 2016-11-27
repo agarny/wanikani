@@ -25,6 +25,7 @@ limitations under the License.
 #include <QColorDialog>
 #include <QMenu>
 #include <QSettings>
+#include <QTextStream>
 
 //==============================================================================
 
@@ -54,6 +55,17 @@ WaniKaniDialog::WaniKaniDialog(WaniKani *pWaniKani) :
     // Set up our GUI
 
     mGui->setupUi(this);
+
+    QFile versionFile(":/version");
+
+    versionFile.open(QIODevice::ReadOnly);
+
+    QTextStream stream(&versionFile);
+    QString version = stream.readAll();
+
+    versionFile.close();
+
+    setWindowTitle(windowTitle()+" "+version);
 
     connect(mGui->currentKanjisRadioButton, SIGNAL(clicked()),
             this, SLOT(updateLevels()));
