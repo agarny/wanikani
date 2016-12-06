@@ -24,8 +24,6 @@ limitations under the License.
 #include <QCloseEvent>
 #include <QColorDialog>
 #include <QDate>
-#include <QMenu>
-#include <QMessageBox>
 #include <QSettings>
 #include <QTextStream>
 
@@ -70,57 +68,10 @@ WaniKaniDialog::WaniKaniDialog(WaniKani *pWaniKani) :
         }
     }
 
-    // Version of our program
-
-    QFile versionFile(":/version");
-
-    versionFile.open(QIODevice::ReadOnly);
-
-    QTextStream stream(&versionFile);
-
-    mVersion = stream.readAll();
-
-    versionFile.close();
-
     // Retrieve our settings and handle a click on our foreground/background
     // push buttons
 
     on_resetAllPushButton_clicked(true);
-
-    // Create some actions
-
-    mWaniKaniAction = new QAction(tr("WaniKani..."), this);
-    mAboutAction = new QAction(tr("About..."), this);
-    mQuitAction = new QAction(tr("Quit"), this);
-
-    connect(mWaniKaniAction, SIGNAL(triggered(bool)),
-            this, SLOT(showWaniKaniDialog()));
-    connect(mAboutAction, SIGNAL(triggered(bool)),
-            this, SLOT(about()));
-    connect(mQuitAction, SIGNAL(triggered(bool)),
-            qApp, SLOT(quit()));
-
-    // Create our system tray icon menu
-
-    mTrayIconMenu = new QMenu(this);
-
-    mTrayIconMenu->addAction(mWaniKaniAction);
-    mTrayIconMenu->addSeparator();
-    mTrayIconMenu->addAction(mAboutAction);
-    mTrayIconMenu->addSeparator();
-    mTrayIconMenu->addAction(mQuitAction);
-
-    // Create and show our system tray icon
-
-    mTrayIcon = new QSystemTrayIcon(this);
-
-    mTrayIcon->setContextMenu(mTrayIconMenu);
-    mTrayIcon->setIcon(QIcon(":/icon"));
-
-    connect(mTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-            this, SLOT(trayIconActivated(const QSystemTrayIcon::ActivationReason &)));
-
-    mTrayIcon->show();
 
     mInitializing = false;
 }
@@ -243,11 +194,9 @@ void WaniKaniDialog::closeEvent(QCloseEvent *pEvent)
         return;
 #endif
 
-    if (mTrayIcon->isVisible()) {
-        hide();
+    hide();
 
-        pEvent->ignore();
-    }
+    pEvent->ignore();
 }
 
 //==============================================================================
@@ -450,51 +399,6 @@ void WaniKaniDialog::setPushButtonColor(QPushButton *pPushButton,
                                            .arg(qGreen(pColor))
                                            .arg(qBlue(pColor))
                                            .arg(qAlpha(pColor)));
-}
-
-//==============================================================================
-
-void WaniKaniDialog::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
-{
-    // Show ourselves or our menu, depending on the platofmr on which we are
-
-    if (pReason == QSystemTrayIcon::Trigger) {
-#ifdef Q_OS_WIN
-        showWaniKaniDialog();
-#else
-        mTrayIcon->show();
-#endif
-    }
-}
-
-//==============================================================================
-
-void WaniKaniDialog::showWaniKaniDialog()
-{
-    // Show ourselves
-
-    show();
-
-    raise();
-    activateWindow();
-}
-
-//==============================================================================
-
-void WaniKaniDialog::about()
-{
-    // Show our about dialog box
-
-    int currentYear = QDate::currentDate().year();
-
-    QMessageBox messageBox(tr("About"),
-                           "<h1 align=center><strong>WaniKani "+mVersion+"</strong></h1>"
-                           "<h3 align=center><em>"+QSysInfo::prettyProductName()+"</em></h3>"
-                           "<p align=center><em>Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+"</em></p>"
-                           "<p>A <a href=\"https://github.com/agarny/wanikani\">simple program</a> that automatically generates and sets a wallpaper based on the Kanjis that one has studied using <a href=\"https://www.wanikani.com/\">WaniKani</a>.</p>",
-                           QMessageBox::Information, 0, 0, 0);
-
-    messageBox.exec();
 }
 
 //==============================================================================

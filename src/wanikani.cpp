@@ -25,12 +25,15 @@ limitations under the License.
 
 //==============================================================================
 
+#include <QAction>
 #include <QDateTime>
 #include <QDesktopWidget>
 #include <QDir>
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMenu>
+#include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -68,6 +71,53 @@ WaniKani::WaniKani(int pArgC, char *pArgV[]) :
     // Create our application
 
     mApplication = new QtSingleApplication(QFileInfo(pArgV[0]).baseName(), pArgC, pArgV);
+
+    // Version of our program
+
+    QFile versionFile(":/version");
+
+    versionFile.open(QIODevice::ReadOnly);
+
+    QTextStream stream(&versionFile);
+
+    mVersion = stream.readAll();
+
+    versionFile.close();
+
+    // Create some actions
+
+    mWaniKaniAction = new QAction(tr("WaniKani..."), this);
+    mAboutAction = new QAction(tr("About..."), this);
+    mQuitAction = new QAction(tr("Quit"), this);
+
+    connect(mWaniKaniAction, SIGNAL(triggered(bool)),
+            this, SLOT(waniKani()));
+    connect(mAboutAction, SIGNAL(triggered(bool)),
+            this, SLOT(about()));
+    connect(mQuitAction, SIGNAL(triggered(bool)),
+            qApp, SLOT(quit()));
+
+    // Create our system tray icon menu
+
+    mTrayIconMenu = new QMenu();
+
+    mTrayIconMenu->addAction(mWaniKaniAction);
+    mTrayIconMenu->addSeparator();
+    mTrayIconMenu->addAction(mAboutAction);
+    mTrayIconMenu->addSeparator();
+    mTrayIconMenu->addAction(mQuitAction);
+
+    // Create and show our system tray icon
+
+    mTrayIcon = new QSystemTrayIcon(this);
+
+    mTrayIcon->setContextMenu(mTrayIconMenu);
+    mTrayIcon->setIcon(QIcon(":/icon"));
+
+    connect(mTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            this, SLOT(trayIconActivated(const QSystemTrayIcon::ActivationReason &)));
+
+    mTrayIcon->show();
 }
 
 //==============================================================================
@@ -113,6 +163,51 @@ int WaniKani::exec()
     QTimer::singleShot(0, this, SLOT(updateKanjis()));
 
     return mApplication->exec();
+}
+
+//==============================================================================
+
+void WaniKani::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
+{
+    // Show ourselves or our menu, depending on the platofmr on which we are
+
+    if (pReason == QSystemTrayIcon::Trigger) {
+#ifdef Q_OS_WIN
+        waniKani();
+#else
+        mTrayIcon->show();
+#endif
+    }
+}
+
+//==============================================================================
+
+void WaniKani::waniKani()
+{
+    // Show ourselves
+
+    mWaniKaniDialog->show();
+
+    mWaniKaniDialog->raise();
+    mWaniKaniDialog->activateWindow();
+}
+
+//==============================================================================
+
+void WaniKani::about()
+{
+    // Show our about dialog box
+
+    int currentYear = QDate::currentDate().year();
+
+    QMessageBox messageBox(tr("About"),
+                           "<h1 align=center><strong>WaniKani "+mVersion+"</strong></h1>"
+                           "<h3 align=center><em>"+QSysInfo::prettyProductName()+"</em></h3>"
+                           "<p align=center><em>Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+"</em></p>"
+                           "<p>A <a href=\"https://github.com/agarny/wanikani\">simple program</a> that automatically generates and sets a wallpaper based on the Kanjis that one has studied using <a href=\"https://www.wanikani.com/\">WaniKani</a>.</p>",
+                           QMessageBox::Information, 0, 0, 0);
+
+    messageBox.exec();
 }
 
 //==============================================================================

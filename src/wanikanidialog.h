@@ -26,7 +26,6 @@ limitations under the License.
 
 #include <QDialog>
 #include <QMap>
-#include <QSystemTrayIcon>
 
 //==============================================================================
 
@@ -75,18 +74,9 @@ private:
 
     bool mInitializing;
 
-    QString mVersion;
-
     QString mFileName;
 
     WaniKani *mWaniKani;
-
-    QSystemTrayIcon *mTrayIcon;
-    QMenu *mTrayIconMenu;
-
-    QAction *mWaniKaniAction;
-    QAction *mAboutAction;
-    QAction *mQuitAction;
 
     QMap<QPushButton *, QRgb> mColors;
 
@@ -109,12 +99,6 @@ private slots:
     void updateLevels();
 
     void updatePushButtonColor();
-
-    void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
-
-    void showWaniKaniDialog();
-
-    void about();
 };
 
 //==============================================================================

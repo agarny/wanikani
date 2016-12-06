@@ -26,6 +26,7 @@ limitations under the License.
 
 #include <QMap>
 #include <QObject>
+#include <QSystemTrayIcon>
 
 //==============================================================================
 
@@ -33,6 +34,8 @@ class WaniKaniDialog;
 
 //==============================================================================
 
+class QAction;
+class QMenu;
 class QTimer;
 
 //==============================================================================
@@ -58,6 +61,15 @@ public:
 private:
     QtSingleApplication *mApplication;
 
+    QString mVersion;
+
+    QSystemTrayIcon *mTrayIcon;
+    QMenu *mTrayIconMenu;
+
+    QAction *mWaniKaniAction;
+    QAction *mAboutAction;
+    QAction *mQuitAction;
+
     bool mNeedToCheckWallpaper;
 
     WaniKaniDialog *mWaniKaniDialog;
@@ -76,6 +88,12 @@ public slots:
     void updateKanjis(const bool &pForceUpdate = false);
 
 private slots:
+    void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
+
+    void waniKani();
+
+    void about();
+
     void checkWallpaper();
 };
 
