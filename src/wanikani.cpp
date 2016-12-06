@@ -71,6 +71,32 @@ WaniKani::WaniKani(int pArgC, char *pArgV[]) :
     // Create our application
 
     mApplication = new QtSingleApplication(QFileInfo(pArgV[0]).baseName(), pArgC, pArgV);
+}
+
+//==============================================================================
+
+WaniKani::~WaniKani()
+{
+    // Delete some internal objects
+
+    delete mWaniKaniDialog;
+    delete mApplication;
+}
+
+//==============================================================================
+
+int WaniKani::exec()
+{
+    // Check whether our application is already running
+
+    if (mApplication->isRunning())
+        return 0;
+
+    // Customise our application
+
+    mApplication->setApplicationName("WaniKani");
+    mApplication->setOrganizationName("Hellix");
+    mApplication->setQuitOnLastWindowClosed(false);
 
     // Version of our program
 
@@ -118,32 +144,6 @@ WaniKani::WaniKani(int pArgC, char *pArgV[]) :
             this, SLOT(trayIconActivated(const QSystemTrayIcon::ActivationReason &)));
 
     mTrayIcon->show();
-}
-
-//==============================================================================
-
-WaniKani::~WaniKani()
-{
-    // Delete some internal objects
-
-    delete mWaniKaniDialog;
-    delete mApplication;
-}
-
-//==============================================================================
-
-int WaniKani::exec()
-{
-    // Check whether our application is already running
-
-    if (mApplication->isRunning())
-        return 0;
-
-    // Customise our application
-
-    mApplication->setApplicationName("WaniKani");
-    mApplication->setOrganizationName("Hellix");
-    mApplication->setQuitOnLastWindowClosed(false);
 
     // Create and (initially) hide our WaniKani dialog
 
