@@ -17,7 +17,7 @@ limitations under the License.
 *******************************************************************************/
 
 #include "wanikani.h"
-#include "wanikanidialog.h"
+#include "wanikaniwidget.h"
 
 //==============================================================================
 
