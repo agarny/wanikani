@@ -29,7 +29,7 @@ limitations under the License.
 
 //==============================================================================
 
-#include "ui_wanikanidialog.h"
+#include "ui_wanikaniwidget.h"
 
 //==============================================================================
 
@@ -45,8 +45,8 @@ static const auto SettingsColor         = QStringLiteral("Color%1%2");
 
 //==============================================================================
 
-WaniKaniDialog::WaniKaniDialog(WaniKani *pWaniKani) :
-    mGui(new Ui::WaniKaniDialog),
+WaniKaniWidget::WaniKaniWidget(WaniKani *pWaniKani) :
+    mGui(new Ui::WaniKaniWidget),
     mInitializing(true),
     mFileName(QString()),
     mWaniKani(pWaniKani),
@@ -78,7 +78,7 @@ WaniKaniDialog::WaniKaniDialog(WaniKani *pWaniKani) :
 
 //==============================================================================
 
-WaniKaniDialog::~WaniKaniDialog()
+WaniKaniWidget::~WaniKaniWidget()
 {
     // Keep track of our settings
 
@@ -102,7 +102,7 @@ WaniKaniDialog::~WaniKaniDialog()
 
 //==============================================================================
 
-QString WaniKaniDialog::fileName() const
+QString WaniKaniWidget::fileName() const
 {
     // Return our file name
 
@@ -111,7 +111,7 @@ QString WaniKaniDialog::fileName() const
 
 //==============================================================================
 
-void WaniKaniDialog::setFileName(const QString &pFileName)
+void WaniKaniWidget::setFileName(const QString &pFileName)
 {
     // Set our file name
 
@@ -120,7 +120,7 @@ void WaniKaniDialog::setFileName(const QString &pFileName)
 
 //==============================================================================
 
-QString WaniKaniDialog::apiKey() const
+QString WaniKaniWidget::apiKey() const
 {
     // Return our API key
 
@@ -129,7 +129,7 @@ QString WaniKaniDialog::apiKey() const
 
 //==============================================================================
 
-int WaniKaniDialog::interval() const
+int WaniKaniWidget::interval() const
 {
     // Return our interval
 
@@ -138,7 +138,7 @@ int WaniKaniDialog::interval() const
 
 //==============================================================================
 
-bool WaniKaniDialog::currentKanjis() const
+bool WaniKaniWidget::currentKanjis() const
 {
     // Return whether we are to display only our current levels
 
@@ -147,7 +147,7 @@ bool WaniKaniDialog::currentKanjis() const
 
 //==============================================================================
 
-QString WaniKaniDialog::fontName() const
+QString WaniKaniWidget::fontName() const
 {
     // Return our font name
 
@@ -156,7 +156,7 @@ QString WaniKaniDialog::fontName() const
 
 //==============================================================================
 
-bool WaniKaniDialog::boldFont() const
+bool WaniKaniWidget::boldFont() const
 {
     // Return whether our font is to be bold
 
@@ -165,7 +165,7 @@ bool WaniKaniDialog::boldFont() const
 
 //==============================================================================
 
-bool WaniKaniDialog::italicsFont() const
+bool WaniKaniWidget::italicsFont() const
 {
     // Return whether our font is to be in italics
 
@@ -174,7 +174,7 @@ bool WaniKaniDialog::italicsFont() const
 
 //==============================================================================
 
-QColor WaniKaniDialog::color(const int &pRow, const int &pColumn) const
+QColor WaniKaniWidget::color(const int &pRow, const int &pColumn) const
 {
     // Return whether our font is to be in italics
 
@@ -185,7 +185,7 @@ QColor WaniKaniDialog::color(const int &pRow, const int &pColumn) const
 
 //==============================================================================
 
-void WaniKaniDialog::closeEvent(QCloseEvent *pEvent)
+void WaniKaniWidget::closeEvent(QCloseEvent *pEvent)
 {
     // Hide ourselves rather than close ourselves
 
@@ -201,7 +201,7 @@ void WaniKaniDialog::closeEvent(QCloseEvent *pEvent)
 
 //==============================================================================
 
-void WaniKaniDialog::on_apiKeyValue_returnPressed()
+void WaniKaniWidget::on_apiKeyValue_returnPressed()
 {
     // Update our Kanjis (and therefore our wallpaper)
 
@@ -210,7 +210,7 @@ void WaniKaniDialog::on_apiKeyValue_returnPressed()
 
 //==============================================================================
 
-void WaniKaniDialog::on_intervalSpinBox_valueChanged(int pInterval)
+void WaniKaniWidget::on_intervalSpinBox_valueChanged(int pInterval)
 {
     // Update our timer's interval
 
@@ -220,7 +220,7 @@ void WaniKaniDialog::on_intervalSpinBox_valueChanged(int pInterval)
 
 //==============================================================================
 
-void WaniKaniDialog::on_forceUpdateButton_clicked()
+void WaniKaniWidget::on_forceUpdateButton_clicked()
 {
     // Update our Kanjis (and therefore our wallpaper)
 
@@ -229,7 +229,7 @@ void WaniKaniDialog::on_forceUpdateButton_clicked()
 
 //==============================================================================
 
-void WaniKaniDialog::on_fontComboBox_currentTextChanged(const QString &pFontName)
+void WaniKaniWidget::on_fontComboBox_currentTextChanged(const QString &pFontName)
 {
     Q_UNUSED(pFontName);
 
@@ -241,7 +241,7 @@ void WaniKaniDialog::on_fontComboBox_currentTextChanged(const QString &pFontName
 
 //==============================================================================
 
-void WaniKaniDialog::on_boldFontCheckBox_clicked()
+void WaniKaniWidget::on_boldFontCheckBox_clicked()
 {
     // Force the update our wallpaper
 
@@ -251,7 +251,7 @@ void WaniKaniDialog::on_boldFontCheckBox_clicked()
 
 //==============================================================================
 
-void WaniKaniDialog::on_italicsFontCheckBox_clicked()
+void WaniKaniWidget::on_italicsFontCheckBox_clicked()
 {
     // Force the update our wallpaper
 
@@ -261,7 +261,7 @@ void WaniKaniDialog::on_italicsFontCheckBox_clicked()
 
 //==============================================================================
 
-void WaniKaniDialog::on_swapPushButton_clicked()
+void WaniKaniWidget::on_swapPushButton_clicked()
 {
     // Swap the foreground and background colours, but leaving the alpha values
     // untouched
@@ -281,7 +281,7 @@ void WaniKaniDialog::on_swapPushButton_clicked()
 
 //==============================================================================
 
-void WaniKaniDialog::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
+void WaniKaniWidget::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
 {
     // Retrieve all of our settings after having reset some of them, if
     // requested
@@ -355,7 +355,7 @@ void WaniKaniDialog::on_resetAllPushButton_clicked(const bool &pRetrieveSettings
 
 //==============================================================================
 
-void WaniKaniDialog::updateLevels()
+void WaniKaniWidget::updateLevels()
 {
     // Update the levels to display
 
@@ -365,7 +365,7 @@ void WaniKaniDialog::updateLevels()
 
 //==============================================================================
 
-void WaniKaniDialog::updatePushButtonColor()
+void WaniKaniWidget::updatePushButtonColor()
 {
     // Update the background colour of the given push button
 
@@ -384,7 +384,7 @@ void WaniKaniDialog::updatePushButtonColor()
 
 //==============================================================================
 
-void WaniKaniDialog::setPushButtonColor(QPushButton *pPushButton,
+void WaniKaniWidget::setPushButtonColor(QPushButton *pPushButton,
                                         const QRgb &pColor)
 {
     // Set the background of the given push button to the given colour

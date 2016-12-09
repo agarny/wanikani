@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WaniKaniDialog</class>
- <widget class="QDialog" name="WaniKaniDialog">
-  <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
-  </property>
+ <class>WaniKaniWidget</class>
+ <widget class="QWidget" name="WaniKaniWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -15,10 +12,6 @@
   </property>
   <property name="windowTitle">
    <string>WaniKani</string>
-  </property>
-  <property name="windowIcon">
-   <iconset resource="../res/resources.qrc">
-    <normaloff>:/icon</normaloff>:/icon</iconset>
   </property>
   <layout class="QVBoxLayout" name="layout">
    <property name="spacing">
