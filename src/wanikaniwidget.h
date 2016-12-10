@@ -57,6 +57,11 @@ public:
 
     QString apiKey() const;
 
+    void updateUserInformation(const QString &pUserName = QString(),
+                               const QPixmap &pGravatar = QPixmap(),
+                               const int &pLevel = 0,
+                               const QString &pTitle = QString());
+
     int interval() const;
 
     bool currentKanjis() const;

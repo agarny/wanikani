@@ -47,6 +47,10 @@ static const auto SettingsColor         = QStringLiteral("Color%1%2");
 
 //==============================================================================
 
+static const auto LinkStyle = "color: rgb(103, 103, 103); outline: 0px; text-decoration: none;";
+
+//==============================================================================
+
 WaniKaniWidget::WaniKaniWidget(WaniKani *pWaniKani) :
     mGui(new Ui::WaniKaniWidget),
     mInitializing(true),
@@ -85,10 +89,10 @@ WaniKaniWidget::WaniKaniWidget(WaniKani *pWaniKani) :
 
     int currentYear = QDate::currentDate().year();
 
-    mGui->aboutValue->setText("<h1 align=center><strong>WaniKani "+version+"</strong></h1>"
-                              "<h3 align=center><em>"+QSysInfo::prettyProductName()+"</em></h3>"
-                              "<p align=center><em>Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+"</em></p>"
-                              "<p>A <a href=\"https://github.com/agarny/wanikani\">simple program</a> that takes advantage of the <a href=\"https://www.wanikani.com/\">WaniKani</a> API.</p>");
+    mGui->aboutValue->setText("<span style=\"font-size: 17pt;\"><strong><a href=\"https://github.com/agarny/wanikani\" style=\""+QString(LinkStyle)+"\">WaniKani "+version+"</a></strong></span><br/>"
+                              "by<br/>"
+                              "<span style=\"font-size: 13pt;\"><strong><em><a href=\"https://github.com/agarny\" style=\""+QString(LinkStyle)+"\">Alan Garny</a></em></strong></span><br/>"
+                              "<em>Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+"</em>");
 
     // Retrieve our settings and handle a click on our foreground/background
     // push buttons
@@ -145,6 +149,30 @@ QString WaniKaniWidget::apiKey() const
     // Return our API key
 
     return mGui->apiKeyValue->text();
+}
+
+//==============================================================================
+
+void WaniKaniWidget::updateUserInformation(const QString &pUserName,
+                                           const QPixmap &pGravatar,
+                                           const int &pLevel,
+                                           const QString &pTitle)
+{
+    // Update our user information
+
+    if (pLevel) {
+        mGui->gravatarValue->setPixmap(pGravatar);
+        mGui->userInformationValue->setText("<center>"
+                                            "    <span style=\"font-size: 15pt;\"><strong><a href=\"https://www.wanikani.com/community/people/"+pUserName+"\" style=\""+QString(LinkStyle)+"\">"+pUserName+"</a></strong> of Sect <strong>"+pTitle+"</strong></span><br/>"
+                                            "    <span style=\"font-size: 11pt;\"><strong><em>Level "+QString::number(pLevel)+"</em></strong></span>"
+                                            "</center>");
+
+        mGui->gravatarValue->show();
+        mGui->userInformationValue->show();
+    } else {
+        mGui->gravatarValue->hide();
+        mGui->userInformationValue->hide();
+    }
 }
 
 //==============================================================================

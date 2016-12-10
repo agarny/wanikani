@@ -85,6 +85,10 @@ WaniKani::~WaniKani()
 
 //==============================================================================
 
+static const auto WaniKaniUrl = QStringLiteral("https://www.wanikani.com/api/v1/user/%1/%2");
+
+//==============================================================================
+
 int WaniKani::exec()
 {
     // Check whether our application is already running
@@ -98,10 +102,54 @@ int WaniKani::exec()
     mApplication->setOrganizationName("Hellix");
     mApplication->setQuitOnLastWindowClosed(false);
 
+    // Create our WaniKani widget
+
+    mWaniKaniWidget = new WaniKaniWidget(this);
+
+    // Retrieve the user's information
+
+    QJsonDocument json = waniKaniRequest(WaniKaniUrl.arg(mWaniKaniWidget->apiKey(), "user-information"));
+
+    if (!json.isNull()) {
+        QVariantMap userInformationMap = json.object().toVariantMap()["user_information"].toMap();
+        QNetworkAccessManager networkAccessManager;
+        QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+userInformationMap["gravatar"].toString()));
+        QEventLoop eventLoop;
+
+        QObject::connect(networkReply, SIGNAL(finished()),
+                         &eventLoop, SLOT(quit()));
+
+        eventLoop.exec();
+
+        QByteArray gravatarData = QByteArray();
+
+        if (networkReply->error() == QNetworkReply::NoError)
+            gravatarData = networkReply->readAll();
+
+        networkReply->deleteLater();
+
+        QPixmap gravatar;
+
+        if (gravatarData.isEmpty())
+            gravatar = QPixmap(":/face");
+        else
+            gravatar.loadFromData(gravatarData);
+
+        mWaniKaniWidget->updateUserInformation(userInformationMap["username"].toString(),
+                                               gravatar,
+                                               userInformationMap["level"].toInt(),
+                                               userInformationMap["title"].toString());
+    } else {
+        mWaniKaniWidget->updateUserInformation();
+    }
+
+    // Retrieve some initial information about the user's kanjis
+
+    updateKanjis();
+
     // Create our system tray icon menu
 
     mTrayIconMenu = new QMenu();
-    mWaniKaniWidget = new WaniKaniWidget(this);
 
     QWidgetAction *widgetAction = new QWidgetAction(this);
 
@@ -115,6 +163,7 @@ int WaniKani::exec()
 
     mTrayIcon->setContextMenu(mTrayIconMenu);
     mTrayIcon->setIcon(QIcon(":/icon"));
+    mTrayIcon->setToolTip("WaniKani");
 
     connect(mTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayIconActivated(const QSystemTrayIcon::ActivationReason &)));
@@ -129,8 +178,6 @@ int WaniKani::exec()
             this, SLOT(updateKanjis()));
 
     updateInterval(mWaniKaniWidget->interval());
-
-    QTimer::singleShot(0, this, SLOT(updateKanjis()));
 
     return mApplication->exec();
 }
@@ -297,7 +344,7 @@ void WaniKani::updateKanjis(const bool &pForceUpdate)
     // Retrieve the list of Kanjis (and their state) the user has already
     // studied
 
-    QString url = "https://www.wanikani.com/api/v1/user/"+mWaniKaniWidget->apiKey()+"/kanji";
+    QString url = WaniKaniUrl.arg(mWaniKaniWidget->apiKey(), "kanji");
 
     if (!mWaniKaniWidget->currentKanjis()) {
         url += "/1";
