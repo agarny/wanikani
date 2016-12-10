@@ -13,16 +13,16 @@ INCLUDEPATH += src/3rdparty/QtSingleApplication
 
 SOURCES = src/main.cpp \
           src/wanikani.cpp \
-          src/wanikanidialog.cpp \
+          src/wanikaniwidget.cpp \
           src/3rdparty/QtSingleApplication/qtlocalpeer.cpp \
           src/3rdparty/QtSingleApplication/qtsingleapplication.cpp
 
 HEADERS = src/wanikani.h \
-          src/wanikanidialog.h \
+          src/wanikaniwidget.h \
           src/3rdparty/QtSingleApplication/qtlocalpeer.h \
           src/3rdparty/QtSingleApplication/qtsingleapplication.h
 
-FORMS = src/wanikanidialog.ui
+FORMS = src/wanikaniwidget.ui
 
 mac: OBJECTIVE_SOURCES = src/macos.mm
 

@@ -30,13 +30,7 @@ limitations under the License.
 
 //==============================================================================
 
-class WaniKaniDialog;
-
-//==============================================================================
-
-class QAction;
-class QMenu;
-class QTimer;
+class WaniKaniWidget;
 
 //==============================================================================
 
@@ -61,18 +55,12 @@ public:
 private:
     QtSingleApplication *mApplication;
 
-    QString mVersion;
-
     QSystemTrayIcon *mTrayIcon;
     QMenu *mTrayIconMenu;
 
-    QAction *mWaniKaniAction;
-    QAction *mAboutAction;
-    QAction *mQuitAction;
-
     bool mNeedToCheckWallpaper;
 
-    WaniKaniDialog *mWaniKaniDialog;
+    WaniKaniWidget *mWaniKaniWidget;
 
     QTimer *mTimer;
 
@@ -89,10 +77,6 @@ public slots:
 
 private slots:
     void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
-
-    void waniKani();
-
-    void about();
 
     void checkWallpaper();
 };

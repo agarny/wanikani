@@ -24,13 +24,13 @@ limitations under the License.
 
 //==============================================================================
 
-#include <QDialog>
 #include <QMap>
+#include <QWidget>
 
 //==============================================================================
 
 namespace Ui {
-    class WaniKaniDialog;
+    class WaniKaniWidget;
 }
 
 //==============================================================================
@@ -39,17 +39,18 @@ class WaniKani;
 
 //==============================================================================
 
-class QAbstractButton;
+class QMenu;
+class QPushButton;
 
 //==============================================================================
 
-class WaniKaniDialog : public QDialog
+class WaniKaniWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit WaniKaniDialog(WaniKani *pWaniKani);
-    ~WaniKaniDialog();
+    explicit WaniKaniWidget(WaniKani *pWaniKani);
+    ~WaniKaniWidget();
 
     QString fileName() const;
     void setFileName(const QString &pFileName);
@@ -70,13 +71,20 @@ protected:
     virtual void closeEvent(QCloseEvent *pEvent);
 
 private:
-    Ui::WaniKaniDialog *mGui;
+    Ui::WaniKaniWidget *mGui;
 
     bool mInitializing;
 
     QString mFileName;
 
     WaniKani *mWaniKani;
+
+    QString mVersion;
+
+    QMenu *mPopupMenu;
+
+    QAction *mAboutAction;
+    QAction *mQuitAction;
 
     QMap<QPushButton *, QRgb> mColors;
 
@@ -99,6 +107,8 @@ private slots:
     void updateLevels();
 
     void updatePushButtonColor();
+
+    void about();
 };
 
 //==============================================================================
