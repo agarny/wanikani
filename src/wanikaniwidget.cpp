@@ -24,6 +24,9 @@ limitations under the License.
 #include <QCloseEvent>
 #include <QColorDialog>
 #include <QDate>
+#include <QFile>
+#include <QMenu>
+#include <QMessageBox>
 #include <QSettings>
 #include <QTextStream>
 
@@ -33,7 +36,6 @@ limitations under the License.
 
 //==============================================================================
 
-static const auto SettingsPosition      = QStringLiteral("Position");
 static const auto SettingsFileName      = QStringLiteral("FileName");
 static const auto SettingsApiKey        = QStringLiteral("ApiKey");
 static const auto SettingsCurrentKanjis = QStringLiteral("CurrentKanjis");
@@ -68,6 +70,38 @@ WaniKaniWidget::WaniKaniWidget(WaniKani *pWaniKani) :
         }
     }
 
+    // Version of our program
+
+    QFile versionFile(":/version");
+
+    versionFile.open(QIODevice::ReadOnly);
+
+    QTextStream stream(&versionFile);
+
+    mVersion = stream.readAll();
+
+    versionFile.close();
+
+    // Create some actions
+
+    mAboutAction = new QAction(tr("About..."), this);
+    mQuitAction = new QAction(tr("Quit"), this);
+
+    connect(mAboutAction, SIGNAL(triggered(bool)),
+            this, SLOT(about()));
+    connect(mQuitAction, SIGNAL(triggered(bool)),
+            qApp, SLOT(quit()));
+
+    // Create and set our popup menu
+
+    mPopupMenu = new QMenu();
+
+    mPopupMenu->addAction(mAboutAction);
+    mPopupMenu->addSeparator();
+    mPopupMenu->addAction(mQuitAction);
+
+    mGui->toolButton->setMenu(mPopupMenu);
+
     // Retrieve our settings and handle a click on our foreground/background
     // push buttons
 
@@ -84,7 +118,6 @@ WaniKaniWidget::~WaniKaniWidget()
 
     QSettings settings;
 
-    settings.setValue(SettingsPosition, pos());
     settings.setValue(SettingsFileName, mFileName);
     settings.setValue(SettingsApiKey, mGui->apiKeyValue->text());
     settings.setValue(SettingsCurrentKanjis, mGui->currentKanjisRadioButton->isChecked());
@@ -289,11 +322,6 @@ void WaniKaniWidget::on_resetAllPushButton_clicked(const bool &pRetrieveSettings
     QSettings settings;
 
     if (mInitializing) {
-        QPoint position = settings.value(SettingsPosition).toPoint();
-
-        if (!position.isNull())
-            move(position);
-
         mFileName = settings.value(SettingsFileName).toString();
 
         mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
@@ -399,6 +427,24 @@ void WaniKaniWidget::setPushButtonColor(QPushButton *pPushButton,
                                            .arg(qGreen(pColor))
                                            .arg(qBlue(pColor))
                                            .arg(qAlpha(pColor)));
+}
+
+//==============================================================================
+
+void WaniKaniWidget::about()
+{
+    // Show our about dialog box
+
+    int currentYear = QDate::currentDate().year();
+
+    QMessageBox messageBox(tr("About"),
+                           "<h1 align=center><strong>WaniKani "+mVersion+"</strong></h1>"
+                           "<h3 align=center><em>"+QSysInfo::prettyProductName()+"</em></h3>"
+                           "<p align=center><em>Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+"</em></p>"
+                           "<p>A <a href=\"https://github.com/agarny/wanikani\">simple program</a> that automatically generates and sets a wallpaper based on the Kanjis that one has studied using <a href=\"https://www.wanikani.com/\">WaniKani</a>.</p>",
+                           QMessageBox::Information, 0, 0, 0);
+
+    messageBox.exec();
 }
 
 //==============================================================================

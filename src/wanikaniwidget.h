@@ -39,6 +39,7 @@ class WaniKani;
 
 //==============================================================================
 
+class QMenu;
 class QPushButton;
 
 //==============================================================================
@@ -78,6 +79,13 @@ private:
 
     WaniKani *mWaniKani;
 
+    QString mVersion;
+
+    QMenu *mPopupMenu;
+
+    QAction *mAboutAction;
+    QAction *mQuitAction;
+
     QMap<QPushButton *, QRgb> mColors;
 
     void setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor);
@@ -99,6 +107,8 @@ private slots:
     void updateLevels();
 
     void updatePushButtonColor();
+
+    void about();
 };
 
 //==============================================================================

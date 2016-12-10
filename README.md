@@ -4,4 +4,4 @@ No binaries are currently provided, so you will need to compile the program your
 
 The original idea (and parts of this implementation) comes from https://www.wanikani.com/chat/api-and-third-party-apps/1565 and https://www.wanikani.com/chat/api-and-third-party-apps/1608.
 
-**Note:** the icon used in the application comes from http://blog.wanikani.com/ (hopefully, it's fine...).
+**Note:** the icon used in the application comes from http://blog.wanikani.com/ (hopefully, it's fine...) while the gear icon comes from [Oxygen](http://packages.ubuntu.com/zesty/oxygen-icon-theme) 5.26.0, which is released under [LGPL v3.0](https://opensource.org/licenses/LGPL-3.0).

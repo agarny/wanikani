@@ -34,12 +34,6 @@ class WaniKaniWidget;
 
 //==============================================================================
 
-class QAction;
-class QMenu;
-class QTimer;
-
-//==============================================================================
-
 class QtSingleApplication;
 
 //==============================================================================
@@ -61,14 +55,8 @@ public:
 private:
     QtSingleApplication *mApplication;
 
-    QString mVersion;
-
     QSystemTrayIcon *mTrayIcon;
     QMenu *mTrayIconMenu;
-
-    QAction *mWaniKaniAction;
-    QAction *mAboutAction;
-    QAction *mQuitAction;
 
     bool mNeedToCheckWallpaper;
 
@@ -89,10 +77,6 @@ public slots:
 
 private slots:
     void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
-
-    void waniKani();
-
-    void about();
 
     void checkWallpaper();
 };
