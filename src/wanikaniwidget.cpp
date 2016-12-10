@@ -24,6 +24,7 @@ limitations under the License.
 #include <QCloseEvent>
 #include <QColorDialog>
 #include <QDate>
+#include <QDesktopWidget>
 #include <QFile>
 #include <QMenu>
 #include <QMessageBox>
@@ -57,6 +58,8 @@ WaniKaniWidget::WaniKaniWidget(WaniKani *pWaniKani) :
     // Set up our GUI
 
     mGui->setupUi(this);
+
+    setMinimumSize(0.75*QDesktopWidget().availableGeometry().size());
 
     connect(mGui->currentKanjisRadioButton, SIGNAL(clicked()),
             this, SLOT(updateLevels()));
