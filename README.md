@@ -4,4 +4,4 @@ No binaries are currently provided, so you need to compile the program yourself 
 
 Some of the ideas crome from elsewhere (e.g. https://www.wanikani.com/chat/api-and-third-party-apps/1608 for the wallpaper).
 
-**Note:** the icon used for the application comes from http://blog.wanikani.com/ (which, hopefully, is fine to use...) while the *close* icon comes from the [Oxygen](http://packages.ubuntu.com/zesty/oxygen-icon-theme) library, which is released under [LGPL v3.0](https://opensource.org/licenses/LGPL-3.0).
+**Note:** the icon used for the application comes from http://blog.wanikani.com/ (which, hopefully, is fine to use...) while other icons come from the [Oxygen](http://packages.ubuntu.com/zesty/oxygen-icon-theme) library, which is released under [LGPL v3.0](https://opensource.org/licenses/LGPL-3.0).

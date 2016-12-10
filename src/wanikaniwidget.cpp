@@ -167,10 +167,10 @@ void WaniKaniWidget::updateUserInformation(const QString &pUserName,
                                             "    <span style=\"font-size: 11pt;\"><strong><em>Level "+QString::number(pLevel)+"</em></strong></span>"
                                             "</center>");
 
-        mGui->gravatarValue->show();
         mGui->userInformationValue->show();
     } else {
-        mGui->gravatarValue->hide();
+        mGui->gravatarValue->setPixmap(QPixmap(":/warning"));
+
         mGui->userInformationValue->hide();
     }
 }
@@ -251,8 +251,9 @@ void WaniKaniWidget::closeEvent(QCloseEvent *pEvent)
 
 void WaniKaniWidget::on_apiKeyValue_returnPressed()
 {
-    // Update our Kanjis (and therefore our wallpaper)
+    // Update our user's information and Kanjis (and therefore our wallpaper)
 
+    mWaniKani->updateUserInformation();
     mWaniKani->updateKanjis(true);
 }
 

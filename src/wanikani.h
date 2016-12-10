@@ -75,6 +75,7 @@ private:
     void setWallpaper();
 
 public slots:
+    void updateUserInformation();
     void updateKanjis(const bool &pForceUpdate = false);
 
 private slots:

@@ -85,10 +85,6 @@ WaniKani::~WaniKani()
 
 //==============================================================================
 
-static const auto WaniKaniUrl = QStringLiteral("https://www.wanikani.com/api/v1/user/%1/%2");
-
-//==============================================================================
-
 int WaniKani::exec()
 {
     // Check whether our application is already running
@@ -106,45 +102,10 @@ int WaniKani::exec()
 
     mWaniKaniWidget = new WaniKaniWidget(this);
 
-    // Retrieve the user's information
+    // Retrieve the user's information and some initial information about the
+    // user's kanjis
 
-    QJsonDocument json = waniKaniRequest(WaniKaniUrl.arg(mWaniKaniWidget->apiKey(), "user-information"));
-
-    if (!json.isNull()) {
-        QVariantMap userInformationMap = json.object().toVariantMap()["user_information"].toMap();
-        QNetworkAccessManager networkAccessManager;
-        QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+userInformationMap["gravatar"].toString()));
-        QEventLoop eventLoop;
-
-        QObject::connect(networkReply, SIGNAL(finished()),
-                         &eventLoop, SLOT(quit()));
-
-        eventLoop.exec();
-
-        QByteArray gravatarData = QByteArray();
-
-        if (networkReply->error() == QNetworkReply::NoError)
-            gravatarData = networkReply->readAll();
-
-        networkReply->deleteLater();
-
-        QPixmap gravatar;
-
-        if (gravatarData.isEmpty())
-            gravatar = QPixmap(":/face");
-        else
-            gravatar.loadFromData(gravatarData);
-
-        mWaniKaniWidget->updateUserInformation(userInformationMap["username"].toString(),
-                                               gravatar,
-                                               userInformationMap["level"].toInt(),
-                                               userInformationMap["title"].toString());
-    } else {
-        mWaniKaniWidget->updateUserInformation();
-    }
-
-    // Retrieve some initial information about the user's kanjis
-
+    updateUserInformation();
     updateKanjis();
 
     // Create our system tray icon menu
@@ -278,6 +239,52 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pUrl)
         return QJsonDocument();
     else
         return QJsonDocument::fromJson(response);
+}
+
+//==============================================================================
+
+static const auto WaniKaniUrl = QStringLiteral("https://www.wanikani.com/api/v1/user/%1/%2");
+
+//==============================================================================
+
+void WaniKani::updateUserInformation()
+{
+    // Retrieve the user's information
+
+    QJsonDocument json = waniKaniRequest(WaniKaniUrl.arg(mWaniKaniWidget->apiKey(), "user-information"));
+
+    if (!json.isNull()) {
+        QVariantMap userInformationMap = json.object().toVariantMap()["user_information"].toMap();
+        QNetworkAccessManager networkAccessManager;
+        QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+userInformationMap["gravatar"].toString()));
+        QEventLoop eventLoop;
+
+        QObject::connect(networkReply, SIGNAL(finished()),
+                         &eventLoop, SLOT(quit()));
+
+        eventLoop.exec();
+
+        QByteArray gravatarData = QByteArray();
+
+        if (networkReply->error() == QNetworkReply::NoError)
+            gravatarData = networkReply->readAll();
+
+        networkReply->deleteLater();
+
+        QPixmap gravatar;
+
+        if (gravatarData.isEmpty())
+            gravatar = QPixmap(":/face");
+        else
+            gravatar.loadFromData(gravatarData);
+
+        mWaniKaniWidget->updateUserInformation(userInformationMap["username"].toString(),
+                                               gravatar,
+                                               userInformationMap["level"].toInt(),
+                                               userInformationMap["title"].toString());
+    } else {
+        mWaniKaniWidget->updateUserInformation();
+    }
 }
 
 //==============================================================================
