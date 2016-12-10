@@ -48,6 +48,8 @@ public:
 
     int exec();
 
+    void close();
+
     void updateInterval(const int &pInterval);
 
     void updateWallpaper(const bool &pForceUpdate = false);
@@ -73,6 +75,7 @@ private:
     void setWallpaper();
 
 public slots:
+    void updateUserInformation();
     void updateKanjis(const bool &pForceUpdate = false);
 
 private slots:
