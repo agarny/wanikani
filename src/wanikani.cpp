@@ -135,6 +135,15 @@ int WaniKani::exec()
 
 //==============================================================================
 
+void WaniKani::close()
+{
+    // Close ourselves
+
+    mApplication->quit();
+}
+
+//==============================================================================
+
 void WaniKani::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
 {
     // Show our menu even when we are triggered (which is already the case on

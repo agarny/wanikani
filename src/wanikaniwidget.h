@@ -79,13 +79,6 @@ private:
 
     WaniKani *mWaniKani;
 
-    QString mVersion;
-
-    QMenu *mPopupMenu;
-
-    QAction *mAboutAction;
-    QAction *mQuitAction;
-
     QMap<QPushButton *, QRgb> mColors;
 
     void setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor);
@@ -103,12 +96,11 @@ private slots:
     void on_swapPushButton_clicked();
 
     void on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly = false);
+    void on_closeToolButton_clicked();
 
     void updateLevels();
 
     void updatePushButtonColor();
-
-    void about();
 };
 
 //==============================================================================

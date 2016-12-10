@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="gear">gear.png</file>
+        <file alias="close">close.png</file>
         <file alias="icon">icon.png</file>
         <file alias="version">version.txt</file>
         <file alias="wallpaper">wallpaper.jpg</file>

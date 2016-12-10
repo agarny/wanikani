@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>228</width>
-    <height>540</height>
+    <width>621</width>
+    <height>761</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,22 +49,65 @@
        <item>
         <layout class="QVBoxLayout" name="settingsVerticalLayout">
          <item>
-          <widget class="QGroupBox" name="waniKaniGroupBox">
-           <property name="title">
-            <string>WaniKani</string>
+          <widget class="QLabel" name="aboutLabel">
+           <property name="wordWrap">
+            <bool>true</bool>
            </property>
-           <layout class="QVBoxLayout" name="waniKaniLayout">
+           <property name="openExternalLinks">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="apiKeyLayout">
+           <item>
+            <widget class="QLabel" name="apiKeyLabel">
+             <property name="text">
+              <string>API key:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="apiKeyValue"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="wallpaperGroupBox">
+           <property name="title">
+            <string>Wallpaper</string>
+           </property>
+           <layout class="QVBoxLayout" name="fontLayout">
             <item>
-             <layout class="QHBoxLayout" name="apiKeyLayout">
+             <layout class="QHBoxLayout" name="refreshLayout">
               <item>
-               <widget class="QLabel" name="apiKeyLabel">
-                <property name="text">
-                 <string>API key:</string>
+               <widget class="QSpinBox" name="intervalSpinBox">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="readOnly">
+                 <bool>false</bool>
+                </property>
+                <property name="accelerated">
+                 <bool>true</bool>
+                </property>
+                <property name="suffix">
+                 <string> min</string>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>60</number>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="apiKeyValue"/>
+               <widget class="QPushButton" name="forceUpdateButton">
+                <property name="text">
+                 <string>Force Update</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -86,53 +129,6 @@
               </item>
              </layout>
             </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="updateGroupBox">
-           <property name="title">
-            <string>Update</string>
-           </property>
-           <layout class="QHBoxLayout" name="updateLayout">
-            <item>
-             <widget class="QSpinBox" name="intervalSpinBox">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="readOnly">
-               <bool>false</bool>
-              </property>
-              <property name="accelerated">
-               <bool>true</bool>
-              </property>
-              <property name="suffix">
-               <string> min</string>
-              </property>
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="maximum">
-               <number>60</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="forceUpdateButton">
-              <property name="text">
-               <string>Force Update</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="fontGroupBox">
-           <property name="title">
-            <string>Font</string>
-           </property>
-           <layout class="QVBoxLayout" name="fontLayout">
             <item>
              <widget class="QFontComboBox" name="fontComboBox">
               <property name="editable">
@@ -161,170 +157,165 @@
               </item>
              </layout>
             </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="colorsGroupBox">
-           <property name="title">
-            <string>Colors</string>
-           </property>
-           <layout class="QGridLayout" name="colorsLayout">
-            <item row="7" column="1" colspan="2">
-             <widget class="QPushButton" name="swapPushButton">
-              <property name="text">
-               <string>Swap</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="pendingLabel">
-              <property name="text">
-               <string>Pending</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QPushButton" name="pendingForegroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2">
-             <widget class="QPushButton" name="pendingBackgroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="foregroundLabel">
-              <property name="text">
-               <string>Foreground</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QLabel" name="backgroundLabel">
-              <property name="text">
-               <string>Background</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="apprenticeLabel">
-              <property name="text">
-               <string>Apprentice</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QPushButton" name="apprenticeBackgroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="2">
-             <widget class="QPushButton" name="masterBackgroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QPushButton" name="guruForegroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QPushButton" name="apprenticeForegroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-              <property name="flat">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="masterLabel">
-              <property name="text">
-               <string>Master</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QPushButton" name="masterForegroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="enlightenedLabel">
-              <property name="text">
-               <string>Enlightened</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1">
-             <widget class="QPushButton" name="burnedForegroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="2">
-             <widget class="QPushButton" name="guruBackgroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="2">
-             <widget class="QPushButton" name="enlightenedBackgroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QPushButton" name="enlightenedForegroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="guruLabel">
-              <property name="text">
-               <string>Guru</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="2">
-             <widget class="QPushButton" name="burnedBackgroundPushButton">
-              <property name="autoDefault">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="burnedLabel">
-              <property name="text">
-               <string>Burned</string>
-              </property>
-             </widget>
+            <item>
+             <layout class="QGridLayout" name="colorsLayout">
+              <item row="7" column="1" colspan="2">
+               <widget class="QPushButton" name="swapPushButton">
+                <property name="text">
+                 <string>Swap</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="pendingLabel">
+                <property name="text">
+                 <string>Pending</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QPushButton" name="pendingForegroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="pendingBackgroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="backgroundLabel">
+                <property name="text">
+                 <string>Background</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="apprenticeLabel">
+                <property name="text">
+                 <string>Apprentice</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QPushButton" name="apprenticeBackgroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="2">
+               <widget class="QPushButton" name="masterBackgroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QPushButton" name="guruForegroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QPushButton" name="apprenticeForegroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="masterLabel">
+                <property name="text">
+                 <string>Master</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QPushButton" name="masterForegroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="enlightenedLabel">
+                <property name="text">
+                 <string>Enlightened</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QPushButton" name="burnedForegroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <widget class="QPushButton" name="guruBackgroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="2">
+               <widget class="QPushButton" name="enlightenedBackgroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QPushButton" name="enlightenedForegroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="guruLabel">
+                <property name="text">
+                 <string>Guru</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="2">
+               <widget class="QPushButton" name="burnedBackgroundPushButton">
+                <property name="autoDefault">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QLabel" name="burnedLabel">
+                <property name="text">
+                 <string>Burned</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="foregroundLabel">
+                <property name="text">
+                 <string>Foreground</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
@@ -341,16 +332,10 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="toolButton">
-           <property name="text">
-            <string>...</string>
-           </property>
+          <widget class="QToolButton" name="closeToolButton">
            <property name="icon">
             <iconset resource="../res/resources.qrc">
-             <normaloff>:/gear</normaloff>:/gear</iconset>
-           </property>
-           <property name="popupMode">
-            <enum>QToolButton::InstantPopup</enum>
+             <normaloff>:/close</normaloff>:/close</iconset>
            </property>
           </widget>
          </item>

@@ -27,7 +27,6 @@ limitations under the License.
 #include <QDesktopWidget>
 #include <QFile>
 #include <QMenu>
-#include <QMessageBox>
 #include <QSettings>
 #include <QTextStream>
 
@@ -68,42 +67,28 @@ WaniKaniWidget::WaniKaniWidget(WaniKani *pWaniKani) :
 
     for (int i = 1; i <= 6; ++i) {
         for (int j = 1; j <= 2; ++j) {
-            connect(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, j)->widget()), SIGNAL(clicked()),
+            connect(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget()), SIGNAL(clicked()),
                     this, SLOT(updatePushButtonColor()));
         }
     }
 
-    // Version of our program
+    // Some about information
 
     QFile versionFile(":/version");
 
     versionFile.open(QIODevice::ReadOnly);
 
     QTextStream stream(&versionFile);
-
-    mVersion = stream.readAll();
+    QString version = stream.readAll();
 
     versionFile.close();
 
-    // Create some actions
+    int currentYear = QDate::currentDate().year();
 
-    mAboutAction = new QAction(tr("About..."), this);
-    mQuitAction = new QAction(tr("Quit"), this);
-
-    connect(mAboutAction, SIGNAL(triggered(bool)),
-            this, SLOT(about()));
-    connect(mQuitAction, SIGNAL(triggered(bool)),
-            qApp, SLOT(quit()));
-
-    // Create and set our popup menu
-
-    mPopupMenu = new QMenu();
-
-    mPopupMenu->addAction(mAboutAction);
-    mPopupMenu->addSeparator();
-    mPopupMenu->addAction(mQuitAction);
-
-    mGui->toolButton->setMenu(mPopupMenu);
+    mGui->aboutLabel->setText("<h1 align=center><strong>WaniKani "+version+"</strong></h1>"
+                              "<h3 align=center><em>"+QSysInfo::prettyProductName()+"</em></h3>"
+                              "<p align=center><em>Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+"</em></p>"
+                              "<p>A <a href=\"https://github.com/agarny/wanikani\">simple program</a> that takes advantage of the <a href=\"https://www.wanikani.com/\">WaniKani</a> API.</p>");
 
     // Retrieve our settings and handle a click on our foreground/background
     // push buttons
@@ -131,7 +116,7 @@ WaniKaniWidget::~WaniKaniWidget()
 
     for (int i = 1; i <= 6; ++i) {
         for (int j = 1; j <= 2; ++j) {
-            settings.setValue(SettingsColor.arg(i).arg(j), mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, j)->widget())));
+            settings.setValue(SettingsColor.arg(i).arg(j), mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget())));
         }
     }
 }
@@ -214,7 +199,7 @@ QColor WaniKaniWidget::color(const int &pRow, const int &pColumn) const
 {
     // Return whether our font is to be in italics
 
-    QRgb rgba = mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(pRow, pColumn)->widget()));
+    QRgb rgba = mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(pRow, pColumn)->widget()));
 
     return QColor(qRed(rgba), qGreen(rgba), qBlue(rgba), qAlpha(rgba));
 }
@@ -303,8 +288,8 @@ void WaniKaniWidget::on_swapPushButton_clicked()
     // untouched
 
     for (int i = 1; i <= 6; ++i) {
-        QPushButton *fgPushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, 1)->widget());
-        QPushButton *bgPushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, 2)->widget());
+        QPushButton *fgPushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, 1)->widget());
+        QPushButton *bgPushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, 2)->widget());
         QRgb fgColor = mColors.value(fgPushButton);
         QRgb bgColor = mColors.value(bgPushButton);
 
@@ -358,7 +343,7 @@ void WaniKaniWidget::on_resetAllPushButton_clicked(const bool &pRetrieveSettings
 
     for (int i = 1; i <= 6; ++i) {
         for (int j = 1; j <= 2; ++j) {
-            QPushButton *pushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsGroupBox->layout())->itemAtPosition(i, j)->widget());
+            QPushButton *pushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget());
             QRgb color = settings.value(SettingsColor.arg(i).arg(j), Colors[i-1][j-1].rgba()).toUInt();
 
             setPushButtonColor(pushButton, color);
@@ -382,6 +367,15 @@ void WaniKaniWidget::on_resetAllPushButton_clicked(const bool &pRetrieveSettings
 
         mWaniKani->updateKanjis(true);
     }
+}
+
+//==============================================================================
+
+void WaniKaniWidget::on_closeToolButton_clicked()
+{
+    // Close ourselves
+
+    mWaniKani->close();
 }
 
 //==============================================================================
@@ -430,24 +424,6 @@ void WaniKaniWidget::setPushButtonColor(QPushButton *pPushButton,
                                            .arg(qGreen(pColor))
                                            .arg(qBlue(pColor))
                                            .arg(qAlpha(pColor)));
-}
-
-//==============================================================================
-
-void WaniKaniWidget::about()
-{
-    // Show our about dialog box
-
-    int currentYear = QDate::currentDate().year();
-
-    QMessageBox messageBox(tr("About"),
-                           "<h1 align=center><strong>WaniKani "+mVersion+"</strong></h1>"
-                           "<h3 align=center><em>"+QSysInfo::prettyProductName()+"</em></h3>"
-                           "<p align=center><em>Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+"</em></p>"
-                           "<p>A <a href=\"https://github.com/agarny/wanikani\">simple program</a> that automatically generates and sets a wallpaper based on the Kanjis that one has studied using <a href=\"https://www.wanikani.com/\">WaniKani</a>.</p>",
-                           QMessageBox::Information, 0, 0, 0);
-
-    messageBox.exec();
 }
 
 //==============================================================================
