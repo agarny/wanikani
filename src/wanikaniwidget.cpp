@@ -164,7 +164,7 @@ void WaniKaniWidget::updateUserInformation(const QString &pUserName,
         mGui->gravatarValue->setPixmap(pGravatar);
         mGui->userInformationValue->setText("<center>"
                                             "    <span style=\"font-size: 15pt;\"><strong><a href=\"https://www.wanikani.com/community/people/"+pUserName+"\" style=\""+QString(LinkStyle)+"\">"+pUserName+"</a></strong> of Sect <strong>"+pTitle+"</strong></span><br/>"
-                                            "    <span style=\"font-size: 11pt;\"><strong><em>Level "+QString::number(pLevel)+"</em></strong></span>"
+                                            "    <span style=\"font-size: 11pt;\"><strong><em>(Level "+QString::number(pLevel)+")</em></strong></span>"
                                             "</center>");
 
         mGui->userInformationValue->show();
