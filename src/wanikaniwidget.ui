@@ -49,7 +49,7 @@
        <item>
         <layout class="QVBoxLayout" name="settingsVerticalLayout">
          <item>
-          <widget class="QLabel" name="aboutLabel">
+          <widget class="QLabel" name="aboutValue">
            <property name="wordWrap">
             <bool>true</bool>
            </property>

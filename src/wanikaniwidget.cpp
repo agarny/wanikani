@@ -85,7 +85,7 @@ WaniKaniWidget::WaniKaniWidget(WaniKani *pWaniKani) :
 
     int currentYear = QDate::currentDate().year();
 
-    mGui->aboutLabel->setText("<h1 align=center><strong>WaniKani "+version+"</strong></h1>"
+    mGui->aboutValue->setText("<h1 align=center><strong>WaniKani "+version+"</strong></h1>"
                               "<h3 align=center><em>"+QSysInfo::prettyProductName()+"</em></h3>"
                               "<p align=center><em>Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+"</em></p>"
                               "<p>A <a href=\"https://github.com/agarny/wanikani\">simple program</a> that takes advantage of the <a href=\"https://www.wanikani.com/\">WaniKani</a> API.</p>");

@@ -206,8 +206,8 @@ void WaniKani::updateInterval(const int &pInterval)
 
 QJsonDocument WaniKani::waniKaniRequest(const QString &pUrl)
 {
-    // Send a request to WaniKani and convert its response a JSON document, if
-    // possible
+    // Send a request to WaniKani and convert its response to a JSON document,
+    // if possible
 
     QNetworkAccessManager networkAccessManager;
     QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(pUrl));
