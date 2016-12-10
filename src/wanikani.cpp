@@ -60,6 +60,8 @@ limitations under the License.
 //==============================================================================
 
 WaniKani::WaniKani(int pArgC, char *pArgV[]) :
+    mTrayIcon(0),
+    mTrayIconMenu(0),
     mNeedToCheckWallpaper(true),
     mWaniKaniWidget(0),
     mKanjisError(false),

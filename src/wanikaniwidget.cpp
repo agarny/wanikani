@@ -115,9 +115,8 @@ WaniKaniWidget::~WaniKaniWidget()
     settings.setValue(SettingsItalicsFont, mGui->italicsFontCheckBox->isChecked());
 
     for (int i = 1; i <= 6; ++i) {
-        for (int j = 1; j <= 2; ++j) {
+        for (int j = 1; j <= 2; ++j)
             settings.setValue(SettingsColor.arg(i).arg(j), mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget())));
-        }
     }
 }
 
