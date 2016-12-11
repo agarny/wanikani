@@ -25,11 +25,9 @@ limitations under the License.
 #include <QDate>
 #include <QDesktopWidget>
 #include <QDir>
-#include <QEventLoop>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QMenu>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -37,7 +35,6 @@ limitations under the License.
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTextStream>
-#include <QTimer>
 #include <QWidgetAction>
 
 //==============================================================================

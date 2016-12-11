@@ -24,7 +24,6 @@ limitations under the License.
 
 //==============================================================================
 
-#include <QMap>
 #include <QMenu>
 #include <QSystemTrayIcon>
 #include <QTimer>
