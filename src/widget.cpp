@@ -303,6 +303,11 @@ void Widget::updateUserInformation()
 
 QJsonDocument Widget::waniKaniRequest(const QString &pRequest)
 {
+    // Make sure that we have an API key
+
+    if (mGui->apiKeyValue->text().isEmpty())
+        return QJsonDocument();
+
     // Send a request to WaniKani and convert its response to a JSON document,
     // if possible
 
