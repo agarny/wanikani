@@ -63,6 +63,7 @@ WaniKani::WaniKani(int pArgC, char *pArgV[]) :
     mTrayIcon(0),
     mTrayIconMenu(0),
     mNeedToCheckWallpaper(true),
+    mPosition(QPoint()),
     mWaniKaniWidget(0),
     mKanjisError(false),
     mKanjisState(QMap<QString, QString>()),
@@ -154,13 +155,25 @@ void WaniKani::close()
 
 //==============================================================================
 
+void WaniKani::showWidget()
+{
+    // Show our widget, i.e. our tray icon menu
+
+    mTrayIconMenu->exec(mPosition);
+}
+
+//==============================================================================
+
 void WaniKani::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
 {
     // Show our menu even when we are triggered (which is already the case on
     // Linux and macOS, but not on Windows)
 
-    if (pReason == QSystemTrayIcon::Trigger)
-        mTrayIconMenu->exec(QCursor::pos());
+    if (pReason == QSystemTrayIcon::Trigger) {
+        mPosition = QCursor::pos();
+
+        showWidget();
+    }
 }
 
 //==============================================================================
@@ -251,9 +264,11 @@ void WaniKani::updateUserInformation()
 {
     // Retrieve the user's information
 
-    QJsonDocument json = waniKaniRequest(WaniKaniUrl.arg(mWaniKaniWidget->apiKey(), "user-information"));
+    QJsonDocument json = waniKaniRequest(WaniKaniUrl.arg(mWaniKaniWidget->apiKey(), "srs-distribution"));
 
     if (!json.isNull()) {
+        // Retrieve the user information
+
         QVariantMap userInformationMap = json.object().toVariantMap()["user_information"].toMap();
         QNetworkAccessManager networkAccessManager;
         QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+userInformationMap["gravatar"].toString()));
@@ -278,11 +293,30 @@ void WaniKani::updateUserInformation()
         else
             gravatar.loadFromData(gravatarData);
 
+        // Retrieve the user's SRS distribution
+
+        QVariantMap srsDistributionMap = json.object().toVariantMap()["requested_information"].toMap();
+        QVariantMap apprenticeMap = srsDistributionMap["apprentice"].toMap();
+        QVariantMap guruMap = srsDistributionMap["guru"].toMap();
+        QVariantMap masterMap = srsDistributionMap["master"].toMap();
+        QVariantMap enlightenedMap = srsDistributionMap["enlighten"].toMap();
+        QVariantMap burnedMap = srsDistributionMap["burned"].toMap();
+
+
+        // Show the user his/her information
+
         mWaniKaniWidget->updateUserInformation(userInformationMap["username"].toString(),
                                                gravatar,
-                                               userInformationMap["level"].toInt(),
-                                               userInformationMap["title"].toString());
+                                               userInformationMap["level"].toString(),
+                                               userInformationMap["title"].toString(),
+                                               apprenticeMap["total"].toString(),
+                                               guruMap["total"].toString(),
+                                               masterMap["total"].toString(),
+                                               enlightenedMap["total"].toString(),
+                                               burnedMap["total"].toString());
     } else {
+        // Nothing to show the user
+
         mWaniKaniWidget->updateUserInformation();
     }
 }

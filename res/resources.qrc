@@ -1,8 +1,13 @@
 <RCC>
     <qresource prefix="/">
+        <file alias="apprentice">apprentice.png</file>
+        <file alias="burned">burned.png</file>
         <file alias="close">close.png</file>
+        <file alias="enlightened">enlightened.png</file>
         <file alias="face">face.png</file>
+        <file alias="guru">guru.png</file>
         <file alias="icon">icon.png</file>
+        <file alias="master">master.png</file>
         <file alias="version">version.txt</file>
         <file alias="wallpaper">wallpaper.jpg</file>
         <file alias="warning">warning.png</file>

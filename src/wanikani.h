@@ -50,6 +50,8 @@ public:
 
     void close();
 
+    void showWidget();
+
     void updateInterval(const int &pInterval);
 
     void updateWallpaper(const bool &pForceUpdate = false);
@@ -61,6 +63,8 @@ private:
     QMenu *mTrayIconMenu;
 
     bool mNeedToCheckWallpaper;
+
+    QPoint mPosition;
 
     WaniKaniWidget *mWaniKaniWidget;
 

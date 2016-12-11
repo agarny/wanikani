@@ -24,7 +24,6 @@ limitations under the License.
 #include <QCloseEvent>
 #include <QColorDialog>
 #include <QDate>
-#include <QDesktopWidget>
 #include <QFile>
 #include <QMenu>
 #include <QSettings>
@@ -62,7 +61,7 @@ WaniKaniWidget::WaniKaniWidget(WaniKani *pWaniKani) :
 
     mGui->setupUi(this);
 
-    setMinimumSize(0.75*QDesktopWidget().availableGeometry().size());
+    setMinimumSize(QSize(1024, 768));
 
     connect(mGui->currentKanjisRadioButton, SIGNAL(clicked()),
             this, SLOT(updateLevels()));
@@ -153,25 +152,82 @@ QString WaniKaniWidget::apiKey() const
 
 //==============================================================================
 
+void WaniKaniWidget::updateSrsDistributionPalettes()
+{
+    // Update the palette of our different SRS distribution information
+
+    QPalette palette;
+
+    palette.setColor(QPalette::Window, mGui->apprenticeBackgroundPushButton->palette().color(QPalette::Button));
+    palette.setColor(QPalette::WindowText, mGui->apprenticeForegroundPushButton->palette().color(QPalette::Button));
+
+    mGui->apprenticeValue->setPalette(palette);
+
+    palette.setColor(QPalette::Window, mGui->guruBackgroundPushButton->palette().color(QPalette::Button));
+    palette.setColor(QPalette::WindowText, mGui->guruForegroundPushButton->palette().color(QPalette::Button));
+
+    mGui->guruValue->setPalette(palette);
+
+    palette.setColor(QPalette::Window, mGui->masterBackgroundPushButton->palette().color(QPalette::Button));
+    palette.setColor(QPalette::WindowText, mGui->masterForegroundPushButton->palette().color(QPalette::Button));
+
+    mGui->masterValue->setPalette(palette);
+
+    palette.setColor(QPalette::Window, mGui->enlightenedBackgroundPushButton->palette().color(QPalette::Button));
+    palette.setColor(QPalette::WindowText, mGui->enlightenedForegroundPushButton->palette().color(QPalette::Button));
+
+    mGui->enlightenedValue->setPalette(palette);
+
+    palette.setColor(QPalette::Window, mGui->burnedBackgroundPushButton->palette().color(QPalette::Button));
+    palette.setColor(QPalette::WindowText, mGui->burnedForegroundPushButton->palette().color(QPalette::Button));
+
+    mGui->burnedValue->setPalette(palette);
+}
+
+//==============================================================================
+
 void WaniKaniWidget::updateUserInformation(const QString &pUserName,
                                            const QPixmap &pGravatar,
-                                           const int &pLevel,
-                                           const QString &pTitle)
+                                           const QString &pLevel,
+                                           const QString &pTitle,
+                                           const QString &pApprentice,
+                                           const QString &pGuru,
+                                           const QString &pMaster,
+                                           const QString &pEnlightened,
+                                           const QString &pBurned)
 {
     // Update our user information
 
-    if (pLevel) {
+    if (!pUserName.isEmpty()) {
         mGui->gravatarValue->setPixmap(pGravatar);
         mGui->userInformationValue->setText("<center>"
                                             "    <span style=\"font-size: 15pt;\"><strong><a href=\"https://www.wanikani.com/community/people/"+pUserName+"\" style=\""+QString(LinkStyle)+"\">"+pUserName+"</a></strong> of Sect <strong>"+pTitle+"</strong></span><br/>"
-                                            "    <span style=\"font-size: 11pt;\"><strong><em>(Level "+QString::number(pLevel)+")</em></strong></span>"
+                                            "    <span style=\"font-size: 11pt;\"><strong><em>(Level "+pLevel+")</em></strong></span>"
                                             "</center>");
 
+        updateSrsDistributionPalettes();
+
+        mGui->apprenticeValue->setText("<img src=\":/apprentice\" width=32 height=32><br/>"+pApprentice);
+        mGui->guruValue->setText("<img src=\":/guru\" width=32 height=32><br/>"+pGuru);
+        mGui->masterValue->setText("<img src=\":/master\" width=32 height=32><br/>"+pMaster);
+        mGui->enlightenedValue->setText("<img src=\":/enlightened\" width=32 height=32><br/>"+pEnlightened);
+        mGui->burnedValue->setText("<img src=\":/burned\" width=32 height=32><br/>"+pBurned);
+
         mGui->userInformationValue->show();
+        mGui->apprenticeValue->show();
+        mGui->guruValue->show();
+        mGui->masterValue->show();
+        mGui->enlightenedValue->show();
+        mGui->burnedValue->show();
     } else {
         mGui->gravatarValue->setPixmap(QPixmap(":/warning"));
 
         mGui->userInformationValue->hide();
+        mGui->apprenticeValue->hide();
+        mGui->guruValue->hide();
+        mGui->masterValue->hide();
+        mGui->enlightenedValue->hide();
+        mGui->burnedValue->hide();
     }
 }
 
@@ -325,6 +381,8 @@ void WaniKaniWidget::on_swapPushButton_clicked()
         setPushButtonColor(bgPushButton, qRgba(qRed(fgColor), qGreen(fgColor), qBlue(fgColor), qAlpha(bgColor)));
     }
 
+    updateSrsDistributionPalettes();
+
     mWaniKani->updateWallpaper(true);
 }
 
@@ -393,6 +451,8 @@ void WaniKaniWidget::on_resetAllPushButton_clicked(const bool &pRetrieveSettings
     if (!pRetrieveSettingsOnly) {
         mInitializing = false;
 
+        updateSrsDistributionPalettes();
+
         mWaniKani->updateKanjis(true);
     }
 }
@@ -431,8 +491,14 @@ void WaniKaniWidget::updatePushButtonColor()
     if (colorDialog.exec() == QDialog::Accepted) {
         setPushButtonColor(pushButton, colorDialog.currentColor().rgba());
 
+        updateSrsDistributionPalettes();
+
         mWaniKani->updateWallpaper(true);
     }
+
+    // We will have been hidden when showing the colour dialog, so show us back
+
+    mWaniKani->showWidget();
 }
 
 //==============================================================================

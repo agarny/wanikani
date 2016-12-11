@@ -59,8 +59,13 @@ public:
 
     void updateUserInformation(const QString &pUserName = QString(),
                                const QPixmap &pGravatar = QPixmap(),
-                               const int &pLevel = 0,
-                               const QString &pTitle = QString());
+                               const QString &pLevel = QString(),
+                               const QString &pTitle = QString(),
+                               const QString &pApprentice = QString(),
+                               const QString &pGuru = QString(),
+                               const QString &pMaster = QString(),
+                               const QString &pEnlightened = QString(),
+                               const QString &pBurned = QString());
 
     int interval() const;
 
@@ -87,6 +92,8 @@ private:
     QMap<QPushButton *, QRgb> mColors;
 
     void setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor);
+
+    void updateSrsDistributionPalettes();
 
 private slots:
     void on_apiKeyValue_returnPressed();
