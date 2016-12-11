@@ -48,9 +48,6 @@ class Widget : public QWidget
 public:
     explicit Widget();
 
-protected:
-    virtual void closeEvent(QCloseEvent *pEvent);
-
 private:
     Ui::Widget *mGui;
 

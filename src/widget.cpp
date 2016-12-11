@@ -584,22 +584,6 @@ QColor Widget::color(const int &pRow, const int &pColumn) const
 
 //==============================================================================
 
-void Widget::closeEvent(QCloseEvent *pEvent)
-{
-    // Hide ourselves rather than close ourselves
-
-#ifdef Q_OS_OSX
-    if (!pEvent->spontaneous() || !isVisible())
-        return;
-#endif
-
-    hide();
-
-    pEvent->ignore();
-}
-
-//==============================================================================
-
 void Widget::on_apiKeyValue_returnPressed()
 {
     // Update our user's information and Kanjis (and therefore our wallpaper)
