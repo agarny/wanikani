@@ -24,6 +24,10 @@ limitations under the License.
 
 //==============================================================================
 
+#include "wanikani.h"
+
+//==============================================================================
+
 #include <QMenu>
 #include <QSystemTrayIcon>
 #include <QTimer>
@@ -52,6 +56,8 @@ private:
     Ui::Widget *mGui;
 
     bool mInitializing;
+
+    WaniKani mWaniKani;
 
     QString mFileName;
 

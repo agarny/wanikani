@@ -12,11 +12,13 @@ mac: LIBS += -framework AppKit
 INCLUDEPATH += src/3rdparty/QtSingleApplication
 
 SOURCES = src/main.cpp \
+          src/wanikani.cpp \
           src/widget.cpp \
           src/3rdparty/QtSingleApplication/qtlocalpeer.cpp \
           src/3rdparty/QtSingleApplication/qtsingleapplication.cpp
 
-HEADERS = src/widget.h \
+HEADERS = src/wanikani.h \
+          src/widget.h \
           src/3rdparty/QtSingleApplication/qtlocalpeer.h \
           src/3rdparty/QtSingleApplication/qtsingleapplication.h
 

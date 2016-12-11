@@ -76,6 +76,7 @@ static const auto LinkStyle = "color: rgb(103, 103, 103); outline: 0px; text-dec
 Widget::Widget() :
     mGui(new Ui::Widget),
     mInitializing(true),
+    mWaniKani(WaniKani()),
     mFileName(QString()),
     mColors(QMap<QPushButton *, QRgb>()),
     mKanjisError(false),
@@ -621,6 +622,8 @@ void Widget::on_apiKeyValue_returnPressed()
 {
     // Update our user's information and Kanjis (and therefore our wallpaper)
 
+    mWaniKani.setApiKey(mGui->apiKeyValue->text());
+
     updateUserInformation();
     updateKanjis(true);
 }
@@ -711,6 +714,8 @@ void Widget::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
         mFileName = settings.value(SettingsFileName).toString();
 
         mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
+
+        mWaniKani.setApiKey(mGui->apiKeyValue->text());
     }
 
     if (!pRetrieveSettingsOnly) {
