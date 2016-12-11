@@ -20,7 +20,7 @@ limitations under the License.
 // Main
 //==============================================================================
 
-#include "wanikaniwidget.h"
+#include "widget.h"
 
 //==============================================================================
 
@@ -51,7 +51,7 @@ int main(int pArgC, char *pArgV[])
 
     // Create our widget
 
-    new WaniKaniWidget();
+    new Widget();
 
     // Execute our application
 

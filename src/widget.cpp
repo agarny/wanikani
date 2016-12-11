@@ -52,7 +52,7 @@ limitations under the License.
 
 //==============================================================================
 
-#include "ui_wanikaniwidget.h"
+#include "ui_widget.h"
 
 //==============================================================================
 
@@ -71,8 +71,8 @@ static const auto LinkStyle = "color: rgb(103, 103, 103); outline: 0px; text-dec
 
 //==============================================================================
 
-WaniKaniWidget::WaniKaniWidget() :
-    mGui(new Ui::WaniKaniWidget),
+Widget::Widget() :
+    mGui(new Ui::Widget),
     mInitializing(true),
     mFileName(QString()),
     mColors(QMap<QPushButton *, QRgb>()),
@@ -159,7 +159,7 @@ WaniKaniWidget::WaniKaniWidget() :
 
 //==============================================================================
 
-void WaniKaniWidget::updateInterval(const int &pInterval)
+void Widget::updateInterval(const int &pInterval)
 {
     // Update our timer's interval
 
@@ -168,7 +168,7 @@ void WaniKaniWidget::updateInterval(const int &pInterval)
 
 //==============================================================================
 
-void WaniKaniWidget::updateSrsDistributionPalettes()
+void Widget::updateSrsDistributionPalettes()
 {
     // Update the palette of our different SRS distribution information
 
@@ -202,7 +202,7 @@ void WaniKaniWidget::updateSrsDistributionPalettes()
 
 //==============================================================================
 
-void WaniKaniWidget::updateUserInformation()
+void Widget::updateUserInformation()
 {
     // Retrieve the user's information
 
@@ -276,7 +276,7 @@ void WaniKaniWidget::updateUserInformation()
 
 //==============================================================================
 
-QJsonDocument WaniKaniWidget::waniKaniRequest(const QString &pRequest)
+QJsonDocument Widget::waniKaniRequest(const QString &pRequest)
 {
     // Send a request to WaniKani and convert its response to a JSON document,
     // if possible
@@ -354,7 +354,7 @@ static const auto Kanjis = QStringLiteral(
 
 //==============================================================================
 
-void WaniKaniWidget::updateKanjis(const bool &pForceUpdate)
+void Widget::updateKanjis(const bool &pForceUpdate)
 {
     // Reset some internal properties
 
@@ -401,7 +401,7 @@ void WaniKaniWidget::updateKanjis(const bool &pForceUpdate)
 
 //==============================================================================
 
-void WaniKaniWidget::updateWallpaper(const bool &pForceUpdate)
+void Widget::updateWallpaper(const bool &pForceUpdate)
 {
     // Generate and set the wallpaper, if needed
 
@@ -546,7 +546,7 @@ void WaniKaniWidget::updateWallpaper(const bool &pForceUpdate)
 
 //==============================================================================
 
-void WaniKaniWidget::setWallpaper()
+void Widget::setWallpaper()
 {
     // Set the new wallpaper
 
@@ -576,7 +576,7 @@ void WaniKaniWidget::setWallpaper()
 
 //==============================================================================
 
-QColor WaniKaniWidget::color(const int &pRow, const int &pColumn) const
+QColor Widget::color(const int &pRow, const int &pColumn) const
 {
     // Return whether our font is to be in italics
 
@@ -587,7 +587,7 @@ QColor WaniKaniWidget::color(const int &pRow, const int &pColumn) const
 
 //==============================================================================
 
-void WaniKaniWidget::closeEvent(QCloseEvent *pEvent)
+void Widget::closeEvent(QCloseEvent *pEvent)
 {
     // Hide ourselves rather than close ourselves
 
@@ -603,7 +603,7 @@ void WaniKaniWidget::closeEvent(QCloseEvent *pEvent)
 
 //==============================================================================
 
-void WaniKaniWidget::on_apiKeyValue_returnPressed()
+void Widget::on_apiKeyValue_returnPressed()
 {
     // Update our user's information and Kanjis (and therefore our wallpaper)
 
@@ -613,7 +613,7 @@ void WaniKaniWidget::on_apiKeyValue_returnPressed()
 
 //==============================================================================
 
-void WaniKaniWidget::on_intervalSpinBox_valueChanged(int pInterval)
+void Widget::on_intervalSpinBox_valueChanged(int pInterval)
 {
     // Update our timer's interval
 
@@ -623,7 +623,7 @@ void WaniKaniWidget::on_intervalSpinBox_valueChanged(int pInterval)
 
 //==============================================================================
 
-void WaniKaniWidget::on_forceUpdateButton_clicked()
+void Widget::on_forceUpdateButton_clicked()
 {
     // Update our Kanjis (and therefore our wallpaper)
 
@@ -632,7 +632,7 @@ void WaniKaniWidget::on_forceUpdateButton_clicked()
 
 //==============================================================================
 
-void WaniKaniWidget::on_fontComboBox_currentTextChanged(const QString &pFontName)
+void Widget::on_fontComboBox_currentTextChanged(const QString &pFontName)
 {
     Q_UNUSED(pFontName);
 
@@ -644,7 +644,7 @@ void WaniKaniWidget::on_fontComboBox_currentTextChanged(const QString &pFontName
 
 //==============================================================================
 
-void WaniKaniWidget::on_boldFontCheckBox_clicked()
+void Widget::on_boldFontCheckBox_clicked()
 {
     // Force the update our wallpaper
 
@@ -654,7 +654,7 @@ void WaniKaniWidget::on_boldFontCheckBox_clicked()
 
 //==============================================================================
 
-void WaniKaniWidget::on_italicsFontCheckBox_clicked()
+void Widget::on_italicsFontCheckBox_clicked()
 {
     // Force the update our wallpaper
 
@@ -664,7 +664,7 @@ void WaniKaniWidget::on_italicsFontCheckBox_clicked()
 
 //==============================================================================
 
-void WaniKaniWidget::on_swapPushButton_clicked()
+void Widget::on_swapPushButton_clicked()
 {
     // Swap the foreground and background colours, but leaving the alpha values
     // untouched
@@ -686,7 +686,7 @@ void WaniKaniWidget::on_swapPushButton_clicked()
 
 //==============================================================================
 
-void WaniKaniWidget::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
+void Widget::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
 {
     // Retrieve all of our settings after having reset some of them, if
     // requested
@@ -757,7 +757,7 @@ void WaniKaniWidget::on_resetAllPushButton_clicked(const bool &pRetrieveSettings
 
 //==============================================================================
 
-void WaniKaniWidget::on_closeToolButton_clicked()
+void Widget::on_closeToolButton_clicked()
 {
     // Keep track of our settings
 
@@ -783,7 +783,7 @@ void WaniKaniWidget::on_closeToolButton_clicked()
 
 //==============================================================================
 
-void WaniKaniWidget::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
+void Widget::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
 {
     // Show our menu even when we are triggered (which is already the case on
     // Linux and macOS, but not on Windows)
@@ -797,7 +797,7 @@ void WaniKaniWidget::trayIconActivated(const QSystemTrayIcon::ActivationReason &
 
 //==============================================================================
 
-void WaniKaniWidget::updateLevels()
+void Widget::updateLevels()
 {
     // Update the levels to display
 
@@ -807,7 +807,7 @@ void WaniKaniWidget::updateLevels()
 
 //==============================================================================
 
-void WaniKaniWidget::updatePushButtonColor()
+void Widget::updatePushButtonColor()
 {
     // Update the background colour of the given push button
 
@@ -832,8 +832,7 @@ void WaniKaniWidget::updatePushButtonColor()
 
 //==============================================================================
 
-void WaniKaniWidget::setPushButtonColor(QPushButton *pPushButton,
-                                        const QRgb &pColor)
+void Widget::setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor)
 {
     // Set the background of the given push button to the given colour
 
@@ -851,7 +850,7 @@ void WaniKaniWidget::setPushButtonColor(QPushButton *pPushButton,
 
 //==============================================================================
 
-void WaniKaniWidget::checkWallpaper()
+void Widget::checkWallpaper()
 {
     // Retrieve the file name of the current wallpaper
 

@@ -33,7 +33,7 @@ limitations under the License.
 //==============================================================================
 
 namespace Ui {
-    class WaniKaniWidget;
+    class Widget;
 }
 
 //==============================================================================
@@ -42,18 +42,18 @@ class QPushButton;
 
 //==============================================================================
 
-class WaniKaniWidget : public QWidget
+class Widget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit WaniKaniWidget();
+    explicit Widget();
 
 protected:
     virtual void closeEvent(QCloseEvent *pEvent);
 
 private:
-    Ui::WaniKaniWidget *mGui;
+    Ui::Widget *mGui;
 
     bool mInitializing;
 
