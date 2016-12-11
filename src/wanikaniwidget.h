@@ -25,6 +25,9 @@ limitations under the License.
 //==============================================================================
 
 #include <QMap>
+#include <QMenu>
+#include <QSystemTrayIcon>
+#include <QTimer>
 #include <QWidget>
 
 //==============================================================================
@@ -35,11 +38,6 @@ namespace Ui {
 
 //==============================================================================
 
-class WaniKani;
-
-//==============================================================================
-
-class QMenu;
 class QPushButton;
 
 //==============================================================================
@@ -49,33 +47,7 @@ class WaniKaniWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit WaniKaniWidget(WaniKani *pWaniKani);
-    ~WaniKaniWidget();
-
-    QString fileName() const;
-    void setFileName(const QString &pFileName);
-
-    QString apiKey() const;
-
-    void updateUserInformation(const QString &pUserName = QString(),
-                               const QPixmap &pGravatar = QPixmap(),
-                               const QString &pLevel = QString(),
-                               const QString &pTitle = QString(),
-                               const QString &pApprentice = QString(),
-                               const QString &pGuru = QString(),
-                               const QString &pMaster = QString(),
-                               const QString &pEnlightened = QString(),
-                               const QString &pBurned = QString());
-
-    int interval() const;
-
-    bool currentKanjis() const;
-
-    QString fontName() const;
-    bool boldFont() const;
-    bool italicsFont() const;
-
-    QColor color(const int &pRow, const int &pColumn) const;
+    explicit WaniKaniWidget();
 
 protected:
     virtual void closeEvent(QCloseEvent *pEvent);
@@ -87,13 +59,35 @@ private:
 
     QString mFileName;
 
-    WaniKani *mWaniKani;
+    QTimer mTimer;
+
+    QSystemTrayIcon mTrayIcon;
+    QMenu mTrayIconMenu;
+
+    QPoint mPosition;
 
     QMap<QPushButton *, QRgb> mColors;
 
+    bool mKanjisError;
+    QMap<QString, QString> mKanjisState;
+    QMap<QString, QString> mOldKanjisState;
+
+    bool mNeedToCheckWallpaper;
+
     void setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor);
 
+    QColor color(const int &pRow, const int &pColumn) const;
+
+    void updateInterval(const int &pInterval);
+
+    QJsonDocument waniKaniRequest(const QString &pRequest);
+
     void updateSrsDistributionPalettes();
+    void updateUserInformation();
+
+    void updateWallpaper(const bool &pForceUpdate = false);
+
+    void setWallpaper();
 
 private slots:
     void on_apiKeyValue_returnPressed();
@@ -110,9 +104,15 @@ private slots:
     void on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly = false);
     void on_closeToolButton_clicked();
 
+    void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
+
     void updateLevels();
 
     void updatePushButtonColor();
+
+    void updateKanjis(const bool &pForceUpdate = false);
+
+    void checkWallpaper();
 };
 
 //==============================================================================

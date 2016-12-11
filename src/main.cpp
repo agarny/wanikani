@@ -20,17 +20,42 @@ limitations under the License.
 // Main
 //==============================================================================
 
-#include "wanikani.h"
+#include "wanikaniwidget.h"
+
+//==============================================================================
+
+#include <QFileInfo>
+
+//==============================================================================
+
+#include <QtSingleApplication>
 
 //==============================================================================
 
 int main(int pArgC, char *pArgV[])
 {
-    // Create and execute our WaniKani application
+    // Create our application
 
-    WaniKani waniKani(pArgC, pArgV);
+    QtSingleApplication app(QFileInfo(pArgV[0]).baseName(), pArgC, pArgV);
 
-    return waniKani.exec();
+    // Check whether another instance of our application is already running and
+    // leave if that's the case
+
+    if (app.isRunning())
+        return 0;
+
+    // Customise our application
+
+    app.setApplicationName("WaniKani");
+    app.setOrganizationName("Hellix");
+
+    // Create our widget
+
+    new WaniKaniWidget();
+
+    // Execute our application
+
+    return app.exec();
 }
 
 //==============================================================================
