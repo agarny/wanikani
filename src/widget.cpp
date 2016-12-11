@@ -173,6 +173,31 @@ void Widget::updateInterval(const int &pInterval)
 
 //==============================================================================
 
+QString Widget::iconDataUri(const QString &pIcon, const int &pWidth,
+                            const int &pHeight, const QIcon::Mode &pMode)
+{
+    // Convert an icon, which resource name is given, to a data URI, after
+    // having resized it, if requested
+
+    QIcon icon(pIcon);
+
+    if (icon.isNull())
+        return QString();
+
+    QByteArray data;
+    QBuffer buffer(&data);
+    QSize iconSize = icon.availableSizes().first();
+
+    buffer.open(QIODevice::WriteOnly);
+    icon.pixmap((pWidth == -1)?iconSize.width():pWidth,
+                (pHeight == -1)?iconSize.height():pHeight,
+                pMode).save(&buffer, "PNG");
+
+    return QString("data:image/png;base64,%1").arg(QString(data.toBase64()));
+}
+
+//==============================================================================
+
 void Widget::updateGravatar(const QPixmap &pGravatar)
 {
     // Update our gravatar
@@ -237,31 +262,6 @@ void Widget::updateSrsDistributionInformation(QLabel *pLabel,
                        "        <td align=right>"+pInformation.vocabulary()+"</td>\n"
                        "    </tr>\n"
                        "</table>\n");
-}
-
-//==============================================================================
-
-QString Widget::iconDataUri(const QString &pIcon, const int &pWidth,
-                            const int &pHeight, const QIcon::Mode &pMode)
-{
-    // Convert an icon, which resource name is given, to a data URI, after
-    // having resized it, if requested
-
-    QIcon icon(pIcon);
-
-    if (icon.isNull())
-        return QString();
-
-    QByteArray data;
-    QBuffer buffer(&data);
-    QSize iconSize = icon.availableSizes().first();
-
-    buffer.open(QIODevice::WriteOnly);
-    icon.pixmap((pWidth == -1)?iconSize.width():pWidth,
-                (pHeight == -1)?iconSize.height():pHeight,
-                pMode).save(&buffer, "PNG");
-
-    return QString("data:image/png;base64,%1").arg(QString(data.toBase64()));
 }
 
 //==============================================================================
