@@ -41,6 +41,7 @@ namespace Ui {
 
 //==============================================================================
 
+class QLabel;
 class QPushButton;
 
 //==============================================================================
@@ -70,9 +71,9 @@ private:
 
     QMap<QPushButton *, QRgb> mColors;
 
-    bool mKanjisError;
-    QMap<QString, QString> mKanjisState;
-    QMap<QString, QString> mOldKanjisState;
+    bool mKanjiError;
+    QMap<QString, QString> mKanjiState;
+    QMap<QString, QString> mOldKanjiState;
 
     bool mNeedToCheckWallpaper;
 
@@ -88,8 +89,10 @@ private:
                         const int &pHeight = -1,
                         const QIcon::Mode &pMode = QIcon::Normal);
 
+    void updateGravatar(const QPixmap &pGravatar);
     void updateSrsDistributionPalettes();
-    void updateUserInformation();
+    void updateSrsDistributionInformation(QLabel *pLabel, const QString &pIcon,
+                                          const SrsDistributionInformation &pInformation);
 
     void updateWallpaper(const bool &pForceUpdate = false);
 
@@ -110,13 +113,16 @@ private slots:
     void on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly = false);
     void on_closeToolButton_clicked();
 
+    void waniKaniUpdated();
+    void waniKaniError();
+
     void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
 
     void updateLevels();
 
     void updatePushButtonColor();
 
-    void updateKanjis(const bool &pForceUpdate = false);
+    void updateKanji(const bool &pForceUpdate = false);
 
     void checkWallpaper();
 };

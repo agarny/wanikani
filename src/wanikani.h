@@ -24,17 +24,93 @@ limitations under the License.
 
 //==============================================================================
 
+#include <QJsonDocument>
+#include <QObject>
+#include <QPixmap>
 #include <QString>
 
 //==============================================================================
 
-class WaniKani
+class SrsDistributionInformation
 {
+    friend class WaniKani;
+
 public:
+    explicit SrsDistributionInformation();
+
+    QString radicals() const;
+    QString kanji() const;
+    QString vocabulary() const;
+    QString total() const;
+
+private:
+    QString mRadicals;
+    QString mKanji;
+    QString mVocabulary;
+    QString mTotal;
+};
+
+//==============================================================================
+
+class SrsDistribution
+{
+    friend class WaniKani;
+
+public:
+    explicit SrsDistribution();
+
+    SrsDistributionInformation apprentice() const;
+    SrsDistributionInformation guru() const;
+    SrsDistributionInformation master() const;
+    SrsDistributionInformation enlightened() const;
+    SrsDistributionInformation burned() const;
+
+private:
+    SrsDistributionInformation mApprentice;
+    SrsDistributionInformation mGuru;
+    SrsDistributionInformation mMaster;
+    SrsDistributionInformation mEnlightened;
+    SrsDistributionInformation mBurned;
+};
+
+//==============================================================================
+
+class WaniKani : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit WaniKani();
+
     void setApiKey(const QString &pApiKey);
+
+    void update();
+
+    QString userName() const;
+    QPixmap gravatar() const;
+    QString level() const;
+    QString title() const;
+
+    SrsDistribution srsDistribution() const;
 
 private:
     QString mApiKey;
+
+    QString mUserName;
+    QPixmap mGravatar;
+    QString mLevel;
+    QString mTitle;
+
+    SrsDistribution mSrsDistribution;
+
+    QJsonDocument waniKaniRequest(const QString &pRequest);
+
+    void updateSrsDistribution(const QVariantMap &pVariantMap,
+                               SrsDistributionInformation &pSrsDistributionInformation);
+
+signals:
+    void updated();
+    void error();
 };
 
 //==============================================================================

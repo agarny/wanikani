@@ -206,18 +206,18 @@
              </layout>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="kanjisLayout">
+             <layout class="QHBoxLayout" name="kanjiLayout">
               <item>
-               <widget class="QRadioButton" name="currentKanjisRadioButton">
+               <widget class="QRadioButton" name="currentKanjiRadioButton">
                 <property name="text">
-                 <string>Current Kanjis</string>
+                 <string>Current Kanji</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="allKanjisRadioButton">
+               <widget class="QRadioButton" name="allKanjiRadioButton">
                 <property name="text">
-                 <string>All Kanjis</string>
+                 <string>All Kanji</string>
                 </property>
                </widget>
               </item>
