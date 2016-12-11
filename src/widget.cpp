@@ -69,7 +69,7 @@ static const auto SettingsColor         = QStringLiteral("Color%1%2");
 
 //==============================================================================
 
-static const auto LinkStyle = "color: rgb(103, 103, 103); outline: 0px; text-decoration: none;";
+static const auto LinkStyle = " style=\"color: rgb(103, 103, 103); outline: 0px; text-decoration: none;\"";
 
 //==============================================================================
 
@@ -115,8 +115,8 @@ Widget::Widget() :
 
     int currentYear = QDate::currentDate().year();
 
-    mGui->aboutValue->setText("<span style=\"font-size: 17pt;\"><strong><a href=\"https://github.com/agarny/wanikani\" style=\""+QString(LinkStyle)+"\">WaniKani "+version+"</a></strong></span><br/>"
-                              "Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+" <a href=\"https://github.com/agarny\" style=\""+QString(LinkStyle)+"\">Alan Garny</a>");
+    mGui->aboutValue->setText("<span style=\"font-size: 17pt;\"><strong><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> "+version+"</strong></span><br/>"
+                              "© 2016"+((currentYear > 2015)?QString("-%1").arg(currentYear):QString())+" <a href=\"https://github.com/agarny\""+QString(LinkStyle)+">Alan Garny</a>");
 
     // Retrieve our settings and handle a click on our foreground/background
     // push buttons
@@ -266,8 +266,8 @@ void Widget::updateUserInformation()
         QString userName = userInformationMap["username"].toString();
 
         mGui->userInformationValue->setText("<center>"
-                                            "    <span style=\"font-size: 15pt;\"><strong><a href=\"https://www.wanikani.com/community/people/"+userName+"\" style=\""+QString(LinkStyle)+"\">"+userName+"</a></strong> of Sect <strong>"+userInformationMap["title"].toString()+"</strong></span><br/>"
-                                            "    <span style=\"font-size: 11pt;\"><strong><em>(Level "+userInformationMap["level"].toString()+")</em></strong></span>"
+                                            "    <span style=\"font-size: 15pt;\"><strong><a href=\"https://www.wanikani.com/community/people/"+userName+"\""+QString(LinkStyle)+">"+userName+"</a></strong> of Sect <strong>"+userInformationMap["title"].toString()+"</strong></span><br/>"
+                                            "    <span style=\"font-size: 11pt;\"><strong><em>(level "+userInformationMap["level"].toString()+")</em></strong></span>"
                                             "</center>");
 
         updateSrsDistributionPalettes();
