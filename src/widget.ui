@@ -14,23 +14,11 @@
    <string>WaniKani</string>
   </property>
   <layout class="QVBoxLayout" name="layout" stretch="1,0,0">
-   <property name="spacing">
-    <number>8</number>
-   </property>
-   <property name="leftMargin">
-    <number>8</number>
-   </property>
-   <property name="topMargin">
-    <number>8</number>
-   </property>
-   <property name="rightMargin">
-    <number>8</number>
-   </property>
-   <property name="bottomMargin">
-    <number>8</number>
-   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -38,14 +26,17 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>0</width>
+         <height>0</height>
         </size>
        </property>
       </spacer>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <item>
         <layout class="QVBoxLayout" name="settingsVerticalLayout">
          <item>
@@ -439,8 +430,8 @@
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
         </spacer>
@@ -458,6 +449,9 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="bottomLayout" stretch="1,0">
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QLabel" name="aboutValue">
        <property name="alignment">
@@ -470,6 +464,9 @@
      </item>
      <item>
       <layout class="QVBoxLayout" name="closeLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <item>
         <spacer name="closeVerticalSpacer">
          <property name="orientation">
@@ -477,8 +474,8 @@
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
         </spacer>

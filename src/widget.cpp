@@ -111,9 +111,7 @@ Widget::Widget() :
     int currentYear = QDate::currentDate().year();
 
     mGui->aboutValue->setText("<span style=\"font-size: 17pt;\"><strong><a href=\"https://github.com/agarny/wanikani\" style=\""+QString(LinkStyle)+"\">WaniKani "+version+"</a></strong></span><br/>"
-                              "by<br/>"
-                              "<span style=\"font-size: 13pt;\"><strong><em><a href=\"https://github.com/agarny\" style=\""+QString(LinkStyle)+"\">Alan Garny</a></em></strong></span><br/>"
-                              "<em>Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+"</em>");
+                              "Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+" <a href=\"https://github.com/agarny\" style=\""+QString(LinkStyle)+"\">Alan Garny</a>");
 
     // Retrieve our settings and handle a click on our foreground/background
     // push buttons
