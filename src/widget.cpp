@@ -20,6 +20,7 @@ limitations under the License.
 
 //==============================================================================
 
+#include <QBuffer>
 #include <QCloseEvent>
 #include <QColorDialog>
 #include <QDate>
@@ -199,6 +200,31 @@ void Widget::updateSrsDistributionPalettes()
 
 //==============================================================================
 
+QString Widget::iconDataUri(const QString &pIcon, const int &pWidth,
+                            const int &pHeight, const QIcon::Mode &pMode)
+{
+    // Convert an icon, which resource name is given, to a data URI, after
+    // having resized it, if requested
+
+    QIcon icon(pIcon);
+
+    if (icon.isNull())
+        return QString();
+
+    QByteArray data;
+    QBuffer buffer(&data);
+    QSize iconSize = icon.availableSizes().first();
+
+    buffer.open(QIODevice::WriteOnly);
+    icon.pixmap((pWidth == -1)?iconSize.width():pWidth,
+                (pHeight == -1)?iconSize.height():pHeight,
+                pMode).save(&buffer, "PNG");
+
+    return QString("data:image/png;base64,%1").arg(QString(data.toBase64()));
+}
+
+//==============================================================================
+
 void Widget::updateUserInformation()
 {
     // Retrieve the user's information
@@ -243,11 +269,11 @@ void Widget::updateUserInformation()
 
         updateSrsDistributionPalettes();
 
-        mGui->apprenticeValue->setText("<img src=\":/apprentice\" width=32 height=32><br/>"+srsDistributionMap["apprentice"].toMap()["total"].toString());
-        mGui->guruValue->setText("<img src=\":/guru\" width=32 height=32><br/>"+srsDistributionMap["guru"].toMap()["total"].toString());
-        mGui->masterValue->setText("<img src=\":/master\" width=32 height=32><br/>"+srsDistributionMap["master"].toMap()["total"].toString());
-        mGui->enlightenedValue->setText("<img src=\":/enlightened\" width=32 height=32><br/>"+srsDistributionMap["enlighten"].toMap()["total"].toString());
-        mGui->burnedValue->setText("<img src=\":/burned\" width=32 height=32><br/>"+srsDistributionMap["burned"].toMap()["total"].toString());
+        mGui->apprenticeValue->setText("<img src=\""+iconDataUri(":/apprentice", 32, 32)+"\"><br/>"+srsDistributionMap["apprentice"].toMap()["total"].toString());
+        mGui->guruValue->setText("<img src=\""+iconDataUri(":/guru", 32, 32)+"\"><br/>"+srsDistributionMap["guru"].toMap()["total"].toString());
+        mGui->masterValue->setText("<img src=\""+iconDataUri(":/master", 32, 32)+"\"><br/>"+srsDistributionMap["master"].toMap()["total"].toString());
+        mGui->enlightenedValue->setText("<img src=\""+iconDataUri(":/enlightened", 32, 32)+"\"><br/>"+srsDistributionMap["enlighten"].toMap()["total"].toString());
+        mGui->burnedValue->setText("<img src=\""+iconDataUri(":/burned", 32, 32)+"\"><br/>"+srsDistributionMap["burned"].toMap()["total"].toString());
 
         mGui->userInformationValue->show();
         mGui->apprenticeValue->show();
