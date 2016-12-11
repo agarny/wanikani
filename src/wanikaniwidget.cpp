@@ -198,8 +198,11 @@ void WaniKaniWidget::updateUserInformation(const QString &pUserName,
 {
     // Update our user information
 
+    QPixmap gravatar = pUserName.isEmpty()?QPixmap(":/warning"):pGravatar;
+
+    mGui->gravatarValue->setPixmap(gravatar.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
     if (!pUserName.isEmpty()) {
-        mGui->gravatarValue->setPixmap(pGravatar);
         mGui->userInformationValue->setText("<center>"
                                             "    <span style=\"font-size: 15pt;\"><strong><a href=\"https://www.wanikani.com/community/people/"+pUserName+"\" style=\""+QString(LinkStyle)+"\">"+pUserName+"</a></strong> of Sect <strong>"+pTitle+"</strong></span><br/>"
                                             "    <span style=\"font-size: 11pt;\"><strong><em>(Level "+pLevel+")</em></strong></span>"
@@ -220,8 +223,6 @@ void WaniKaniWidget::updateUserInformation(const QString &pUserName,
         mGui->enlightenedValue->show();
         mGui->burnedValue->show();
     } else {
-        mGui->gravatarValue->setPixmap(QPixmap(":/warning"));
-
         mGui->userInformationValue->hide();
         mGui->apprenticeValue->hide();
         mGui->guruValue->hide();
