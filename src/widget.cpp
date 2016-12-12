@@ -820,6 +820,10 @@ void Widget::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
 
     move(availableGeometry.center()-QPoint(width() >> 1, height() >> 1));
 
+    // Show ourselves
+
+    show();
+
     // Note: to show ourselves, one would normally use activateWindow() (and
     //       possibly raise()), but depending on the operating system it may or
     //       not bring our widget to the foreground, so instead we do what
@@ -854,10 +858,6 @@ void Widget::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
 
         SetForegroundWindow(mainWinId);
     }
-
-    // Show ourselves
-
-    show();
 #elif defined(Q_OS_LINUX) || defined(Q_OS_MAC)
     // We are on Linux or macOS, so we can simply activate the window and raise
     // ourselves
