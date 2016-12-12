@@ -84,8 +84,6 @@ public:
 
     void setApiKey(const QString &pApiKey);
 
-    void update();
-
     QString userName() const;
     QPixmap gravatar() const;
     QString level() const;
@@ -111,6 +109,9 @@ private:
 signals:
     void updated();
     void error();
+
+public slots:
+    void update();
 };
 
 //==============================================================================

@@ -135,8 +135,11 @@ Widget::Widget() :
 
     updateKanji();
 
-    // Use our timer to retrieve the kanji and set our wallpaper
+    // Use our timer to update our WaniKani object, as well as retrieve the
+    // kanji and set our wallpaper
 
+    connect(&mTimer, SIGNAL(timeout()),
+            &mWaniKani, SLOT(update()));
     connect(&mTimer, SIGNAL(timeout()),
             this, SLOT(updateKanji()));
 
@@ -770,7 +773,7 @@ void Widget::waniKaniUpdated()
 
     mGui->userInformationValue->setText("<center>"
                                         "    <span style=\"font-size: 15px;\"><strong><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></strong> of Sect <strong>"+mWaniKani.title()+"</strong></span><br/>"
-                                        "    <span style=\"font-size: 11px;\"><strong><em>(level "+mWaniKani.level()+")</em></strong></span>"
+                                        "    <span style=\"font-size: 11px;\"><strong>Level "+mWaniKani.level()+"</strong></span>"
                                         "</center>");
 
     updateSrsDistributionInformation(mGui->apprenticeValue, ":/apprentice", mWaniKani.srsDistribution().apprentice());
