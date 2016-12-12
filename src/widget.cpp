@@ -48,6 +48,8 @@ limitations under the License.
     #include <Windows.h>
 #elif defined(Q_OS_MAC)
     #include "macos.h"
+
+    #include <math.h>
 #else
     #include <QProcess>
 #endif
