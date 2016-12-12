@@ -25,7 +25,6 @@ limitations under the License.
 //==============================================================================
 
 #include <QBuffer>
-#include <QCloseEvent>
 #include <QColorDialog>
 #include <QDate>
 #include <QDesktopWidget>
@@ -33,6 +32,7 @@ limitations under the License.
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QKeyEvent>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -40,7 +40,6 @@ limitations under the License.
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTextStream>
-#include <QWidgetAction>
 
 //==============================================================================
 
@@ -90,6 +89,7 @@ Widget::Widget() :
     mGui->setupUi(this);
 
     setMinimumSize(QSize(1024, 768));
+    setWindowFlags(Qt::Popup);
 
     connect(mGui->currentKanjiRadioButton, SIGNAL(clicked()),
             this, SLOT(updateLevels()));
@@ -116,7 +116,7 @@ Widget::Widget() :
 
     int currentYear = QDate::currentDate().year();
 
-    mGui->aboutValue->setText("<span style=\"font-size: 17pt;\"><strong><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> "+version+"</strong></span><br/>"
+    mGui->aboutValue->setText("<span style=\"font-size: 19px;\"><strong><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> "+version+"</strong></span><br/>"
                               "© 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+" <a href=\"https://github.com/agarny\""+QString(LinkStyle)+">Alan Garny</a>");
 
     // Handle signals from our WaniKani object
@@ -142,17 +142,8 @@ Widget::Widget() :
 
     updateInterval(mGui->intervalSpinBox->value());
 
-    // Create our system tray icon menu
-
-    QWidgetAction *widgetAction = new QWidgetAction(this);
-
-    widgetAction->setDefaultWidget(this);
-
-    mTrayIconMenu.addAction(widgetAction);
-
     // Create and show our system tray icon
 
-    mTrayIcon.setContextMenu(&mTrayIconMenu);
     mTrayIcon.setIcon(QIcon(":/icon"));
     mTrayIcon.setToolTip("WaniKani");
 
@@ -778,8 +769,8 @@ void Widget::waniKaniUpdated()
     updateSrsDistributionPalettes();
 
     mGui->userInformationValue->setText("<center>"
-                                        "    <span style=\"font-size: 15pt;\"><strong><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></strong> of Sect <strong>"+mWaniKani.title()+"</strong></span><br/>"
-                                        "    <span style=\"font-size: 11pt;\"><strong><em>(level "+mWaniKani.level()+")</em></strong></span>"
+                                        "    <span style=\"font-size: 15px;\"><strong><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></strong> of Sect <strong>"+mWaniKani.title()+"</strong></span><br/>"
+                                        "    <span style=\"font-size: 11px;\"><strong><em>(level "+mWaniKani.level()+")</em></strong></span>"
                                         "</center>");
 
     updateSrsDistributionInformation(mGui->apprenticeValue, ":/apprentice", mWaniKani.srsDistribution().apprentice());
@@ -816,14 +807,63 @@ void Widget::waniKaniError()
 
 void Widget::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
 {
-    // Show our menu even when we are triggered (which is already the case on
-    // Linux and macOS, but not on Windows)
+    Q_UNUSED(pReason);
 
-    if (pReason == QSystemTrayIcon::Trigger) {
-        mPosition = QCursor::pos();
+    // Show ourselves in all cases by first making sure that we are in the
+    // centre of the screen
 
-        mTrayIconMenu.exec(mPosition);
+    QDesktopWidget desktopWidget;
+    QRect availableGeometry = desktopWidget.availableGeometry();
+
+    move(availableGeometry.center()-QPoint(width() >> 1, height() >> 1));
+
+    // Note: to show ourselves, one would normally use activateWindow() (and
+    //       possibly raise()), but depending on the operating system it may or
+    //       not bring our widget to the foreground, so instead we do what
+    //       follows, depending on the operating system...
+
+#if defined(Q_OS_WIN)
+    // Show ourselves the Windows way
+
+    // Retrieve our window Id
+
+    HWND mainWinId = reinterpret_cast<HWND>(winId());
+
+    // Bring us to the foreground
+
+    DWORD foregroundThreadProcId = GetWindowThreadProcessId(GetForegroundWindow(), 0);
+    DWORD mainThreadProcId = GetWindowThreadProcessId(mainWinId, 0);
+
+    if (foregroundThreadProcId != mainThreadProcId) {
+        // Our thread process Id is not that of the foreground window, so attach
+        // the foreground thread to ourselves, set ourselves to the foreground,
+        // and detach the foreground thread from ourselves
+
+        AttachThreadInput(foregroundThreadProcId, mainThreadProcId, true);
+
+        SetForegroundWindow(mainWinId);
+        SetFocus(mainWinId);
+
+        AttachThreadInput(foregroundThreadProcId, mainThreadProcId, false);
+    } else {
+        // Our thread process Id is that of the foreground window, so just set
+        // ourselves to the foreground
+
+        SetForegroundWindow(mainWinId);
     }
+
+    // Show ourselves
+
+    show();
+#elif defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+    // We are on Linux or macOS, so we can simply activate the window and raise
+    // ourselves
+
+    activateWindow();
+    raise();
+#else
+    #error Unsupported platform
+#endif
 }
 
 //==============================================================================
@@ -855,10 +895,6 @@ void Widget::updatePushButtonColor()
 
         updateWallpaper(true);
     }
-
-    // We will have been hidden when showing the colour dialog, so show us back
-
-    mTrayIconMenu.exec(mPosition);
 }
 
 //==============================================================================

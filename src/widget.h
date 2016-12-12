@@ -28,7 +28,7 @@ limitations under the License.
 
 //==============================================================================
 
-#include <QMenu>
+#include <QMap>
 #include <QSystemTrayIcon>
 #include <QTimer>
 #include <QWidget>
@@ -65,9 +65,6 @@ private:
     QTimer mTimer;
 
     QSystemTrayIcon mTrayIcon;
-    QMenu mTrayIconMenu;
-
-    QPoint mPosition;
 
     QMap<QPushButton *, QRgb> mColors;
 
