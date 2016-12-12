@@ -831,6 +831,7 @@ void Widget::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
 {
     Q_UNUSED(pReason);
 
+#ifndef Q_OS_MAC
     // Show ourselves in all cases by first making sure that we are in the
     // centre of the screen
 
@@ -838,15 +839,15 @@ void Widget::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
     QRect availableGeometry = desktopWidget.availableGeometry();
 
     move(availableGeometry.center()-QPoint(width() >> 1, height() >> 1));
+#endif
 
     // Show ourselves
-
-    show();
-
     // Note: to show ourselves, one would normally use activateWindow() (and
     //       possibly raise()), but depending on the operating system it may or
     //       not bring our widget to the foreground, so instead we do what
     //       follows, depending on the operating system...
+
+    show();
 
 #if defined(Q_OS_WIN)
     // Show ourselves the Windows way
