@@ -53,6 +53,11 @@ class Widget : public QWidget
 public:
     explicit Widget();
 
+#ifdef Q_OS_MAC
+protected:
+    virtual void keyPressEvent(QKeyEvent *pEvent);
+#endif
+
 private:
     Ui::Widget *mGui;
 

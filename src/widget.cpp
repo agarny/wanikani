@@ -89,7 +89,12 @@ Widget::Widget() :
     mGui->setupUi(this);
 
     setMinimumSize(QSize(1024, 768));
+
+#ifdef Q_OS_MAC
+    setWindowFlags(Qt::FramelessWindowHint);
+#else
     setWindowFlags(Qt::Popup);
+#endif
 
     connect(mGui->currentKanjiRadioButton, SIGNAL(clicked()),
             this, SLOT(updateLevels()));
@@ -157,6 +162,20 @@ Widget::Widget() :
 
     mInitializing = false;
 }
+
+//==============================================================================
+
+#ifdef Q_OS_MAC
+void Widget::keyPressEvent(QKeyEvent *pEvent)
+{
+    // Hide ourselves if the user presses the escape key
+
+    if (pEvent->key() == Qt::Key_Escape)
+        hide();
+    else
+        QWidget::keyPressEvent(pEvent);
+}
+#endif
 
 //==============================================================================
 
