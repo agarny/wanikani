@@ -156,7 +156,7 @@ Widget::Widget() :
     mTrayIcon.setToolTip("WaniKani");
 
     connect(&mTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-            this, SLOT(trayIconActivated(const QSystemTrayIcon::ActivationReason &)));
+            this, SLOT(trayIconActivated()));
 
     mTrayIcon.show();
 
@@ -830,13 +830,10 @@ void Widget::waniKaniError()
 
 //==============================================================================
 
-void Widget::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
+void Widget::trayIconActivated()
 {
-    Q_UNUSED(pReason);
-
 #ifndef Q_OS_MAC
-    // Show ourselves in all cases by first making sure that we are in the
-    // centre of the screen
+    // Make sure that we are in the centre of the screen
 
     QDesktopWidget desktopWidget;
     QRect availableGeometry = desktopWidget.availableGeometry();

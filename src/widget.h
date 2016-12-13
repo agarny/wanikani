@@ -118,7 +118,7 @@ private slots:
     void waniKaniUpdated();
     void waniKaniError();
 
-    void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
+    void trayIconActivated();
 
     void updateLevels();
 
