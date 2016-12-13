@@ -1,4 +1,4 @@
-ARGET = WaniKani
+TARGET = WaniKani
 
 TEMPLATE = app
 
