@@ -619,7 +619,10 @@ void Widget::on_intervalSpinBox_valueChanged(int pInterval)
 
 void Widget::on_forceUpdateButton_clicked()
 {
-    // Update our Kanji (and therefore our wallpaper)
+    // Update our WaniKani object, as well as our kanji (resulting in our
+    // wallpaper being updated too)
+
+    mWaniKani.update();
 
     updateKanji(true);
 }
