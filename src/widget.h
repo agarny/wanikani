@@ -78,6 +78,8 @@ private:
 
     bool mNeedToCheckWallpaper;
 
+    void retrieveSettings(const bool &pResetSettings = false);
+
     void setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor);
 
     QColor color(const int &pRow, const int &pColumn) const;
@@ -111,7 +113,7 @@ private slots:
 
     void on_swapPushButton_clicked();
 
-    void on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly = false);
+    void on_resetAllPushButton_clicked();
     void on_closeToolButton_clicked();
 
     void waniKaniUpdated();

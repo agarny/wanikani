@@ -130,10 +130,9 @@ Widget::Widget() :
     connect(&mWaniKani, SIGNAL(error()),
             this, SLOT(waniKaniError()));
 
-    // Retrieve our settings and handle a click on our foreground/background
-    // push buttons
+    // Retrieve our settings
 
-    on_resetAllPushButton_clicked(true);
+    retrieveSettings();
 
     // Retrieve some initial information about the user's kanji
 
@@ -175,6 +174,83 @@ void Widget::keyPressEvent(QKeyEvent *pEvent)
         QWidget::keyPressEvent(pEvent);
 }
 #endif
+
+//==============================================================================
+
+void Widget::retrieveSettings(const bool &pResetSettings)
+{
+    // Retrieve all of our settings after having reset some of them, if
+    // requested
+
+    QSettings settings;
+    bool setWaniKaniApiKey = false;
+
+    if (mInitializing) {
+        mFileName = settings.value(SettingsFileName).toString();
+
+        mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
+
+        setWaniKaniApiKey = true;
+    }
+
+    if (pResetSettings) {
+        mInitializing = true;
+
+        settings.clear();
+    }
+
+    if (settings.value(SettingsCurrentKanji, true).toBool())
+        mGui->currentKanjiRadioButton->setChecked(true);
+    else
+        mGui->allKanjiRadioButton->setChecked(true);
+
+    mGui->intervalSpinBox->setValue(settings.value(SettingsInterval).toInt());
+
+    static const QColor Colors[6][2] = { { "#606060", "#60808080"},
+                                         { "#606060", "#60dd0093"},
+                                         { "#606060", "#60882d9e"},
+                                         { "#606060", "#60294ddb"},
+                                         { "#606060", "#600093dd"},
+                                         { "#606060", "#60fbc042"} };
+
+    QString fontName = settings.value(SettingsFontName).toString();
+
+    mGui->fontComboBox->setCurrentText(fontName);
+    mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
+    mGui->italicsFontCheckBox->setChecked(settings.value(SettingsItalicsFont).toBool());
+
+    for (int i = 1; i <= 6; ++i) {
+        for (int j = 1; j <= 2; ++j) {
+            QPushButton *pushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget());
+            QRgb color = settings.value(SettingsColor.arg(i).arg(j), Colors[i-1][j-1].rgba()).toUInt();
+
+            setPushButtonColor(pushButton, color);
+        }
+    }
+
+    if (fontName.isEmpty()) {
+#if defined(Q_OS_WIN)
+        mGui->fontComboBox->setCurrentText("MS Mincho");
+#elif defined(Q_OS_LINUX)
+        mGui->fontComboBox->setCurrentText("Droid Sans Fallback");
+#elif defined(Q_OS_MAC)
+        mGui->fontComboBox->setCurrentText("Hiragino Mincho Pro");
+#else
+    #error Unsupported platform
+#endif
+    }
+
+    if (setWaniKaniApiKey)
+        mWaniKani.setApiKey(mGui->apiKeyValue->text());
+
+    if (pResetSettings) {
+        mInitializing = false;
+
+        updateSrsDistributionPalettes();
+
+        updateKanji(true);
+    }
+}
 
 //==============================================================================
 
@@ -681,79 +757,11 @@ void Widget::on_swapPushButton_clicked()
 
 //==============================================================================
 
-void Widget::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
+void Widget::on_resetAllPushButton_clicked()
 {
-    // Retrieve all of our settings after having reset some of them, if
-    // requested
+    // Retrieve all of our settings after having reset some of them
 
-    QSettings settings;
-    bool setWaniKaniApiKey = false;
-
-    if (mInitializing) {
-        mFileName = settings.value(SettingsFileName).toString();
-
-        mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
-
-        setWaniKaniApiKey = true;
-    }
-
-    if (!pRetrieveSettingsOnly) {
-        mInitializing = true;
-
-        settings.clear();
-    }
-
-    if (settings.value(SettingsCurrentKanji, true).toBool())
-        mGui->currentKanjiRadioButton->setChecked(true);
-    else
-        mGui->allKanjiRadioButton->setChecked(true);
-
-    mGui->intervalSpinBox->setValue(settings.value(SettingsInterval).toInt());
-
-    static const QColor Colors[6][2] = { { "#606060", "#60808080"},
-                                         { "#606060", "#60dd0093"},
-                                         { "#606060", "#60882d9e"},
-                                         { "#606060", "#60294ddb"},
-                                         { "#606060", "#600093dd"},
-                                         { "#606060", "#60fbc042"} };
-
-    QString fontName = settings.value(SettingsFontName).toString();
-
-    mGui->fontComboBox->setCurrentText(fontName);
-    mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
-    mGui->italicsFontCheckBox->setChecked(settings.value(SettingsItalicsFont).toBool());
-
-    for (int i = 1; i <= 6; ++i) {
-        for (int j = 1; j <= 2; ++j) {
-            QPushButton *pushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget());
-            QRgb color = settings.value(SettingsColor.arg(i).arg(j), Colors[i-1][j-1].rgba()).toUInt();
-
-            setPushButtonColor(pushButton, color);
-        }
-    }
-
-    if (fontName.isEmpty()) {
-#if defined(Q_OS_WIN)
-        mGui->fontComboBox->setCurrentText("MS Mincho");
-#elif defined(Q_OS_LINUX)
-        mGui->fontComboBox->setCurrentText("Droid Sans Fallback");
-#elif defined(Q_OS_MAC)
-        mGui->fontComboBox->setCurrentText("Hiragino Mincho Pro");
-#else
-    #error Unsupported platform
-#endif
-    }
-
-    if (setWaniKaniApiKey)
-        mWaniKani.setApiKey(mGui->apiKeyValue->text());
-
-    if (!pRetrieveSettingsOnly) {
-        mInitializing = false;
-
-        updateSrsDistributionPalettes();
-
-        updateKanji(true);
-    }
+    retrieveSettings(true);
 }
 
 //==============================================================================
