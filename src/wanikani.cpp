@@ -144,20 +144,283 @@ SrsDistributionInformation SrsDistribution::burned() const
 
 //==============================================================================
 
+KanjiUserSpecific::KanjiUserSpecific() :
+    mSrs(QString()),
+    mSrsNumeric(0),
+    mUnlockedDate(0),
+    mAvailableDate(0),
+    mBurned(false),
+    mBurnedDate(0),
+    mMeaningCorrect(0),
+    mMeaningIncorrect(0),
+    mMeaningMaxStreak(0),
+    mMeaningCurrentStreak(0),
+    mReadingCorrect(0),
+    mReadingIncorrect(0),
+    mReadingMaxStreak(0),
+    mReadingCurrentStreak(0),
+    mMeaningNote(QString()),
+    mUserSynonyms(QString()),
+    mReadingNote(QString())
+{
+}
+
+//==============================================================================
+
+QString KanjiUserSpecific::srs() const
+{
+    // Return our SRS
+
+    return mSrs;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::srsNumeric() const
+{
+    // Return our SRS numeric
+
+    return mSrsNumeric;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::unlockedDate() const
+{
+    // Return our unlocked date
+
+    return mUnlockedDate;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::availableDate() const
+{
+    // Return our available date
+
+    return mAvailableDate;
+}
+
+//==============================================================================
+
+bool KanjiUserSpecific::burned() const
+{
+    // Return whether we are burned
+
+    return mBurned;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::burnedDate() const
+{
+    // Return our burned date
+
+    return mBurnedDate;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::meaningCorrect() const
+{
+    // Return our number of correct meanings
+
+    return mMeaningCorrect;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::meaningIncorrect() const
+{
+    // Return our number of incorrect meanings
+
+    return mMeaningIncorrect;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::meaningMaxStreak() const
+{
+    // Return our maximum streak for the meaning
+
+    return mMeaningMaxStreak;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::meaningCurrentStreak() const
+{
+    // Return our current streak for the meaning
+
+    return mMeaningCurrentStreak;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::readingCorrect() const
+{
+    // Return our number of correct readings
+
+    return mReadingCorrect;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::readingIncorrect() const
+{
+    // Return our number of incorrect readings
+
+    return mReadingCorrect;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::readingMaxStreak() const
+{
+    // Return our maximum streak for the reading
+
+    return mReadingMaxStreak;
+}
+
+//==============================================================================
+
+int KanjiUserSpecific::readingCurrentStreak() const
+{
+    // Return our current streak for the reading
+
+    return mReadingCurrentStreak;
+}
+
+//==============================================================================
+
+QString KanjiUserSpecific::meaningNote() const
+{
+    // Return our meaning note
+
+    return mMeaningNote;
+}
+
+//==============================================================================
+
+QString KanjiUserSpecific::userSynonyms() const
+{
+    // Return our user synonyms
+
+    return mUserSynonyms;
+}
+
+//==============================================================================
+
+QString KanjiUserSpecific::readingNote() const
+{
+    // Return our reading note
+
+    return mReadingNote;
+}
+
+//==============================================================================
+
+Kanji::Kanji() :
+    mCharacter(QChar()),
+    mMeaning(QString()),
+    mOnyomi(QString()),
+    mKunyomi(QString()),
+    mNanori(QString()),
+    mImportantReading(QString()),
+    mLevel(0),
+    mUserSpecific(KanjiUserSpecific())
+{
+}
+
+//==============================================================================
+
+QChar Kanji::character() const
+{
+    // Return our character
+
+    return mCharacter;
+}
+
+//==============================================================================
+
+QString Kanji::meaning() const
+{
+    // Return our meaning
+
+    return mMeaning;
+}
+
+//==============================================================================
+
+QString Kanji::onyomi() const
+{
+    // Return our Onyomi reading
+
+    return mOnyomi;
+}
+
+//==============================================================================
+
+QString Kanji::kunyomi() const
+{
+    // Return our Kunyomi reading
+
+    return mKunyomi;
+}
+
+//==============================================================================
+
+QString Kanji::nanori() const
+{
+    // Return our Nanori reading
+
+    return mNanori;
+}
+
+//==============================================================================
+
+QString Kanji::imporantReading() const
+{
+    // Return our important reading
+
+    return mImportantReading;
+}
+
+//==============================================================================
+
+int Kanji::level() const
+{
+    // Return our level
+
+    return mLevel;
+}
+
+//==============================================================================
+
+KanjiUserSpecific Kanji::userSpecific() const
+{
+    // Return our user specific information
+
+    return mUserSpecific;
+}
+
+//==============================================================================
+
 WaniKani::WaniKani() :
     mApiKey(QString()),
     mUserName(QString()),
     mGravatar(QPixmap()),
     mLevel(0),
     mTitle(QString()),
-    mSrsDistribution(SrsDistribution()),
     mAbout(QString()),
     mWebsite(QString()),
     mTwitter(QString()),
     mTopicsCount(0),
     mPostsCount(0),
     mCreationDate(0),
-    mVacationDate(0)
+    mVacationDate(0),
+    mSrsDistribution(SrsDistribution()),
+    mKanjiList(KanjiList())
 {
 }
 
@@ -227,9 +490,9 @@ void WaniKani::update()
             && !kanjiResponse.object().contains("error")) {
             // Retrieve the user's gravatar
 
-            QVariantMap userMap = srsDistributionResponse.object().toVariantMap()["user_information"].toMap();
+            QVariantMap userInformationMap = srsDistributionResponse.object().toVariantMap()["user_information"].toMap();
             QNetworkAccessManager networkAccessManager;
-            QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+userMap["gravatar"].toString()));
+            QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+userInformationMap["gravatar"].toString()));
             QEventLoop eventLoop;
 
             QObject::connect(networkReply, SIGNAL(finished()),
@@ -251,16 +514,16 @@ void WaniKani::update()
 
             // Retrieve some of the user's information
 
-            mUserName = userMap["username"].toString();
-            mLevel = userMap["level"].toInt();
-            mTitle = userMap["title"].toString();
-            mAbout = userMap["about"].toString();
-            mWebsite = userMap["website"].toString();
-            mTwitter = userMap["twitter"].toString();
-            mTopicsCount = userMap["topics_count"].toInt();
-            mPostsCount = userMap["posts_count"].toInt();
-            mCreationDate = userMap["creation_date"].toInt();
-            mVacationDate = userMap["vacation_date"].toInt();
+            mUserName = userInformationMap["username"].toString();
+            mLevel = userInformationMap["level"].toInt();
+            mTitle = userInformationMap["title"].toString();
+            mAbout = userInformationMap["about"].toString();
+            mWebsite = userInformationMap["website"].toString();
+            mTwitter = userInformationMap["twitter"].toString();
+            mTopicsCount = userInformationMap["topics_count"].toInt();
+            mPostsCount = userInformationMap["posts_count"].toInt();
+            mCreationDate = userInformationMap["creation_date"].toInt();
+            mVacationDate = userInformationMap["vacation_date"].toInt();
 
             // Retrieve the user's SRS distribution
 
@@ -274,11 +537,40 @@ void WaniKani::update()
 
             // Retrieve the Kanji and their information
 
-            foreach (const QVariant &kanji,
+            foreach (const QVariant &kanjiInformation,
                      kanjiResponse.object().toVariantMap()["requested_information"].toList()) {
-                QVariantMap kanjiMap = kanji.toMap();
+                QVariantMap kanjiInformationMap = kanjiInformation.toMap();
+                Kanji kanji;
 
-//---GRY--- TO BE DONE...
+                kanji.mCharacter = kanjiInformationMap["character"].toChar();
+                kanji.mMeaning = kanjiInformationMap["meaning"].toString();
+                kanji.mOnyomi = kanjiInformationMap["onyomi"].toString();
+                kanji.mKunyomi = kanjiInformationMap["kunyomi"].toString();
+                kanji.mNanori = kanjiInformationMap["nanori"].toString();
+                kanji.mImportantReading = kanjiInformationMap["important_reading"].toString();
+                kanji.mLevel = kanjiInformationMap["level"].toInt();
+
+                QVariantMap kanjiUserSpecificInformationMap = kanjiInformationMap["user_specific"].toMap();
+
+                kanji.mUserSpecific.mSrs = kanjiUserSpecificInformationMap["srs"].toString();
+                kanji.mUserSpecific.mSrsNumeric = kanjiUserSpecificInformationMap["srs_numeric"].toInt();
+                kanji.mUserSpecific.mUnlockedDate = kanjiUserSpecificInformationMap["unlocked_date"].toInt();
+                kanji.mUserSpecific.mAvailableDate = kanjiUserSpecificInformationMap["available_date"].toInt();
+                kanji.mUserSpecific.mBurned = kanjiUserSpecificInformationMap["burned"].toBool();
+                kanji.mUserSpecific.mBurnedDate = kanjiUserSpecificInformationMap["burned_date"].toInt();
+                kanji.mUserSpecific.mMeaningCorrect = kanjiUserSpecificInformationMap["meaning_correct"].toInt();
+                kanji.mUserSpecific.mMeaningIncorrect = kanjiUserSpecificInformationMap["meaning_incorrect"].toInt();
+                kanji.mUserSpecific.mMeaningMaxStreak = kanjiUserSpecificInformationMap["meaning_max_streak"].toInt();
+                kanji.mUserSpecific.mMeaningCurrentStreak = kanjiUserSpecificInformationMap["meaning_current_streak"].toInt();
+                kanji.mUserSpecific.mReadingCorrect = kanjiUserSpecificInformationMap["reading_correct"].toInt();
+                kanji.mUserSpecific.mReadingIncorrect = kanjiUserSpecificInformationMap["reading_incorrect"].toInt();
+                kanji.mUserSpecific.mReadingMaxStreak = kanjiUserSpecificInformationMap["reading_max_streak"].toInt();
+                kanji.mUserSpecific.mReadingCurrentStreak = kanjiUserSpecificInformationMap["reading_current_streak"].toInt();
+                kanji.mUserSpecific.mMeaningNote = kanjiUserSpecificInformationMap["meaning_note"].toString();
+                kanji.mUserSpecific.mUserSynonyms = kanjiUserSpecificInformationMap["user_synonyms"].toString();
+                kanji.mUserSpecific.mReadingNote = kanjiUserSpecificInformationMap["reading_note"].toString();
+
+                mKanjiList << kanji;
             }
 
             // Let people know that we have been updated

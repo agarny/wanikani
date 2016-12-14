@@ -27,6 +27,7 @@ limitations under the License.
 #include <QJsonDocument>
 #include <QObject>
 #include <QPixmap>
+#include <QList>
 #include <QString>
 
 //==============================================================================
@@ -77,6 +78,86 @@ private:
 
 //==============================================================================
 
+class KanjiUserSpecific
+{
+    friend class WaniKani;
+
+public:
+    explicit KanjiUserSpecific();
+
+    QString srs() const;
+    int srsNumeric() const;
+    int unlockedDate() const;
+    int availableDate() const;
+    bool burned() const;
+    int burnedDate() const;
+    int meaningCorrect() const;
+    int meaningIncorrect() const;
+    int meaningMaxStreak() const;
+    int meaningCurrentStreak() const;
+    int readingCorrect() const;
+    int readingIncorrect() const;
+    int readingMaxStreak() const;
+    int readingCurrentStreak() const;
+    QString meaningNote() const;
+    QString userSynonyms() const;
+    QString readingNote() const;
+
+private:
+    QString mSrs;
+    int mSrsNumeric;
+    int mUnlockedDate;
+    int mAvailableDate;
+    bool mBurned;
+    int mBurnedDate;
+    int mMeaningCorrect;
+    int mMeaningIncorrect;
+    int mMeaningMaxStreak;
+    int mMeaningCurrentStreak;
+    int mReadingCorrect;
+    int mReadingIncorrect;
+    int mReadingMaxStreak;
+    int mReadingCurrentStreak;
+    QString mMeaningNote;
+    QString mUserSynonyms;
+    QString mReadingNote;
+};
+
+//==============================================================================
+
+class Kanji
+{
+    friend class WaniKani;
+
+public:
+    explicit Kanji();
+
+    QChar character() const;
+    QString meaning() const;
+    QString onyomi() const;
+    QString kunyomi() const;
+    QString nanori() const;
+    QString imporantReading() const;
+    int level() const;
+    KanjiUserSpecific userSpecific() const;
+
+private:
+    QChar mCharacter;
+    QString mMeaning;
+    QString mOnyomi;
+    QString mKunyomi;
+    QString mNanori;
+    QString mImportantReading;
+    int mLevel;
+    KanjiUserSpecific mUserSpecific;
+};
+
+//==============================================================================
+
+typedef QList<Kanji> KanjiList;
+
+//==============================================================================
+
 class WaniKani : public QObject
 {
     Q_OBJECT
@@ -116,6 +197,7 @@ private:
     int mVacationDate;
 
     SrsDistribution mSrsDistribution;
+    KanjiList mKanjiList;
 
     QJsonDocument waniKaniRequest(const QString &pRequest);
 
