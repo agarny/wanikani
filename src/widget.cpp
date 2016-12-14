@@ -801,7 +801,7 @@ void Widget::waniKaniUpdated()
 
     mGui->userInformationValue->setText("<center>"
                                         "    <span style=\"font-size: 15px;\"><strong><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></strong> of Sect <strong>"+mWaniKani.title()+"</strong></span><br/>"
-                                        "    <span style=\"font-size: 11px;\"><strong>Level "+mWaniKani.level()+"</strong></span>"
+                                        "    <span style=\"font-size: 11px;\"><strong>Level "+QString::number(mWaniKani.level())+"</strong></span>"
                                         "</center>");
 
     updateSrsDistributionInformation(mGui->apprenticeValue, ":/apprentice", mWaniKani.srsDistribution().apprentice());

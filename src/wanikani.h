@@ -88,8 +88,15 @@ public:
 
     QString userName() const;
     QPixmap gravatar() const;
-    QString level() const;
+    int level() const;
     QString title() const;
+    QString about() const;
+    QString website() const;
+    QString twitter() const;
+    int topicsCount() const;
+    int postsCount() const;
+    int creationDate() const;
+    int vacationDate() const;
 
     SrsDistribution srsDistribution() const;
 
@@ -98,8 +105,15 @@ private:
 
     QString mUserName;
     QPixmap mGravatar;
-    QString mLevel;
+    int mLevel;
     QString mTitle;
+    QString mAbout;
+    QString mWebsite;
+    QString mTwitter;
+    int mTopicsCount;
+    int mPostsCount;
+    int mCreationDate;
+    int mVacationDate;
 
     SrsDistribution mSrsDistribution;
 

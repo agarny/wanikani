@@ -148,9 +148,16 @@ WaniKani::WaniKani() :
     mApiKey(QString()),
     mUserName(QString()),
     mGravatar(QPixmap()),
-    mLevel(QString()),
+    mLevel(0),
     mTitle(QString()),
-    mSrsDistribution(SrsDistribution())
+    mSrsDistribution(SrsDistribution()),
+    mAbout(QString()),
+    mWebsite(QString()),
+    mTwitter(QString()),
+    mTopicsCount(0),
+    mPostsCount(0),
+    mCreationDate(0),
+    mVacationDate(0)
 {
 }
 
@@ -178,7 +185,7 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
     // if possible
 
     QNetworkAccessManager networkAccessManager;
-    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(QString("https://www.wanikani.com/api/v1/user/%1/%2").arg(mApiKey, pRequest)));
+    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(QString("https://www.wanikani.com/api/v1.4/user/%1/%2").arg(mApiKey, pRequest)));
     QEventLoop eventLoop;
 
     QObject::connect(networkReply, SIGNAL(finished()),
@@ -208,52 +215,80 @@ void WaniKani::update()
 {
     // Retrieve the user's information and his/her SRS distribution
 
-    QJsonDocument jsonDocument = waniKaniRequest("srs-distribution");
+    QJsonDocument srsDistributionResponse = waniKaniRequest("srs-distribution");
 
-    if (!jsonDocument.isNull()) {
-        // Retrieve the user's gravatar
+    if (   !srsDistributionResponse.isNull()
+        && !srsDistributionResponse.object().contains("error")) {
+        // Retrieve the user's list of Kanji (and their information)
 
-        QVariantMap userInformationMap = jsonDocument.object().toVariantMap()["user_information"].toMap();
-        QNetworkAccessManager networkAccessManager;
-        QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+userInformationMap["gravatar"].toString()));
-        QEventLoop eventLoop;
+        QJsonDocument kanjiResponse = waniKaniRequest("kanji/1,2,3,4,5,6,7,8,9,0,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
 
-        QObject::connect(networkReply, SIGNAL(finished()),
-                         &eventLoop, SLOT(quit()));
+        if (   !kanjiResponse.isNull()
+            && !kanjiResponse.object().contains("error")) {
+            // Retrieve the user's gravatar
 
-        eventLoop.exec();
+            QVariantMap userMap = srsDistributionResponse.object().toVariantMap()["user_information"].toMap();
+            QNetworkAccessManager networkAccessManager;
+            QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+userMap["gravatar"].toString()));
+            QEventLoop eventLoop;
 
-        QByteArray gravatarData = QByteArray();
+            QObject::connect(networkReply, SIGNAL(finished()),
+                             &eventLoop, SLOT(quit()));
 
-        if (networkReply->error() == QNetworkReply::NoError)
-            gravatarData = networkReply->readAll();
+            eventLoop.exec();
 
-        networkReply->deleteLater();
+            QByteArray gravatarData = QByteArray();
 
-        if (gravatarData.isEmpty())
-            mGravatar = QPixmap(":/face");
-        else
-            mGravatar.loadFromData(gravatarData);
+            if (networkReply->error() == QNetworkReply::NoError)
+                gravatarData = networkReply->readAll();
 
-        // Retrieve some of the user's information
+            networkReply->deleteLater();
 
-        mUserName = userInformationMap["username"].toString();
-        mLevel = userInformationMap["level"].toString();
-        mTitle = userInformationMap["title"].toString();
+            if (gravatarData.isEmpty())
+                mGravatar = QPixmap(":/face");
+            else
+                mGravatar.loadFromData(gravatarData);
 
-        // Retrieve the user's SRS distribution
+            // Retrieve some of the user's information
 
-        QVariantMap srsDistributionMap = jsonDocument.object().toVariantMap()["requested_information"].toMap();
+            mUserName = userMap["username"].toString();
+            mLevel = userMap["level"].toInt();
+            mTitle = userMap["title"].toString();
+            mAbout = userMap["about"].toString();
+            mWebsite = userMap["website"].toString();
+            mTwitter = userMap["twitter"].toString();
+            mTopicsCount = userMap["topics_count"].toInt();
+            mPostsCount = userMap["posts_count"].toInt();
+            mCreationDate = userMap["creation_date"].toInt();
+            mVacationDate = userMap["vacation_date"].toInt();
 
-        updateSrsDistribution("Apprentice", srsDistributionMap["apprentice"].toMap(), mSrsDistribution.mApprentice);
-        updateSrsDistribution("Guru", srsDistributionMap["guru"].toMap(), mSrsDistribution.mGuru);
-        updateSrsDistribution("Master", srsDistributionMap["master"].toMap(), mSrsDistribution.mMaster);
-        updateSrsDistribution("Enlightened", srsDistributionMap["enlighten"].toMap(), mSrsDistribution.mEnlightened);
-        updateSrsDistribution("Burned", srsDistributionMap["burned"].toMap(), mSrsDistribution.mBurned);
+            // Retrieve the user's SRS distribution
 
-        // Let people know that we have been updated
+            QVariantMap srsDistributionMap = srsDistributionResponse.object().toVariantMap()["requested_information"].toMap();
 
-        emit updated();
+            updateSrsDistribution("Apprentice", srsDistributionMap["apprentice"].toMap(), mSrsDistribution.mApprentice);
+            updateSrsDistribution("Guru", srsDistributionMap["guru"].toMap(), mSrsDistribution.mGuru);
+            updateSrsDistribution("Master", srsDistributionMap["master"].toMap(), mSrsDistribution.mMaster);
+            updateSrsDistribution("Enlightened", srsDistributionMap["enlighten"].toMap(), mSrsDistribution.mEnlightened);
+            updateSrsDistribution("Burned", srsDistributionMap["burned"].toMap(), mSrsDistribution.mBurned);
+
+            // Retrieve the Kanji and their information
+
+            foreach (const QVariant &kanji,
+                     kanjiResponse.object().toVariantMap()["requested_information"].toList()) {
+                QVariantMap kanjiMap = kanji.toMap();
+
+//---GRY--- TO BE DONE...
+            }
+
+            // Let people know that we have been updated
+
+            emit updated();
+        } else {
+            // Let people know that something went wrong
+
+            emit error();
+        }
     } else {
         // Let people know that something went wrong
 
@@ -296,7 +331,7 @@ QPixmap WaniKani::gravatar() const
 
 //==============================================================================
 
-QString WaniKani::level() const
+int WaniKani::level() const
 {
     // Return our level
 
@@ -310,6 +345,69 @@ QString WaniKani::title() const
     // Return our title
 
     return mTitle;
+}
+
+//==============================================================================
+
+QString WaniKani::about() const
+{
+    // Return our about information
+
+    return mAbout;
+}
+
+//==============================================================================
+
+QString WaniKani::website() const
+{
+    // Return our website
+
+    return mWebsite;
+}
+
+//==============================================================================
+
+QString WaniKani::twitter() const
+{
+    // Return our Twitter account
+
+    return mTwitter;
+}
+
+//==============================================================================
+
+int WaniKani::topicsCount() const
+{
+    // Return the number of topics we have created
+
+    return mTopicsCount;
+}
+
+//==============================================================================
+
+int WaniKani::postsCount() const
+{
+    // Return the number of posts we have made
+
+    return mPostsCount;
+}
+
+//==============================================================================
+
+int WaniKani::creationDate() const
+{
+    // Return our creation date
+
+    return mCreationDate;
+}
+
+//==============================================================================
+
+int WaniKani::vacationDate() const
+{
+    // Return our vacation date
+
+    return mVacationDate;
 }
 
 //==============================================================================
