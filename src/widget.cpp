@@ -79,7 +79,6 @@ Widget::Widget() :
     mInitializing(true),
     mFileName(QString()),
     mColors(QMap<QPushButton *, QRgb>()),
-    mKanjiError(false),
     mKanjiState(QMap<QString, QString>()),
     mOldKanjiState(QMap<QString, QString>()),
     mNeedToCheckWallpaper(true)
@@ -368,7 +367,6 @@ void Widget::updateKanji(const bool &pForceUpdate)
 {
     // Reset some internal properties
 
-    mKanjiError = true;
     mKanjiState = QMap<QString, QString>();
 
     if (pForceUpdate)
@@ -387,19 +385,15 @@ void Widget::updateKanji(const bool &pForceUpdate)
 
     QJsonDocument json = waniKaniRequest(request);
 
-    if (!json.isNull()) {
-        mKanjiError = json.object().contains("error");
-
+    if (!json.isNull() && !json.object().contains("error")) {
         QVariantMap requestedInformationMap;
 
-        if (!mKanjiError) {
-            foreach (const QVariant &requestedInformation,
-                     json.object().toVariantMap()["requested_information"].toList()) {
-                requestedInformationMap = requestedInformation.toMap();
+        foreach (const QVariant &requestedInformation,
+                 json.object().toVariantMap()["requested_information"].toList()) {
+            requestedInformationMap = requestedInformation.toMap();
 
-                mKanjiState.insert(requestedInformationMap["character"].toString(),
-                                   requestedInformationMap["stats"].toMap()["srs"].toString());
-            }
+            mKanjiState.insert(requestedInformationMap["character"].toString(),
+                               requestedInformationMap["stats"].toMap()["srs"].toString());
         }
     }
 
@@ -414,121 +408,120 @@ void Widget::updateWallpaper(const bool &pForceUpdate)
 {
     // Generate and set the wallpaper, if needed
 
-    if (pForceUpdate || mKanjiError || (mKanjiState != mOldKanjiState)) {
+    if (   !mKanjiState.isEmpty()
+        &&  (pForceUpdate || (mKanjiState != mOldKanjiState))) {
         // Default wallpaper
 
         QPixmap pixmap;
 
         pixmap.load(":/wallpaper");
 
-        if (!mKanjiError) {
-            // Generate the wallpaper
+        // Generate the wallpaper
 
-            static const int LeftBorder = 1240;
-            static const int Shift = 32;
-            static const int SmallShift = 1;
+        static const int LeftBorder = 1240;
+        static const int Shift = 32;
+        static const int SmallShift = 1;
 
-            QDesktopWidget desktopWidget;
-            QRect availableGeometry = desktopWidget.availableGeometry();
-            QRect geometry = desktopWidget.geometry();
+        QDesktopWidget desktopWidget;
+        QRect availableGeometry = desktopWidget.availableGeometry();
+        QRect geometry = desktopWidget.geometry();
 
-            int areaWidth = pixmap.width()-LeftBorder-2*Shift;
-            int areaHeight = double(availableGeometry.height())/geometry.height()*pixmap.height()-2*Shift;
+        int areaWidth = pixmap.width()-LeftBorder-2*Shift;
+        int areaHeight = double(availableGeometry.height())/geometry.height()*pixmap.height()-2*Shift;
 
-            QFont font = QFont(mGui->fontComboBox->currentText());
+        QFont font = QFont(mGui->fontComboBox->currentText());
 
-            font.setBold(mGui->boldFontCheckBox->isChecked());
-            font.setItalic(mGui->italicsFontCheckBox->isChecked());
+        font.setBold(mGui->boldFontCheckBox->isChecked());
+        font.setItalic(mGui->italicsFontCheckBox->isChecked());
 
-            int fontPixelSize = 1;
-            int charWidth = 0;
-            int charHeight = 0;
-            int nbOfRows = 0;
-            int nbOfCols = 0;
-            int descent = 0;
+        int fontPixelSize = 1;
+        int charWidth = 0;
+        int charHeight = 0;
+        int nbOfRows = 0;
+        int nbOfCols = 0;
+        int descent = 0;
 
-            forever {
-                font.setPixelSize(fontPixelSize);
+        forever {
+            font.setPixelSize(fontPixelSize);
 
-                QFontMetrics fontMetrics(font);
-                int crtCharWidth = fontMetrics.width(Kanji.at(0));
-                int crtCharHeight = fontMetrics.height();
-                int crtNbOfCols = areaWidth/(crtCharWidth+SmallShift);
-                int crtNbOfRows =  floor(mKanjiState.size()/crtNbOfCols)
-                                  +((mKanjiState.size() % crtNbOfCols)?1:0);
+            QFontMetrics fontMetrics(font);
+            int crtCharWidth = fontMetrics.width(Kanji.at(0));
+            int crtCharHeight = fontMetrics.height();
+            int crtNbOfCols = areaWidth/(crtCharWidth+SmallShift);
+            int crtNbOfRows =  floor(mKanjiState.size()/crtNbOfCols)
+                              +((mKanjiState.size() % crtNbOfCols)?1:0);
 
-                if (crtNbOfRows*crtCharHeight+(crtNbOfRows-1)*SmallShift+fontMetrics.descent() <= areaHeight) {
-                    charWidth = crtCharWidth;
-                    charHeight = crtCharHeight;
+            if (crtNbOfRows*crtCharHeight+(crtNbOfRows-1)*SmallShift+fontMetrics.descent() <= areaHeight) {
+                charWidth = crtCharWidth;
+                charHeight = crtCharHeight;
 
-                    nbOfRows = crtNbOfRows;
-                    nbOfCols = crtNbOfCols;
+                nbOfRows = crtNbOfRows;
+                nbOfCols = crtNbOfCols;
 
-                    descent = fontMetrics.descent();
+                descent = fontMetrics.descent();
 
-                    ++fontPixelSize;
-                } else {
-                    font.setPixelSize(fontPixelSize-1);
+                ++fontPixelSize;
+            } else {
+                font.setPixelSize(fontPixelSize-1);
 
-                    break;
-                }
+                break;
             }
+        }
 
-            QPainter painter(&pixmap);
+        QPainter painter(&pixmap);
 
-            painter.setFont(font);
+        painter.setFont(font);
 
-            int xStart = LeftBorder+Shift+((areaWidth-nbOfCols*charWidth-(nbOfCols-1)*SmallShift) >> 1);
-            int x = 0;
-            int y =  double(availableGeometry.top())/geometry.height()*pixmap.height()
-                    +Shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*SmallShift) >> 1)-descent;
-            int radius = ceil(0.75*(qMax(charWidth, charHeight) >> 3));
+        int xStart = LeftBorder+Shift+((areaWidth-nbOfCols*charWidth-(nbOfCols-1)*SmallShift) >> 1);
+        int x = 0;
+        int y =  double(availableGeometry.top())/geometry.height()*pixmap.height()
+                +Shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*SmallShift) >> 1)-descent;
+        int radius = ceil(0.75*(qMax(charWidth, charHeight) >> 3));
 
-            for (int i = 0, j = 0, iMax = Kanji.size(); i < iMax; ++i) {
-                if (mKanjiState.keys().contains(Kanji.at(i))) {
-                    if (!(j % nbOfCols)) {
-                        x = xStart;
-                        y += charHeight+(j?SmallShift:0);
-                    }
-
-                    QString state = mKanjiState.value(Kanji.at(i));
-                    QColor foregroundColor;
-                    QColor backgroundColor;
-
-                    if (!state.compare("apprentice")) {
-                        foregroundColor = color(2, 1);
-                        backgroundColor = color(2, 2);
-                    } else if (!state.compare("guru")) {
-                        foregroundColor = color(3, 1);
-                        backgroundColor = color(3, 2);
-                    } else if (!state.compare("master")) {
-                        foregroundColor = color(4, 1);
-                        backgroundColor = color(4, 2);
-                    } else if (!state.compare("enlighten")) {
-                        foregroundColor = color(5, 1);
-                        backgroundColor = color(5, 2);
-                    } else if (!state.compare("burned")) {
-                        foregroundColor = color(6, 1);
-                        backgroundColor = color(6, 2);
-                    } else {
-                        foregroundColor = color(1, 1);
-                        backgroundColor = color(1, 2);
-                    }
-
-                    painter.setPen(foregroundColor);
-
-                    QPainterPath path;
-
-                    path.addRoundedRect(QRectF(x, y-charHeight+descent, charWidth, charHeight),
-                                        radius, radius);
-
-                    painter.fillPath(path, QColor(backgroundColor));
-                    painter.drawText(x, y, Kanji.at(i));
-
-                    x += charWidth+SmallShift;
-
-                    ++j;
+        for (int i = 0, j = 0, iMax = Kanji.size(); i < iMax; ++i) {
+            if (mKanjiState.keys().contains(Kanji.at(i))) {
+                if (!(j % nbOfCols)) {
+                    x = xStart;
+                    y += charHeight+(j?SmallShift:0);
                 }
+
+                QString state = mKanjiState.value(Kanji.at(i));
+                QColor foregroundColor;
+                QColor backgroundColor;
+
+                if (!state.compare("apprentice")) {
+                    foregroundColor = color(2, 1);
+                    backgroundColor = color(2, 2);
+                } else if (!state.compare("guru")) {
+                    foregroundColor = color(3, 1);
+                    backgroundColor = color(3, 2);
+                } else if (!state.compare("master")) {
+                    foregroundColor = color(4, 1);
+                    backgroundColor = color(4, 2);
+                } else if (!state.compare("enlighten")) {
+                    foregroundColor = color(5, 1);
+                    backgroundColor = color(5, 2);
+                } else if (!state.compare("burned")) {
+                    foregroundColor = color(6, 1);
+                    backgroundColor = color(6, 2);
+                } else {
+                    foregroundColor = color(1, 1);
+                    backgroundColor = color(1, 2);
+                }
+
+                painter.setPen(foregroundColor);
+
+                QPainterPath path;
+
+                path.addRoundedRect(QRectF(x, y-charHeight+descent, charWidth, charHeight),
+                                    radius, radius);
+
+                painter.fillPath(path, QColor(backgroundColor));
+                painter.drawText(x, y, Kanji.at(i));
+
+                x += charWidth+SmallShift;
+
+                ++j;
             }
         }
 
@@ -633,7 +626,7 @@ void Widget::on_fontComboBox_currentTextChanged(const QString &pFontName)
 {
     Q_UNUSED(pFontName);
 
-    // Force the update our wallpaper
+    // Force the update of our wallpaper
 
     if (!mInitializing)
         updateWallpaper(true);
@@ -643,7 +636,7 @@ void Widget::on_fontComboBox_currentTextChanged(const QString &pFontName)
 
 void Widget::on_boldFontCheckBox_clicked()
 {
-    // Force the update our wallpaper
+    // Force the update of our wallpaper
 
     if (!mInitializing)
         updateWallpaper(true);
@@ -653,7 +646,7 @@ void Widget::on_boldFontCheckBox_clicked()
 
 void Widget::on_italicsFontCheckBox_clicked()
 {
-    // Force the update our wallpaper
+    // Force the update of our wallpaper
 
     if (!mInitializing)
         updateWallpaper(true);

@@ -73,7 +73,6 @@ private:
 
     QMap<QPushButton *, QRgb> mColors;
 
-    bool mKanjiError;
     QMap<QString, QString> mKanjiState;
     QMap<QString, QString> mOldKanjiState;
 
