@@ -263,6 +263,11 @@ void Widget::updateSrsDistributionInformation(QLabel *pLabel,
 
     pLabel->setText("<img src=\""+iconDataUri(pIcon, 32, 32)+"\"><br/>"+pInformation.total());
     pLabel->setToolTip("<table>\n"
+                       "    <thead>\n"
+                       "        <tr>\n"
+                       "            <td colspan=2 align=center><strong>"+pInformation.name()+"</strong></td>\n"
+                       "        </tr>\n"
+                       "    </thead>\n"
                        "    <tr>\n"
                        "        <td>Radicals:</td>\n"
                        "        <td align=right>"+pInformation.radicals()+"</td>\n"

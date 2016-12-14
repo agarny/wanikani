@@ -38,12 +38,14 @@ class SrsDistributionInformation
 public:
     explicit SrsDistributionInformation();
 
+    QString name() const;
     QString radicals() const;
     QString kanji() const;
     QString vocabulary() const;
     QString total() const;
 
 private:
+    QString mName;
     QString mRadicals;
     QString mKanji;
     QString mVocabulary;
@@ -103,7 +105,8 @@ private:
 
     QJsonDocument waniKaniRequest(const QString &pRequest);
 
-    void updateSrsDistribution(const QVariantMap &pVariantMap,
+    void updateSrsDistribution(const QString &pName,
+                               const QVariantMap &pVariantMap,
                                SrsDistributionInformation &pSrsDistributionInformation);
 
 signals:

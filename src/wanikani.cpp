@@ -33,11 +33,21 @@ limitations under the License.
 //==============================================================================
 
 SrsDistributionInformation::SrsDistributionInformation() :
+    mName(QString()),
     mRadicals(QString()),
     mKanji(QString()),
     mVocabulary(QString()),
     mTotal(QString())
 {
+}
+
+//==============================================================================
+
+QString SrsDistributionInformation::name() const
+{
+    // Return our name
+
+    return mName;
 }
 
 //==============================================================================
@@ -235,11 +245,11 @@ void WaniKani::update()
 
         QVariantMap srsDistributionMap = jsonDocument.object().toVariantMap()["requested_information"].toMap();
 
-        updateSrsDistribution(srsDistributionMap["apprentice"].toMap(), mSrsDistribution.mApprentice);
-        updateSrsDistribution(srsDistributionMap["guru"].toMap(), mSrsDistribution.mGuru);
-        updateSrsDistribution(srsDistributionMap["master"].toMap(), mSrsDistribution.mMaster);
-        updateSrsDistribution(srsDistributionMap["enlighten"].toMap(), mSrsDistribution.mEnlightened);
-        updateSrsDistribution(srsDistributionMap["burned"].toMap(), mSrsDistribution.mBurned);
+        updateSrsDistribution("Apprentice", srsDistributionMap["apprentice"].toMap(), mSrsDistribution.mApprentice);
+        updateSrsDistribution("Guru", srsDistributionMap["guru"].toMap(), mSrsDistribution.mGuru);
+        updateSrsDistribution("Master", srsDistributionMap["master"].toMap(), mSrsDistribution.mMaster);
+        updateSrsDistribution("Enlightened", srsDistributionMap["enlighten"].toMap(), mSrsDistribution.mEnlightened);
+        updateSrsDistribution("Burned", srsDistributionMap["burned"].toMap(), mSrsDistribution.mBurned);
 
         // Let people know that we have been updated
 
@@ -253,11 +263,13 @@ void WaniKani::update()
 
 //==============================================================================
 
-void WaniKani::updateSrsDistribution(const QVariantMap &pVariantMap,
+void WaniKani::updateSrsDistribution(const QString &pName,
+                                     const QVariantMap &pVariantMap,
                                      SrsDistributionInformation &pSrsDistributionInformation)
 {
     // Update the given SRS distribution information using the given variant map
 
+    pSrsDistributionInformation.mName = pName;
     pSrsDistributionInformation.mRadicals = pVariantMap["radicals"].toString();
     pSrsDistributionInformation.mKanji = pVariantMap["kanji"].toString();
     pSrsDistributionInformation.mVocabulary = pVariantMap["vocabulary"].toString();
