@@ -420,7 +420,7 @@ WaniKani::WaniKani() :
     mCreationDate(0),
     mVacationDate(0),
     mSrsDistribution(SrsDistribution()),
-    mKanjiList(KanjiList())
+    mKanjis(Kanjis())
 {
 }
 
@@ -570,7 +570,7 @@ void WaniKani::update()
                 kanji.mUserSpecific.mUserSynonyms = kanjiUserSpecificInformationMap["user_synonyms"].toString();
                 kanji.mUserSpecific.mReadingNote = kanjiUserSpecificInformationMap["reading_note"].toString();
 
-                mKanjiList << kanji;
+                mKanjis << kanji;
             }
 
             // Let people know that we have been updated
@@ -713,11 +713,11 @@ SrsDistribution WaniKani::srsDistribution() const
 
 //==============================================================================
 
-KanjiList WaniKani::kanjiList() const
+Kanjis WaniKani::kanjis() const
 {
     // Return our list of Kanji
 
-    return mKanjiList;
+    return mKanjis;
 }
 
 //==============================================================================

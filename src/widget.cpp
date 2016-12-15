@@ -782,7 +782,7 @@ void Widget::waniKaniUpdated()
     mCurrentKanjiState = QMap<QChar, QString>();
     mAllKanjiState = QMap<QChar, QString>();
 
-    foreach (const Kanji &kanji, mWaniKani.kanjiList()) {
+    foreach (const Kanji &kanji, mWaniKani.kanjis()) {
         if (kanji.level() == mWaniKani.level()) {
             if (kanji.userSpecific().srsNumeric() >= 5)
                 ++kanjiProgress;

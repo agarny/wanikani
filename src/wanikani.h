@@ -154,7 +154,7 @@ private:
 
 //==============================================================================
 
-typedef QList<Kanji> KanjiList;
+typedef QList<Kanji> Kanjis;
 
 //==============================================================================
 
@@ -180,7 +180,7 @@ public:
     int vacationDate() const;
 
     SrsDistribution srsDistribution() const;
-    KanjiList kanjiList() const;
+    Kanjis kanjis() const;
 
 private:
     QString mApiKey;
@@ -198,7 +198,7 @@ private:
     int mVacationDate;
 
     SrsDistribution mSrsDistribution;
-    KanjiList mKanjiList;
+    Kanjis mKanjis;
 
     QJsonDocument waniKaniRequest(const QString &pRequest);
 
