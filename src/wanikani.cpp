@@ -461,6 +461,7 @@ WaniKani::WaniKani() :
     mCreationDate(0),
     mVacationDate(0),
     mSrsDistribution(SrsDistribution()),
+    mRadicals(Radicals()),
     mKanjis(Kanjis())
 {
 }
@@ -517,90 +518,123 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
 
 void WaniKani::update()
 {
-    // Retrieve the user's information and his/her SRS distribution
+    // Retrieve
+    //  - the user's information and his/her SRS distribution
+    //  - the user's list of Kanji (and their information)
 
     QJsonDocument srsDistributionResponse = waniKaniRequest("srs-distribution");
+    QJsonDocument radicalsResponse = (   srsDistributionResponse.isNull()
+                                      || srsDistributionResponse.object().contains("error"))?
+                                         QJsonDocument():
+                                         waniKaniRequest("radicals/1,2,3,4,5,6,7,8,9,0,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
+    QJsonDocument kanjiResponse = (   radicalsResponse.isNull()
+                                   || radicalsResponse.object().contains("error"))?
+                                      QJsonDocument():
+                                      waniKaniRequest("kanji/1,2,3,4,5,6,7,8,9,0,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
 
-    if (   !srsDistributionResponse.isNull()
-        && !srsDistributionResponse.object().contains("error")) {
-        // Retrieve the user's list of Kanji (and their information)
+    if (   !kanjiResponse.isNull()
+        && !kanjiResponse.object().contains("error")) {
+        // Retrieve some of the user's information
 
-        QJsonDocument kanjiResponse = waniKaniRequest("kanji/1,2,3,4,5,6,7,8,9,0,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
+        QVariantMap userInformationMap = srsDistributionResponse.object().toVariantMap()["user_information"].toMap();
 
-        if (   !kanjiResponse.isNull()
-            && !kanjiResponse.object().contains("error")) {
-            // Retrieve some of the user's information
+        mUserName = userInformationMap["username"].toString();
+        mGravatar = userInformationMap["gravatar"].toString();
+        mLevel = userInformationMap["level"].toInt();
+        mTitle = userInformationMap["title"].toString();
+        mAbout = userInformationMap["about"].toString();
+        mWebsite = userInformationMap["website"].toString();
+        mTwitter = userInformationMap["twitter"].toString();
+        mTopicsCount = userInformationMap["topics_count"].toInt();
+        mPostsCount = userInformationMap["posts_count"].toInt();
+        mCreationDate = userInformationMap["creation_date"].toInt();
+        mVacationDate = userInformationMap["vacation_date"].toInt();
 
-            QVariantMap userInformationMap = srsDistributionResponse.object().toVariantMap()["user_information"].toMap();
+        // Retrieve the user's SRS distribution
 
-            mUserName = userInformationMap["username"].toString();
-            mGravatar = userInformationMap["gravatar"].toString();
-            mLevel = userInformationMap["level"].toInt();
-            mTitle = userInformationMap["title"].toString();
-            mAbout = userInformationMap["about"].toString();
-            mWebsite = userInformationMap["website"].toString();
-            mTwitter = userInformationMap["twitter"].toString();
-            mTopicsCount = userInformationMap["topics_count"].toInt();
-            mPostsCount = userInformationMap["posts_count"].toInt();
-            mCreationDate = userInformationMap["creation_date"].toInt();
-            mVacationDate = userInformationMap["vacation_date"].toInt();
+        QVariantMap srsDistributionMap = srsDistributionResponse.object().toVariantMap()["requested_information"].toMap();
 
-            // Retrieve the user's SRS distribution
+        updateSrsDistribution("Apprentice", srsDistributionMap["apprentice"].toMap(), mSrsDistribution.mApprentice);
+        updateSrsDistribution("Guru", srsDistributionMap["guru"].toMap(), mSrsDistribution.mGuru);
+        updateSrsDistribution("Master", srsDistributionMap["master"].toMap(), mSrsDistribution.mMaster);
+        updateSrsDistribution("Enlightened", srsDistributionMap["enlighten"].toMap(), mSrsDistribution.mEnlightened);
+        updateSrsDistribution("Burned", srsDistributionMap["burned"].toMap(), mSrsDistribution.mBurned);
 
-            QVariantMap srsDistributionMap = srsDistributionResponse.object().toVariantMap()["requested_information"].toMap();
+        // Retrieve the radicals and their information
 
-            updateSrsDistribution("Apprentice", srsDistributionMap["apprentice"].toMap(), mSrsDistribution.mApprentice);
-            updateSrsDistribution("Guru", srsDistributionMap["guru"].toMap(), mSrsDistribution.mGuru);
-            updateSrsDistribution("Master", srsDistributionMap["master"].toMap(), mSrsDistribution.mMaster);
-            updateSrsDistribution("Enlightened", srsDistributionMap["enlighten"].toMap(), mSrsDistribution.mEnlightened);
-            updateSrsDistribution("Burned", srsDistributionMap["burned"].toMap(), mSrsDistribution.mBurned);
+        foreach (const QVariant &radicalInformation,
+                 radicalsResponse.object().toVariantMap()["requested_information"].toList()) {
+            QVariantMap radicalInformationMap = radicalInformation.toMap();
+            Radical radical;
 
-            // Retrieve the Kanji and their information
+            radical.mCharacter = radicalInformationMap["character"].toString()[0];
+            radical.mMeaning = radicalInformationMap["meaning"].toString();
+            radical.mImage = radicalInformationMap["image"].toString();
+            radical.mLevel = radicalInformationMap["level"].toInt();
 
-            foreach (const QVariant &kanjiInformation,
-                     kanjiResponse.object().toVariantMap()["requested_information"].toList()) {
-                QVariantMap kanjiInformationMap = kanjiInformation.toMap();
-                Kanji kanji;
+            QVariantMap radicalUserSpecificInformationMap = radicalInformationMap["user_specific"].toMap();
 
-                kanji.mCharacter = kanjiInformationMap["character"].toString()[0];
-                kanji.mMeaning = kanjiInformationMap["meaning"].toString();
-                kanji.mOnyomi = kanjiInformationMap["onyomi"].toString();
-                kanji.mKunyomi = kanjiInformationMap["kunyomi"].toString();
-                kanji.mNanori = kanjiInformationMap["nanori"].toString();
-                kanji.mImportantReading = kanjiInformationMap["important_reading"].toString();
-                kanji.mLevel = kanjiInformationMap["level"].toInt();
+            radical.mUserSpecific.mSrs = radicalUserSpecificInformationMap["srs"].toString();
+            radical.mUserSpecific.mSrsNumeric = radicalUserSpecificInformationMap["srs_numeric"].toInt();
+            radical.mUserSpecific.mUnlockedDate = radicalUserSpecificInformationMap["unlocked_date"].toInt();
+            radical.mUserSpecific.mAvailableDate = radicalUserSpecificInformationMap["available_date"].toInt();
+            radical.mUserSpecific.mBurned = radicalUserSpecificInformationMap["burned"].toBool();
+            radical.mUserSpecific.mBurnedDate = radicalUserSpecificInformationMap["burned_date"].toInt();
+            radical.mUserSpecific.mMeaningCorrect = radicalUserSpecificInformationMap["meaning_correct"].toInt();
+            radical.mUserSpecific.mMeaningIncorrect = radicalUserSpecificInformationMap["meaning_incorrect"].toInt();
+            radical.mUserSpecific.mMeaningMaxStreak = radicalUserSpecificInformationMap["meaning_max_streak"].toInt();
+            radical.mUserSpecific.mMeaningCurrentStreak = radicalUserSpecificInformationMap["meaning_current_streak"].toInt();
+            radical.mUserSpecific.mReadingCorrect = radicalUserSpecificInformationMap["reading_correct"].toInt();
+            radical.mUserSpecific.mReadingIncorrect = radicalUserSpecificInformationMap["reading_incorrect"].toInt();
+            radical.mUserSpecific.mReadingMaxStreak = radicalUserSpecificInformationMap["reading_max_streak"].toInt();
+            radical.mUserSpecific.mReadingCurrentStreak = radicalUserSpecificInformationMap["reading_current_streak"].toInt();
+            radical.mUserSpecific.mMeaningNote = radicalUserSpecificInformationMap["meaning_note"].toString();
+            radical.mUserSpecific.mUserSynonyms = radicalUserSpecificInformationMap["user_synonyms"].toString();
 
-                QVariantMap kanjiUserSpecificInformationMap = kanjiInformationMap["user_specific"].toMap();
-
-                kanji.mUserSpecific.mSrs = kanjiUserSpecificInformationMap["srs"].toString();
-                kanji.mUserSpecific.mSrsNumeric = kanjiUserSpecificInformationMap["srs_numeric"].toInt();
-                kanji.mUserSpecific.mUnlockedDate = kanjiUserSpecificInformationMap["unlocked_date"].toInt();
-                kanji.mUserSpecific.mAvailableDate = kanjiUserSpecificInformationMap["available_date"].toInt();
-                kanji.mUserSpecific.mBurned = kanjiUserSpecificInformationMap["burned"].toBool();
-                kanji.mUserSpecific.mBurnedDate = kanjiUserSpecificInformationMap["burned_date"].toInt();
-                kanji.mUserSpecific.mMeaningCorrect = kanjiUserSpecificInformationMap["meaning_correct"].toInt();
-                kanji.mUserSpecific.mMeaningIncorrect = kanjiUserSpecificInformationMap["meaning_incorrect"].toInt();
-                kanji.mUserSpecific.mMeaningMaxStreak = kanjiUserSpecificInformationMap["meaning_max_streak"].toInt();
-                kanji.mUserSpecific.mMeaningCurrentStreak = kanjiUserSpecificInformationMap["meaning_current_streak"].toInt();
-                kanji.mUserSpecific.mReadingCorrect = kanjiUserSpecificInformationMap["reading_correct"].toInt();
-                kanji.mUserSpecific.mReadingIncorrect = kanjiUserSpecificInformationMap["reading_incorrect"].toInt();
-                kanji.mUserSpecific.mReadingMaxStreak = kanjiUserSpecificInformationMap["reading_max_streak"].toInt();
-                kanji.mUserSpecific.mReadingCurrentStreak = kanjiUserSpecificInformationMap["reading_current_streak"].toInt();
-                kanji.mUserSpecific.mMeaningNote = kanjiUserSpecificInformationMap["meaning_note"].toString();
-                kanji.mUserSpecific.mUserSynonyms = kanjiUserSpecificInformationMap["user_synonyms"].toString();
-                kanji.mUserSpecific.mReadingNote = kanjiUserSpecificInformationMap["reading_note"].toString();
-
-                mKanjis << kanji;
-            }
-
-            // Let people know that we have been updated
-
-            emit updated();
-        } else {
-            // Let people know that something went wrong
-
-            emit error();
+            mRadicals << radical;
         }
+
+        // Retrieve the Kanji and their information
+
+        foreach (const QVariant &kanjiInformation,
+                 kanjiResponse.object().toVariantMap()["requested_information"].toList()) {
+            QVariantMap kanjiInformationMap = kanjiInformation.toMap();
+            Kanji kanji;
+
+            kanji.mCharacter = kanjiInformationMap["character"].toString()[0];
+            kanji.mMeaning = kanjiInformationMap["meaning"].toString();
+            kanji.mOnyomi = kanjiInformationMap["onyomi"].toString();
+            kanji.mKunyomi = kanjiInformationMap["kunyomi"].toString();
+            kanji.mNanori = kanjiInformationMap["nanori"].toString();
+            kanji.mImportantReading = kanjiInformationMap["important_reading"].toString();
+            kanji.mLevel = kanjiInformationMap["level"].toInt();
+
+            QVariantMap kanjiUserSpecificInformationMap = kanjiInformationMap["user_specific"].toMap();
+
+            kanji.mUserSpecific.mSrs = kanjiUserSpecificInformationMap["srs"].toString();
+            kanji.mUserSpecific.mSrsNumeric = kanjiUserSpecificInformationMap["srs_numeric"].toInt();
+            kanji.mUserSpecific.mUnlockedDate = kanjiUserSpecificInformationMap["unlocked_date"].toInt();
+            kanji.mUserSpecific.mAvailableDate = kanjiUserSpecificInformationMap["available_date"].toInt();
+            kanji.mUserSpecific.mBurned = kanjiUserSpecificInformationMap["burned"].toBool();
+            kanji.mUserSpecific.mBurnedDate = kanjiUserSpecificInformationMap["burned_date"].toInt();
+            kanji.mUserSpecific.mMeaningCorrect = kanjiUserSpecificInformationMap["meaning_correct"].toInt();
+            kanji.mUserSpecific.mMeaningIncorrect = kanjiUserSpecificInformationMap["meaning_incorrect"].toInt();
+            kanji.mUserSpecific.mMeaningMaxStreak = kanjiUserSpecificInformationMap["meaning_max_streak"].toInt();
+            kanji.mUserSpecific.mMeaningCurrentStreak = kanjiUserSpecificInformationMap["meaning_current_streak"].toInt();
+            kanji.mUserSpecific.mReadingCorrect = kanjiUserSpecificInformationMap["reading_correct"].toInt();
+            kanji.mUserSpecific.mReadingIncorrect = kanjiUserSpecificInformationMap["reading_incorrect"].toInt();
+            kanji.mUserSpecific.mReadingMaxStreak = kanjiUserSpecificInformationMap["reading_max_streak"].toInt();
+            kanji.mUserSpecific.mReadingCurrentStreak = kanjiUserSpecificInformationMap["reading_current_streak"].toInt();
+            kanji.mUserSpecific.mMeaningNote = kanjiUserSpecificInformationMap["meaning_note"].toString();
+            kanji.mUserSpecific.mUserSynonyms = kanjiUserSpecificInformationMap["user_synonyms"].toString();
+            kanji.mUserSpecific.mReadingNote = kanjiUserSpecificInformationMap["reading_note"].toString();
+
+            mKanjis << kanji;
+        }
+
+        // Let people know that we have been updated
+
+        emit updated();
     } else {
         // Let people know that something went wrong
 
@@ -729,6 +763,15 @@ SrsDistribution WaniKani::srsDistribution() const
     // Return our SRS distribution
 
     return mSrsDistribution;
+}
+
+//==============================================================================
+
+Radicals WaniKani::radicals() const
+{
+    // Return our list of radicals
+
+    return mRadicals;
 }
 
 //==============================================================================

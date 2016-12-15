@@ -159,6 +159,10 @@ private:
 
 //==============================================================================
 
+typedef QList<Radical> Radicals;
+
+//==============================================================================
+
 class KanjiUserSpecific : public UserSpecific
 {
     friend class WaniKani;
@@ -223,6 +227,7 @@ public:
     int vacationDate() const;
 
     SrsDistribution srsDistribution() const;
+    Radicals radicals() const;
     Kanjis kanjis() const;
 
 private:
@@ -241,6 +246,7 @@ private:
     int mVacationDate;
 
     SrsDistribution mSrsDistribution;
+    Radicals mRadicals;
     Kanjis mKanjis;
 
     QJsonDocument waniKaniRequest(const QString &pRequest);
