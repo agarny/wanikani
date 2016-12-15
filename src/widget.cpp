@@ -135,10 +135,6 @@ Widget::Widget() :
 
     retrieveSettings();
 
-    // Initialise our WaniKani object
-
-    mWaniKani.update();
-
     // Use our timer to update our WaniKani object
 
     connect(&mTimer, SIGNAL(timeout()),
