@@ -79,8 +79,9 @@ Widget::Widget() :
     mInitializing(true),
     mFileName(QString()),
     mColors(QMap<QPushButton *, QRgb>()),
-    mKanjiState(QMap<QString, QString>()),
-    mOldKanjiState(QMap<QString, QString>()),
+    mCurrentKanjiState(QMap<QChar, QString>()),
+    mAllKanjiState(QMap<QChar, QString>()),
+    mOldKanjiState(QMap<QChar, QString>()),
     mNeedToCheckWallpaper(true)
 {
     // Set up our GUI
@@ -134,17 +135,14 @@ Widget::Widget() :
 
     retrieveSettings();
 
-    // Retrieve some initial information about the user's kanji
+    // Initialise our WaniKani object
 
-    updateKanji();
+    mWaniKani.update();
 
-    // Use our timer to update our WaniKani object, as well as retrieve the
-    // kanji and set our wallpaper
+    // Use our timer to update our WaniKani object
 
     connect(&mTimer, SIGNAL(timeout()),
             &mWaniKani, SLOT(update()));
-    connect(&mTimer, SIGNAL(timeout()),
-            this, SLOT(updateKanji()));
 
     updateInterval(mGui->intervalSpinBox->value());
 
@@ -248,7 +246,7 @@ void Widget::retrieveSettings(const bool &pResetSettings)
 
         updateSrsDistributionPalettes();
 
-        updateKanji(true);
+        updateWallpaper(true);
     }
 }
 
@@ -395,7 +393,7 @@ QJsonDocument Widget::waniKaniRequest(const QString &pRequest)
 
 //==============================================================================
 
-static const QString Kanji =
+static const QString KanjiTable =
 "一二三四五六七八九十口日月田目古吾冒朋明唱晶品呂昌早旭世胃旦胆亘凹凸旧自白百中千舌升昇丸寸専博"
 "占上下卓朝只貝貞員見児元頁頑凡負万句肌旬勺的首乙乱直具真工左右有賄貢項刀刃切召昭則副別丁町可頂"
 "子孔了女好如母貫兄克小少大多夕汐外名石肖硝砕砂削光太器臭妙省厚奇川州順水氷永泉原願泳沼沖江汁潮"
@@ -444,53 +442,18 @@ static const QString Kanji =
 
 //==============================================================================
 
-void Widget::updateKanji(const bool &pForceUpdate)
-{
-    // Reset some internal properties
-
-    mKanjiState = QMap<QString, QString>();
-
-    if (pForceUpdate)
-        mOldKanjiState = QMap<QString, QString>();
-
-    // Retrieve the list of Kanji (and their state) the user has already studied
-
-    QString request = "kanji";
-
-    if (!mGui->currentKanjiRadioButton->isChecked()) {
-        request += "/1";
-
-        for (int i = 2; i <= 60; ++i)
-            request += ","+QString::number(i);
-    }
-
-    QJsonDocument json = waniKaniRequest(request);
-
-    if (!json.isNull() && !json.object().contains("error")) {
-        QVariantMap requestedInformationMap;
-
-        foreach (const QVariant &requestedInformation,
-                 json.object().toVariantMap()["requested_information"].toList()) {
-            requestedInformationMap = requestedInformation.toMap();
-
-            mKanjiState.insert(requestedInformationMap["character"].toString(),
-                               requestedInformationMap["stats"].toMap()["srs"].toString());
-        }
-    }
-
-    // Update our wallpaper
-
-    updateWallpaper();
-}
-
-//==============================================================================
-
 void Widget::updateWallpaper(const bool &pForceUpdate)
 {
     // Generate and set the wallpaper, if needed
 
-    if (   !mKanjiState.isEmpty()
-        &&  (pForceUpdate || (mKanjiState != mOldKanjiState))) {
+    QMap<QChar, QString> kanjiState = mGui->currentKanjiRadioButton->isChecked()?mCurrentKanjiState:mAllKanjiState;
+
+    if (   !kanjiState.isEmpty()
+        &&  (pForceUpdate || (kanjiState != mOldKanjiState))) {
+        // Keep track our needed Kanji
+
+        mOldKanjiState = kanjiState;
+
         // Default wallpaper
 
         QPixmap pixmap;
@@ -526,11 +489,11 @@ void Widget::updateWallpaper(const bool &pForceUpdate)
             font.setPixelSize(fontPixelSize);
 
             QFontMetrics fontMetrics(font);
-            int crtCharWidth = fontMetrics.width(Kanji.at(0));
+            int crtCharWidth = fontMetrics.width(KanjiTable.at(0));
             int crtCharHeight = fontMetrics.height();
             int crtNbOfCols = areaWidth/(crtCharWidth+SmallShift);
-            int crtNbOfRows =  floor(mKanjiState.size()/crtNbOfCols)
-                              +((mKanjiState.size() % crtNbOfCols)?1:0);
+            int crtNbOfRows =  floor(kanjiState.size()/crtNbOfCols)
+                              +((kanjiState.size() % crtNbOfCols)?1:0);
 
             if (crtNbOfRows*crtCharHeight+(crtNbOfRows-1)*SmallShift+fontMetrics.descent() <= areaHeight) {
                 charWidth = crtCharWidth;
@@ -559,14 +522,14 @@ void Widget::updateWallpaper(const bool &pForceUpdate)
                 +Shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*SmallShift) >> 1)-descent;
         int radius = ceil(0.75*(qMax(charWidth, charHeight) >> 3));
 
-        for (int i = 0, j = 0, iMax = Kanji.size(); i < iMax; ++i) {
-            if (mKanjiState.keys().contains(Kanji.at(i))) {
+        for (int i = 0, j = 0, iMax = KanjiTable.size(); i < iMax; ++i) {
+            if (kanjiState.keys().contains(KanjiTable.at(i))) {
                 if (!(j % nbOfCols)) {
                     x = xStart;
                     y += charHeight+(j?SmallShift:0);
                 }
 
-                QString state = mKanjiState.value(Kanji.at(i));
+                QString state = kanjiState.value(KanjiTable.at(i));
                 QColor foregroundColor;
                 QColor backgroundColor;
 
@@ -598,7 +561,7 @@ void Widget::updateWallpaper(const bool &pForceUpdate)
                                     radius, radius);
 
                 painter.fillPath(path, QColor(backgroundColor));
-                painter.drawText(x, y, Kanji.at(i));
+                painter.drawText(x, y, KanjiTable.at(i));
 
                 x += charWidth+SmallShift;
 
@@ -672,11 +635,9 @@ QColor Widget::color(const int &pRow, const int &pColumn) const
 
 void Widget::on_apiKeyValue_returnPressed()
 {
-    // Update our user's information and Kanji (and therefore our wallpaper)
+    // Set our WaniKani API key
 
     mWaniKani.setApiKey(mGui->apiKeyValue->text());
-
-    updateKanji(true);
 }
 
 //==============================================================================
@@ -693,12 +654,9 @@ void Widget::on_intervalSpinBox_valueChanged(int pInterval)
 
 void Widget::on_forceUpdateButton_clicked()
 {
-    // Update our WaniKani object, as well as our kanji (resulting in our
-    // wallpaper being updated too)
+    // Update our WaniKani object
 
     mWaniKani.update();
-
-    updateKanji(true);
 }
 
 //==============================================================================
@@ -816,6 +774,23 @@ void Widget::waniKaniUpdated()
     mGui->masterValue->show();
     mGui->enlightenedValue->show();
     mGui->burnedValue->show();
+
+    // Retrieve the Kanji from our WaniKani object, so that we can generate our
+    // wallpaper
+
+    mCurrentKanjiState = QMap<QChar, QString>();
+    mAllKanjiState = QMap<QChar, QString>();
+
+    foreach (const Kanji &kanji, mWaniKani.kanjiList()) {
+        if (kanji.level() <= mWaniKani.level())
+            mCurrentKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
+
+        mAllKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
+    }
+
+    // Update our wallpaper
+
+    updateWallpaper();
 }
 
 //==============================================================================
@@ -902,7 +877,7 @@ void Widget::updateLevels()
     // Update the levels to display
 
     if (!mInitializing)
-        updateKanji(true);
+        updateWallpaper(true);
 }
 
 //==============================================================================

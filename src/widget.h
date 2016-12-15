@@ -73,8 +73,9 @@ private:
 
     QMap<QPushButton *, QRgb> mColors;
 
-    QMap<QString, QString> mKanjiState;
-    QMap<QString, QString> mOldKanjiState;
+    QMap<QChar, QString> mCurrentKanjiState;
+    QMap<QChar, QString> mAllKanjiState;
+    QMap<QChar, QString> mOldKanjiState;
 
     bool mNeedToCheckWallpaper;
 
@@ -124,8 +125,6 @@ private slots:
     void updateLevels();
 
     void updatePushButtonColor();
-
-    void updateKanji(const bool &pForceUpdate = false);
 
     void checkWallpaper();
 };

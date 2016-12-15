@@ -542,7 +542,7 @@ void WaniKani::update()
                 QVariantMap kanjiInformationMap = kanjiInformation.toMap();
                 Kanji kanji;
 
-                kanji.mCharacter = kanjiInformationMap["character"].toChar();
+                kanji.mCharacter = kanjiInformationMap["character"].toString()[0];
                 kanji.mMeaning = kanjiInformationMap["meaning"].toString();
                 kanji.mOnyomi = kanjiInformationMap["onyomi"].toString();
                 kanji.mKunyomi = kanjiInformationMap["kunyomi"].toString();

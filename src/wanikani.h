@@ -25,9 +25,9 @@ limitations under the License.
 //==============================================================================
 
 #include <QJsonDocument>
+#include <QList>
 #include <QObject>
 #include <QPixmap>
-#include <QList>
 #include <QString>
 
 //==============================================================================
