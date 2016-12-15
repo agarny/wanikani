@@ -179,6 +179,32 @@
               </item>
              </layout>
             </item>
+            <item>
+             <widget class="QProgressBar" name="currentRadicalsValue">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>8</height>
+               </size>
+              </property>
+              <property name="value">
+               <number>24</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QProgressBar" name="currentKanjiValue">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>8</height>
+               </size>
+              </property>
+              <property name="value">
+               <number>24</number>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>

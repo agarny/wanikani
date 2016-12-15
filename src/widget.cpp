@@ -776,15 +776,30 @@ void Widget::waniKaniUpdated()
     // Retrieve the Kanji from our WaniKani object, so that we can generate our
     // wallpaper
 
+    int kanjiProgress = 0;
+    int kanjiTotal = 0;
+
     mCurrentKanjiState = QMap<QChar, QString>();
     mAllKanjiState = QMap<QChar, QString>();
 
     foreach (const Kanji &kanji, mWaniKani.kanjiList()) {
+        if (kanji.level() == mWaniKani.level()) {
+            if (kanji.userSpecific().srsNumeric() >= 5)
+                ++kanjiProgress;
+
+            ++kanjiTotal;
+        }
+
         if (kanji.level() <= mWaniKani.level())
             mCurrentKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
 
         mAllKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
     }
+
+    int currentKanjiValue = 100*kanjiProgress/kanjiTotal;
+
+    mGui->currentKanjiValue->setValue(currentKanjiValue);
+    mGui->currentKanjiValue->setToolTip(QString("Kanji Progression: %1%").arg(currentKanjiValue));
 
     // Update our wallpaper
 
