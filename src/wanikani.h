@@ -142,6 +142,23 @@ private:
 
 //==============================================================================
 
+class Radical : public Item
+{
+    friend class WaniKani;
+
+public:
+    explicit Radical();
+
+    QString image() const;
+    UserSpecific userSpecific() const;
+
+private:
+    QString mImage;
+    UserSpecific mUserSpecific;
+};
+
+//==============================================================================
+
 class KanjiUserSpecific : public UserSpecific
 {
     friend class WaniKani;

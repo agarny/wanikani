@@ -346,6 +346,33 @@ QString UserSpecific::userSynonyms() const
 
 //==============================================================================
 
+Radical::Radical() :
+    Item(),
+    mImage(QString()),
+    mUserSpecific(UserSpecific())
+{
+}
+
+//==============================================================================
+
+QString Radical::image() const
+{
+    // Return our image
+
+    return mImage;
+}
+
+//==============================================================================
+
+UserSpecific Radical::userSpecific() const
+{
+    // Return our user specific information
+
+    return mUserSpecific;
+}
+
+//==============================================================================
+
 KanjiUserSpecific::KanjiUserSpecific() :
     UserSpecific(),
     mReadingNote(QString())
