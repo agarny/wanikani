@@ -144,7 +144,43 @@ SrsDistributionInformation SrsDistribution::burned() const
 
 //==============================================================================
 
-KanjiUserSpecific::KanjiUserSpecific() :
+Item::Item() :
+    mCharacter(QChar()),
+    mMeaning(QString()),
+    mLevel(0)
+{
+}
+
+//==============================================================================
+
+QChar Item::character() const
+{
+    // Return our character
+
+    return mCharacter;
+}
+
+//==============================================================================
+
+QString Item::meaning() const
+{
+    // Return our meaning
+
+    return mMeaning;
+}
+
+//==============================================================================
+
+int Item::level() const
+{
+    // Return our level
+
+    return mLevel;
+}
+
+//==============================================================================
+
+UserSpecific::UserSpecific() :
     mSrs(QString()),
     mSrsNumeric(0),
     mUnlockedDate(0),
@@ -167,7 +203,7 @@ KanjiUserSpecific::KanjiUserSpecific() :
 
 //==============================================================================
 
-QString KanjiUserSpecific::srs() const
+QString UserSpecific::srs() const
 {
     // Return our SRS
 
@@ -176,7 +212,7 @@ QString KanjiUserSpecific::srs() const
 
 //==============================================================================
 
-int KanjiUserSpecific::srsNumeric() const
+int UserSpecific::srsNumeric() const
 {
     // Return our SRS numeric
 
@@ -185,7 +221,7 @@ int KanjiUserSpecific::srsNumeric() const
 
 //==============================================================================
 
-int KanjiUserSpecific::unlockedDate() const
+int UserSpecific::unlockedDate() const
 {
     // Return our unlocked date
 
@@ -194,7 +230,7 @@ int KanjiUserSpecific::unlockedDate() const
 
 //==============================================================================
 
-int KanjiUserSpecific::availableDate() const
+int UserSpecific::availableDate() const
 {
     // Return our available date
 
@@ -203,7 +239,7 @@ int KanjiUserSpecific::availableDate() const
 
 //==============================================================================
 
-bool KanjiUserSpecific::burned() const
+bool UserSpecific::burned() const
 {
     // Return whether we are burned
 
@@ -212,7 +248,7 @@ bool KanjiUserSpecific::burned() const
 
 //==============================================================================
 
-int KanjiUserSpecific::burnedDate() const
+int UserSpecific::burnedDate() const
 {
     // Return our burned date
 
@@ -221,7 +257,7 @@ int KanjiUserSpecific::burnedDate() const
 
 //==============================================================================
 
-int KanjiUserSpecific::meaningCorrect() const
+int UserSpecific::meaningCorrect() const
 {
     // Return our number of correct meanings
 
@@ -230,7 +266,7 @@ int KanjiUserSpecific::meaningCorrect() const
 
 //==============================================================================
 
-int KanjiUserSpecific::meaningIncorrect() const
+int UserSpecific::meaningIncorrect() const
 {
     // Return our number of incorrect meanings
 
@@ -239,7 +275,7 @@ int KanjiUserSpecific::meaningIncorrect() const
 
 //==============================================================================
 
-int KanjiUserSpecific::meaningMaxStreak() const
+int UserSpecific::meaningMaxStreak() const
 {
     // Return our maximum streak for the meaning
 
@@ -248,7 +284,7 @@ int KanjiUserSpecific::meaningMaxStreak() const
 
 //==============================================================================
 
-int KanjiUserSpecific::meaningCurrentStreak() const
+int UserSpecific::meaningCurrentStreak() const
 {
     // Return our current streak for the meaning
 
@@ -257,7 +293,7 @@ int KanjiUserSpecific::meaningCurrentStreak() const
 
 //==============================================================================
 
-int KanjiUserSpecific::readingCorrect() const
+int UserSpecific::readingCorrect() const
 {
     // Return our number of correct readings
 
@@ -266,7 +302,7 @@ int KanjiUserSpecific::readingCorrect() const
 
 //==============================================================================
 
-int KanjiUserSpecific::readingIncorrect() const
+int UserSpecific::readingIncorrect() const
 {
     // Return our number of incorrect readings
 
@@ -275,7 +311,7 @@ int KanjiUserSpecific::readingIncorrect() const
 
 //==============================================================================
 
-int KanjiUserSpecific::readingMaxStreak() const
+int UserSpecific::readingMaxStreak() const
 {
     // Return our maximum streak for the reading
 
@@ -284,7 +320,7 @@ int KanjiUserSpecific::readingMaxStreak() const
 
 //==============================================================================
 
-int KanjiUserSpecific::readingCurrentStreak() const
+int UserSpecific::readingCurrentStreak() const
 {
     // Return our current streak for the reading
 
@@ -293,7 +329,7 @@ int KanjiUserSpecific::readingCurrentStreak() const
 
 //==============================================================================
 
-QString KanjiUserSpecific::meaningNote() const
+QString UserSpecific::meaningNote() const
 {
     // Return our meaning note
 
@@ -302,7 +338,7 @@ QString KanjiUserSpecific::meaningNote() const
 
 //==============================================================================
 
-QString KanjiUserSpecific::userSynonyms() const
+QString UserSpecific::userSynonyms() const
 {
     // Return our user synonyms
 
@@ -311,7 +347,7 @@ QString KanjiUserSpecific::userSynonyms() const
 
 //==============================================================================
 
-QString KanjiUserSpecific::readingNote() const
+QString UserSpecific::readingNote() const
 {
     // Return our reading note
 
@@ -321,33 +357,13 @@ QString KanjiUserSpecific::readingNote() const
 //==============================================================================
 
 Kanji::Kanji() :
-    mCharacter(QChar()),
-    mMeaning(QString()),
+    Item(),
     mOnyomi(QString()),
     mKunyomi(QString()),
     mNanori(QString()),
     mImportantReading(QString()),
-    mLevel(0),
-    mUserSpecific(KanjiUserSpecific())
+    mUserSpecific(UserSpecific())
 {
-}
-
-//==============================================================================
-
-QChar Kanji::character() const
-{
-    // Return our character
-
-    return mCharacter;
-}
-
-//==============================================================================
-
-QString Kanji::meaning() const
-{
-    // Return our meaning
-
-    return mMeaning;
 }
 
 //==============================================================================
@@ -388,16 +404,7 @@ QString Kanji::imporantReading() const
 
 //==============================================================================
 
-int Kanji::level() const
-{
-    // Return our level
-
-    return mLevel;
-}
-
-//==============================================================================
-
-KanjiUserSpecific Kanji::userSpecific() const
+UserSpecific Kanji::userSpecific() const
 {
     // Return our user specific information
 

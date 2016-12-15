@@ -78,12 +78,31 @@ private:
 
 //==============================================================================
 
-class KanjiUserSpecific
+class Item
 {
     friend class WaniKani;
 
 public:
-    explicit KanjiUserSpecific();
+    explicit Item();
+
+    QChar character() const;
+    QString meaning() const;
+    int level() const;
+
+private:
+    QChar mCharacter;
+    QString mMeaning;
+    int mLevel;
+};
+
+//==============================================================================
+
+class UserSpecific
+{
+    friend class WaniKani;
+
+public:
+    explicit UserSpecific();
 
     QString srs() const;
     int srsNumeric() const;
@@ -125,31 +144,25 @@ private:
 
 //==============================================================================
 
-class Kanji
+class Kanji : public Item
 {
     friend class WaniKani;
 
 public:
     explicit Kanji();
 
-    QChar character() const;
-    QString meaning() const;
     QString onyomi() const;
     QString kunyomi() const;
     QString nanori() const;
     QString imporantReading() const;
-    int level() const;
-    KanjiUserSpecific userSpecific() const;
+    UserSpecific userSpecific() const;
 
 private:
-    QChar mCharacter;
-    QString mMeaning;
     QString mOnyomi;
     QString mKunyomi;
     QString mNanori;
     QString mImportantReading;
-    int mLevel;
-    KanjiUserSpecific mUserSpecific;
+    UserSpecific mUserSpecific;
 };
 
 //==============================================================================
