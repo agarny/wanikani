@@ -180,6 +180,7 @@ public:
     int vacationDate() const;
 
     SrsDistribution srsDistribution() const;
+    KanjiList kanjiList() const;
 
 private:
     QString mApiKey;
