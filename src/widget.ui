@@ -187,8 +187,8 @@
                 <height>8</height>
                </size>
               </property>
-              <property name="value">
-               <number>24</number>
+              <property name="textVisible">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -200,8 +200,8 @@
                 <height>8</height>
                </size>
               </property>
-              <property name="value">
-               <number>24</number>
+              <property name="textVisible">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
