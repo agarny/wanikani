@@ -750,9 +750,34 @@ void Widget::on_closeToolButton_clicked()
 
 void Widget::waniKaniUpdated()
 {
+    // Retrieve the user's gravatar
+
+    QNetworkAccessManager networkAccessManager;
+    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+mWaniKani.gravatar()));
+    QEventLoop eventLoop;
+
+    QObject::connect(networkReply, SIGNAL(finished()),
+                     &eventLoop, SLOT(quit()));
+
+    eventLoop.exec();
+
+    QByteArray gravatarData = QByteArray();
+
+    if (networkReply->error() == QNetworkReply::NoError)
+        gravatarData = networkReply->readAll();
+
+    networkReply->deleteLater();
+
+    QPixmap gravatar;
+
+    if (gravatarData.isEmpty())
+        gravatar = QPixmap(":/face");
+    else
+        gravatar.loadFromData(gravatarData);
+
     // Update the GUI based on our WaniKani information
 
-    updateGravatar(mWaniKani.gravatar());
+    updateGravatar(gravatar);
     updateSrsDistributionPalettes();
 
     mGui->userInformationValue->setText("<center>"

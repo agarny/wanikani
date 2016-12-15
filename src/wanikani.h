@@ -211,7 +211,7 @@ public:
     void setApiKey(const QString &pApiKey);
 
     QString userName() const;
-    QPixmap gravatar() const;
+    QString gravatar() const;
     int level() const;
     QString title() const;
     QString about() const;
@@ -229,7 +229,7 @@ private:
     QString mApiKey;
 
     QString mUserName;
-    QPixmap mGravatar;
+    QString mGravatar;
     int mLevel;
     QString mTitle;
     QString mAbout;

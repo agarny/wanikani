@@ -450,7 +450,7 @@ KanjiUserSpecific Kanji::userSpecific() const
 WaniKani::WaniKani() :
     mApiKey(QString()),
     mUserName(QString()),
-    mGravatar(QPixmap()),
+    mGravatar(QString()),
     mLevel(0),
     mTitle(QString()),
     mAbout(QString()),
@@ -529,33 +529,12 @@ void WaniKani::update()
 
         if (   !kanjiResponse.isNull()
             && !kanjiResponse.object().contains("error")) {
-            // Retrieve the user's gravatar
-
-            QVariantMap userInformationMap = srsDistributionResponse.object().toVariantMap()["user_information"].toMap();
-            QNetworkAccessManager networkAccessManager;
-            QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+userInformationMap["gravatar"].toString()));
-            QEventLoop eventLoop;
-
-            QObject::connect(networkReply, SIGNAL(finished()),
-                             &eventLoop, SLOT(quit()));
-
-            eventLoop.exec();
-
-            QByteArray gravatarData = QByteArray();
-
-            if (networkReply->error() == QNetworkReply::NoError)
-                gravatarData = networkReply->readAll();
-
-            networkReply->deleteLater();
-
-            if (gravatarData.isEmpty())
-                mGravatar = QPixmap(":/face");
-            else
-                mGravatar.loadFromData(gravatarData);
-
             // Retrieve some of the user's information
 
+            QVariantMap userInformationMap = srsDistributionResponse.object().toVariantMap()["user_information"].toMap();
+
             mUserName = userInformationMap["username"].toString();
+            mGravatar = userInformationMap["gravatar"].toString();
             mLevel = userInformationMap["level"].toInt();
             mTitle = userInformationMap["title"].toString();
             mAbout = userInformationMap["about"].toString();
@@ -655,7 +634,7 @@ QString WaniKani::userName() const
 
 //==============================================================================
 
-QPixmap WaniKani::gravatar() const
+QString WaniKani::gravatar() const
 {
     // Return our gravatar
 
