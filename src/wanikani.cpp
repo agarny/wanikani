@@ -196,8 +196,7 @@ UserSpecific::UserSpecific() :
     mReadingMaxStreak(0),
     mReadingCurrentStreak(0),
     mMeaningNote(QString()),
-    mUserSynonyms(QString()),
-    mReadingNote(QString())
+    mUserSynonyms(QString())
 {
 }
 
@@ -347,7 +346,15 @@ QString UserSpecific::userSynonyms() const
 
 //==============================================================================
 
-QString UserSpecific::readingNote() const
+KanjiUserSpecific::KanjiUserSpecific() :
+    UserSpecific(),
+    mReadingNote(QString())
+{
+}
+
+//==============================================================================
+
+QString KanjiUserSpecific::readingNote() const
 {
     // Return our reading note
 
@@ -362,7 +369,7 @@ Kanji::Kanji() :
     mKunyomi(QString()),
     mNanori(QString()),
     mImportantReading(QString()),
-    mUserSpecific(UserSpecific())
+    mUserSpecific(KanjiUserSpecific())
 {
 }
 
@@ -404,7 +411,7 @@ QString Kanji::imporantReading() const
 
 //==============================================================================
 
-UserSpecific Kanji::userSpecific() const
+KanjiUserSpecific Kanji::userSpecific() const
 {
     // Return our user specific information
 

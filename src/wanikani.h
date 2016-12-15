@@ -120,7 +120,6 @@ public:
     int readingCurrentStreak() const;
     QString meaningNote() const;
     QString userSynonyms() const;
-    QString readingNote() const;
 
 private:
     QString mSrs;
@@ -139,6 +138,20 @@ private:
     int mReadingCurrentStreak;
     QString mMeaningNote;
     QString mUserSynonyms;
+};
+
+//==============================================================================
+
+class KanjiUserSpecific : public UserSpecific
+{
+    friend class WaniKani;
+
+public:
+    explicit KanjiUserSpecific();
+
+    QString readingNote() const;
+
+private:
     QString mReadingNote;
 };
 
@@ -155,14 +168,14 @@ public:
     QString kunyomi() const;
     QString nanori() const;
     QString imporantReading() const;
-    UserSpecific userSpecific() const;
+    KanjiUserSpecific userSpecific() const;
 
 private:
     QString mOnyomi;
     QString mKunyomi;
     QString mNanori;
     QString mImportantReading;
-    UserSpecific mUserSpecific;
+    KanjiUserSpecific mUserSpecific;
 };
 
 //==============================================================================
