@@ -456,7 +456,7 @@ Vocabulary::Vocabulary() :
 
 //==============================================================================
 
-QString Vocabulary::onyomi() const
+QString Vocabulary::kana() const
 {
     // Return our Kana reading
 
@@ -480,7 +480,8 @@ WaniKani::WaniKani() :
     mVacationDate(0),
     mSrsDistribution(SrsDistribution()),
     mRadicals(Radicals()),
-    mKanjis(Kanjis())
+    mKanjis(Kanjis()),
+    mVocabularies(Vocabularies())
 {
 }
 
@@ -540,19 +541,24 @@ void WaniKani::update()
     //  - the user's information and his/her SRS distribution
     //  - the user's list of radicals (and their information)
     //  - the user's list of Kanji (and their information)
+    //  - the user's list of vocabulary (and their information)
 
     QJsonDocument srsDistributionResponse = waniKaniRequest("srs-distribution");
     QJsonDocument radicalsResponse = (   srsDistributionResponse.isNull()
                                       || srsDistributionResponse.object().contains("error"))?
-                                         QJsonDocument():
-                                         waniKaniRequest("radicals/1,2,3,4,5,6,7,8,9,0,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
+                                             QJsonDocument():
+                                             waniKaniRequest("radicals/1,2,3,4,5,6,7,8,9,0,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
     QJsonDocument kanjiResponse = (   radicalsResponse.isNull()
                                    || radicalsResponse.object().contains("error"))?
-                                      QJsonDocument():
-                                      waniKaniRequest("kanji/1,2,3,4,5,6,7,8,9,0,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
+                                          QJsonDocument():
+                                          waniKaniRequest("kanji/1,2,3,4,5,6,7,8,9,0,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
+    QJsonDocument vocabularyResponse = (   kanjiResponse.isNull()
+                                        || kanjiResponse.object().contains("error"))?
+                                               QJsonDocument():
+                                               waniKaniRequest("vocabulary/1,2,3,4,5,6,7,8,9,0,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
 
-    if (   !kanjiResponse.isNull()
-        && !kanjiResponse.object().contains("error")) {
+    if (   !vocabularyResponse.isNull()
+        && !vocabularyResponse.object().contains("error")) {
         // Retrieve some of the user's information
 
         QVariantMap userInformationMap = srsDistributionResponse.object().toVariantMap()["user_information"].toMap();
@@ -649,6 +655,41 @@ void WaniKani::update()
             kanji.mUserSpecific.mReadingNote = kanjiUserSpecificInformationMap["reading_note"].toString();
 
             mKanjis << kanji;
+        }
+
+        // Retrieve the vocabularies and their information
+
+        foreach (const QVariant &vocabularyInformation,
+                 vocabularyResponse.object().toVariantMap()["requested_information"].toList()) {
+            QVariantMap vocabularyInformationMap = vocabularyInformation.toMap();
+            Vocabulary vocabulary;
+
+            vocabulary.mCharacter = vocabularyInformationMap["character"].toString()[0];
+            vocabulary.mKana = vocabularyInformationMap["kana"].toString();
+            vocabulary.mMeaning = vocabularyInformationMap["meaning"].toString();
+            vocabulary.mLevel = vocabularyInformationMap["level"].toInt();
+
+            QVariantMap vocabularyUserSpecificInformationMap = vocabularyInformationMap["user_specific"].toMap();
+
+            vocabulary.mUserSpecific.mSrs = vocabularyUserSpecificInformationMap["srs"].toString();
+            vocabulary.mUserSpecific.mSrsNumeric = vocabularyUserSpecificInformationMap["srs_numeric"].toInt();
+            vocabulary.mUserSpecific.mUnlockedDate = vocabularyUserSpecificInformationMap["unlocked_date"].toInt();
+            vocabulary.mUserSpecific.mAvailableDate = vocabularyUserSpecificInformationMap["available_date"].toInt();
+            vocabulary.mUserSpecific.mBurned = vocabularyUserSpecificInformationMap["burned"].toBool();
+            vocabulary.mUserSpecific.mBurnedDate = vocabularyUserSpecificInformationMap["burned_date"].toInt();
+            vocabulary.mUserSpecific.mMeaningCorrect = vocabularyUserSpecificInformationMap["meaning_correct"].toInt();
+            vocabulary.mUserSpecific.mMeaningIncorrect = vocabularyUserSpecificInformationMap["meaning_incorrect"].toInt();
+            vocabulary.mUserSpecific.mMeaningMaxStreak = vocabularyUserSpecificInformationMap["meaning_max_streak"].toInt();
+            vocabulary.mUserSpecific.mMeaningCurrentStreak = vocabularyUserSpecificInformationMap["meaning_current_streak"].toInt();
+            vocabulary.mUserSpecific.mReadingCorrect = vocabularyUserSpecificInformationMap["reading_correct"].toInt();
+            vocabulary.mUserSpecific.mReadingIncorrect = vocabularyUserSpecificInformationMap["reading_incorrect"].toInt();
+            vocabulary.mUserSpecific.mReadingMaxStreak = vocabularyUserSpecificInformationMap["reading_max_streak"].toInt();
+            vocabulary.mUserSpecific.mReadingCurrentStreak = vocabularyUserSpecificInformationMap["reading_current_streak"].toInt();
+            vocabulary.mUserSpecific.mMeaningNote = vocabularyUserSpecificInformationMap["meaning_note"].toString();
+            vocabulary.mUserSpecific.mUserSynonyms = vocabularyUserSpecificInformationMap["user_synonyms"].toString();
+            vocabulary.mUserSpecific.mReadingNote = vocabularyUserSpecificInformationMap["reading_note"].toString();
+
+            mVocabularies << vocabulary;
         }
 
         // Let people know that we have been updated

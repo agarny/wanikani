@@ -269,6 +269,7 @@ private:
     SrsDistribution mSrsDistribution;
     Radicals mRadicals;
     Kanjis mKanjis;
+    Vocabularies mVocabularies;
 
     QJsonDocument waniKaniRequest(const QString &pRequest);
 
