@@ -46,6 +46,31 @@ class QPushButton;
 
 //==============================================================================
 
+class ProgressBarWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit ProgressBarWidget(QWidget *pParent);
+
+    void setValue(const double &pValue);
+    void setColor(const QRgb &pColor);
+
+protected:
+    virtual void paintEvent(QPaintEvent *pEvent);
+    virtual void resizeEvent(QResizeEvent *pEvent);
+
+private:
+    int mWidth;
+
+    double mOldValue;
+    double mValue;
+
+    QRgb mColor;
+};
+
+//==============================================================================
+
 class Widget : public QWidget
 {
     Q_OBJECT
@@ -78,6 +103,9 @@ private:
     QMap<QChar, QString> mOldKanjiState;
 
     bool mNeedToCheckWallpaper;
+
+    ProgressBarWidget *mCurrentRadicalsValue;
+    ProgressBarWidget *mCurrentKanjiValue;
 
     void retrieveSettings(const bool &pResetSettings = false);
 

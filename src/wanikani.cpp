@@ -520,6 +520,7 @@ void WaniKani::update()
 {
     // Retrieve
     //  - the user's information and his/her SRS distribution
+    //  - the user's list of radicals (and their information)
     //  - the user's list of Kanji (and their information)
 
     QJsonDocument srsDistributionResponse = waniKaniRequest("srs-distribution");

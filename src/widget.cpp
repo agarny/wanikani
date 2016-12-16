@@ -59,6 +59,94 @@ limitations under the License.
 
 //==============================================================================
 
+ProgressBarWidget::ProgressBarWidget(QWidget *pParent) :
+    QWidget(pParent),
+    mWidth(0),
+    mOldValue(0.0),
+    mValue(0.0),
+    mColor(QPalette().highlight().color().rgba())
+{
+    // Minimum and maximum sizes for our progress bar
+
+    setMinimumSize(QSize(6, 6));
+    setMaximumSize(QSize(16777215, 6));
+}
+
+//==============================================================================
+
+void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
+{
+    // Paint ourselves
+
+    QPainter painter(this);
+
+    int value = mValue*(mWidth-2);
+
+    painter.setPen(QPalette().mid().color());
+    painter.drawRect(0, 0, mWidth-1, height()-1);
+
+    if (value) {
+        QColor color;
+
+        color.setRgba(mColor);
+
+        painter.fillRect(1, 1, value, height()-2, color);
+    }
+
+    // Accept the event
+
+    pEvent->accept();
+}
+
+//==============================================================================
+
+void ProgressBarWidget::resizeEvent(QResizeEvent *pEvent)
+{
+    // Default handling of the event
+
+    QWidget::resizeEvent(pEvent);
+
+    // Keep track of our new width
+
+    mWidth = pEvent->size().width();
+}
+
+//==============================================================================
+
+void ProgressBarWidget::setValue(const double &pValue)
+{
+    // Update both our value and ourselves, if needed
+
+    double value = qMin(1.0, qMax(pValue, 0.0));
+
+    if (value != mValue) {
+        mValue = value;
+
+        // Update ourselves, but only if necessary
+
+        if (int(mOldValue*mWidth) != int(mValue*mWidth)) {
+            mOldValue = mValue;
+
+            update();
+        }
+    }
+}
+
+//==============================================================================
+
+void ProgressBarWidget::setColor(const QRgb &pColor)
+{
+    // Update our color, if needed
+
+    if (pColor != mColor) {
+        mColor = pColor;
+
+        update();
+    }
+}
+
+//==============================================================================
+
 static const auto SettingsFileName     = QStringLiteral("FileName");
 static const auto SettingsApiKey       = QStringLiteral("ApiKey");
 static const auto SettingsCurrentKanji = QStringLiteral("CurrentKanji");
@@ -87,6 +175,12 @@ Widget::Widget() :
     // Set up our GUI
 
     mGui->setupUi(this);
+
+    mCurrentRadicalsValue = new ProgressBarWidget(this);
+    mCurrentKanjiValue = new ProgressBarWidget(this);
+
+    mGui->userInformationGroupBox->layout()->addWidget(mCurrentRadicalsValue);
+    mGui->userInformationGroupBox->layout()->addWidget(mCurrentKanjiValue);
 
     setMinimumSize(QSize(1024, 768));
 
@@ -797,8 +891,8 @@ void Widget::waniKaniUpdated()
     mGui->masterValue->show();
     mGui->enlightenedValue->show();
     mGui->burnedValue->show();
-    mGui->currentRadicalsValue->show();
-    mGui->currentKanjiValue->show();
+    mCurrentRadicalsValue->show();
+    mCurrentKanjiValue->show();
 
     // Retrieve the radicals from our WaniKani object, so that we can determine
     // current level progress
@@ -820,21 +914,21 @@ void Widget::waniKaniUpdated()
         mAllKanjiState.insert(radical.character(), radical.userSpecific().srs());
     }
 
-    int currentRadicalsValue = 100*radicalsProgress/radicalsTotal;
+    double currentRadicalsValue = double(radicalsProgress)/radicalsTotal;
 
-    mGui->currentRadicalsValue->setValue(currentRadicalsValue);
-    mGui->currentRadicalsValue->setToolTip("<table>\n"
-                                        "    <thead>\n"
-                                        "        <tr>\n"
-                                        "            <td align=center><strong>Radicals Progression</strong></td>\n"
-                                        "        </tr>\n"
-                                        "    </thead>\n"
-                                        "    <tbody>\n"
-                                        "        <tr>\n"
-                                        "            <td align=center>"+QString::number(currentRadicalsValue)+"%</td>\n"
-                                        "        </tr>\n"
-                                        "    </tbody>\n"
-                                        "</table>\n");
+    mCurrentRadicalsValue->setValue(currentRadicalsValue);
+    mCurrentRadicalsValue->setToolTip("<table>\n"
+                                      "    <thead>\n"
+                                      "        <tr>\n"
+                                      "            <td align=center><strong>Radicals Progression</strong></td>\n"
+                                      "        </tr>\n"
+                                      "    </thead>\n"
+                                      "    <tbody>\n"
+                                      "        <tr>\n"
+                                      "            <td align=center>"+QString::number(int(100*currentRadicalsValue))+"%</td>\n"
+                                      "        </tr>\n"
+                                      "    </tbody>\n"
+                                      "</table>\n");
 
     // Retrieve the Kanji from our WaniKani object, so that we can determine
     // current level progress, as well as generate our wallpaper
@@ -859,21 +953,21 @@ void Widget::waniKaniUpdated()
         mAllKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
     }
 
-    int currentKanjiValue = 100*kanjiProgress/kanjiTotal;
+    double currentKanjiValue = double(kanjiProgress)/kanjiTotal;
 
-    mGui->currentKanjiValue->setValue(currentKanjiValue);
-    mGui->currentKanjiValue->setToolTip("<table>\n"
-                                        "    <thead>\n"
-                                        "        <tr>\n"
-                                        "            <td align=center><strong>Kanji Progression</strong></td>\n"
-                                        "        </tr>\n"
-                                        "    </thead>\n"
-                                        "    <tbody>\n"
-                                        "        <tr>\n"
-                                        "            <td align=center>"+QString::number(currentKanjiValue)+"%</td>\n"
-                                        "        </tr>\n"
-                                        "    </tbody>\n"
-                                        "</table>\n");
+    mCurrentKanjiValue->setValue(currentKanjiValue);
+    mCurrentKanjiValue->setToolTip("<table>\n"
+                                   "    <thead>\n"
+                                   "        <tr>\n"
+                                   "            <td align=center><strong>Kanji Progression</strong></td>\n"
+                                   "        </tr>\n"
+                                   "    </thead>\n"
+                                   "    <tbody>\n"
+                                   "        <tr>\n"
+                                   "            <td align=center>"+QString::number(int(100*currentKanjiValue))+"%</td>\n"
+                                   "        </tr>\n"
+                                   "    </tbody>\n"
+                                   "</table>\n");
 
     // Update our wallpaper
 
@@ -894,8 +988,8 @@ void Widget::waniKaniError()
     mGui->masterValue->hide();
     mGui->enlightenedValue->hide();
     mGui->burnedValue->hide();
-    mGui->currentRadicalsValue->hide();
-    mGui->currentKanjiValue->hide();
+    mCurrentRadicalsValue->hide();
+    mCurrentKanjiValue->hide();
 }
 
 //==============================================================================
@@ -1006,6 +1100,11 @@ void Widget::setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor)
                                            .arg(qGreen(pColor))
                                            .arg(qBlue(pColor))
                                            .arg(qAlpha(pColor)));
+
+    if (pPushButton == mGui->enlightenedBackgroundPushButton)
+        mCurrentRadicalsValue->setColor(pColor);
+    else if (pPushButton == mGui->apprenticeBackgroundPushButton)
+        mCurrentKanjiValue->setColor(pColor);
 }
 
 //==============================================================================
