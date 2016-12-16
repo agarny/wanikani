@@ -25,7 +25,6 @@ limitations under the License.
 //==============================================================================
 
 #include <QBuffer>
-#include <QCloseEvent>
 #include <QColorDialog>
 #include <QDate>
 #include <QDesktopWidget>
@@ -33,14 +32,14 @@ limitations under the License.
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QKeyEvent>
 #include <QNetworkAccessManager>
-#include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QPainter>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTextStream>
-#include <QWidgetAction>
 
 //==============================================================================
 
@@ -48,6 +47,8 @@ limitations under the License.
     #include <Windows.h>
 #elif defined(Q_OS_MAC)
     #include "macos.h"
+
+    #include <math.h>
 #else
     #include <QProcess>
 #endif
@@ -58,18 +59,114 @@ limitations under the License.
 
 //==============================================================================
 
-static const auto SettingsFileName      = QStringLiteral("FileName");
-static const auto SettingsApiKey        = QStringLiteral("ApiKey");
-static const auto SettingsCurrentKanjis = QStringLiteral("CurrentKanjis");
-static const auto SettingsInterval      = QStringLiteral("Interval");
-static const auto SettingsFontName      = QStringLiteral("FontName");
-static const auto SettingsBoldFont      = QStringLiteral("BoldFont");
-static const auto SettingsItalicsFont   = QStringLiteral("ItalicsFont");
-static const auto SettingsColor         = QStringLiteral("Color%1%2");
+ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pParent) :
+    QWidget(pParent)
+{
+    // Minimum and maximum sizes for our progress bar
+
+    setMinimumSize(QSize(0, 150));
+    setMaximumSize(QSize(16777215, 150));
+}
 
 //==============================================================================
 
-static const auto LinkStyle = "color: rgb(103, 103, 103); outline: 0px; text-decoration: none;";
+void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
+{
+    // Paint ourselves
+
+    QPainter painter(this);
+
+    painter.fillRect(0, 0, width(), height(), QPalette().button());
+
+    // Accept the event
+
+    pEvent->accept();
+}
+
+//==============================================================================
+
+ProgressBarWidget::ProgressBarWidget(QWidget *pParent) :
+    QWidget(pParent),
+    mValue(0.0),
+    mColor(QPalette().highlight().color().rgba())
+{
+    // Minimum and maximum sizes for our progress bar
+
+    setMinimumSize(QSize(0, 6));
+    setMaximumSize(QSize(16777215, 6));
+}
+
+//==============================================================================
+
+void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
+{
+    // Paint ourselves
+
+    QPainter painter(this);
+
+    int value = mValue*(width()-2);
+
+    painter.setPen(QPalette().mid().color());
+    painter.drawRect(0, 0, width()-1, height()-1);
+
+    if (value) {
+        QColor color;
+
+        color.setRgba(mColor);
+
+        painter.fillRect(1, 1, value, height()-2, color);
+    }
+
+    // Accept the event
+
+    pEvent->accept();
+}
+
+//==============================================================================
+
+void ProgressBarWidget::setValue(const double &pValue)
+{
+    // Update both our value and ourselves, if needed
+
+    double value = qMin(1.0, qMax(pValue, 0.0));
+
+    if (value != mValue) {
+        bool needUpdate = int(mValue*width()) != int(value*width());
+
+        mValue = value;
+
+        if (needUpdate)
+            update();
+    }
+}
+
+//==============================================================================
+
+void ProgressBarWidget::setColor(const QRgb &pColor)
+{
+    // Update our color, if needed
+
+    if (pColor != mColor) {
+        mColor = pColor;
+
+        update();
+    }
+}
+
+//==============================================================================
+
+static const auto SettingsFileName     = QStringLiteral("FileName");
+static const auto SettingsApiKey       = QStringLiteral("ApiKey");
+static const auto SettingsCurrentKanji = QStringLiteral("CurrentKanji");
+static const auto SettingsInterval     = QStringLiteral("Interval");
+static const auto SettingsFontName     = QStringLiteral("FontName");
+static const auto SettingsBoldFont     = QStringLiteral("BoldFont");
+static const auto SettingsItalicsFont  = QStringLiteral("ItalicsFont");
+static const auto SettingsColor        = QStringLiteral("Color%1%2");
+
+//==============================================================================
+
+static const auto LinkStyle = " style=\"color: rgb(103, 103, 103); outline: 0px; text-decoration: none;\"";
 
 //==============================================================================
 
@@ -78,20 +175,36 @@ Widget::Widget() :
     mInitializing(true),
     mFileName(QString()),
     mColors(QMap<QPushButton *, QRgb>()),
-    mKanjisError(false),
-    mKanjisState(QMap<QString, QString>()),
-    mOldKanjisState(QMap<QString, QString>()),
+    mCurrentKanjiState(QMap<QChar, QString>()),
+    mAllKanjiState(QMap<QChar, QString>()),
+    mOldKanjiState(QMap<QChar, QString>()),
     mNeedToCheckWallpaper(true)
 {
     // Set up our GUI
 
     mGui->setupUi(this);
 
+    mCurrentRadicalsValue = new ProgressBarWidget(this);
+    mCurrentKanjiValue = new ProgressBarWidget(this);
+
+    mGui->userInformationGroupBox->layout()->addWidget(mCurrentRadicalsValue);
+    mGui->userInformationGroupBox->layout()->addWidget(mCurrentKanjiValue);
+
+    mReviewsTimeLine = new ReviewsTimeLineWidget(this);
+
+    mGui->layout->insertWidget(mGui->layout->indexOf(mGui->bottomSeparator), mReviewsTimeLine);
+
     setMinimumSize(QSize(1024, 768));
 
-    connect(mGui->currentKanjisRadioButton, SIGNAL(clicked()),
+#ifdef Q_OS_MAC
+    setWindowFlags(Qt::FramelessWindowHint);
+#else
+    setWindowFlags(Qt::Popup);
+#endif
+
+    connect(mGui->currentKanjiRadioButton, SIGNAL(clicked()),
             this, SLOT(updateLevels()));
-    connect(mGui->allKanjisRadioButton, SIGNAL(clicked()),
+    connect(mGui->allKanjiRadioButton, SIGNAL(clicked()),
             this, SLOT(updateLevels()));
 
     for (int i = 1; i <= 6; ++i) {
@@ -114,47 +227,129 @@ Widget::Widget() :
 
     int currentYear = QDate::currentDate().year();
 
-    mGui->aboutValue->setText("<span style=\"font-size: 17pt;\"><strong><a href=\"https://github.com/agarny/wanikani\" style=\""+QString(LinkStyle)+"\">WaniKani "+version+"</a></strong></span><br/>"
-                              "Copyright 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+" <a href=\"https://github.com/agarny\" style=\""+QString(LinkStyle)+"\">Alan Garny</a>");
+    mGui->aboutValue->setText("<span style=\"font-size: 19px;\"><strong><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> "+version+"</strong></span><br/>"
+                              "© 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+" <a href=\"https://github.com/agarny\""+QString(LinkStyle)+">Alan Garny</a>");
 
-    // Retrieve our settings and handle a click on our foreground/background
-    // push buttons
+    // Handle signals from our WaniKani object
 
-    on_resetAllPushButton_clicked(true);
+    connect(&mWaniKani, SIGNAL(updated()),
+            this, SLOT(waniKaniUpdated()));
+    connect(&mWaniKani, SIGNAL(error()),
+            this, SLOT(waniKaniError()));
 
-    // Retrieve the user's information and some initial information about the
-    // user's kanjis
+    // Retrieve our settings
 
-    updateUserInformation();
-    updateKanjis();
+    retrieveSettings();
 
-    // Use our timer to retrieve the kanjis and set our wallpaper
+    // Use our timer to update our WaniKani object
 
     connect(&mTimer, SIGNAL(timeout()),
-            this, SLOT(updateKanjis()));
+            &mWaniKani, SLOT(update()));
 
     updateInterval(mGui->intervalSpinBox->value());
 
-    // Create our system tray icon menu
-
-    QWidgetAction *widgetAction = new QWidgetAction(this);
-
-    widgetAction->setDefaultWidget(this);
-
-    mTrayIconMenu.addAction(widgetAction);
-
     // Create and show our system tray icon
 
-    mTrayIcon.setContextMenu(&mTrayIconMenu);
     mTrayIcon.setIcon(QIcon(":/icon"));
     mTrayIcon.setToolTip("WaniKani");
 
     connect(&mTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-            this, SLOT(trayIconActivated(const QSystemTrayIcon::ActivationReason &)));
+            this, SLOT(trayIconActivated()));
 
     mTrayIcon.show();
 
     mInitializing = false;
+}
+
+//==============================================================================
+
+#ifdef Q_OS_MAC
+void Widget::keyPressEvent(QKeyEvent *pEvent)
+{
+    // Hide ourselves if the user presses the escape key
+
+    if (pEvent->key() == Qt::Key_Escape)
+        hide();
+    else
+        QWidget::keyPressEvent(pEvent);
+}
+#endif
+
+//==============================================================================
+
+void Widget::retrieveSettings(const bool &pResetSettings)
+{
+    // Retrieve all of our settings after having reset some of them, if
+    // requested
+
+    QSettings settings;
+    bool setWaniKaniApiKey = false;
+
+    if (mInitializing) {
+        mFileName = settings.value(SettingsFileName).toString();
+
+        mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
+
+        setWaniKaniApiKey = true;
+    }
+
+    if (pResetSettings) {
+        mInitializing = true;
+
+        settings.clear();
+    }
+
+    if (settings.value(SettingsCurrentKanji, true).toBool())
+        mGui->currentKanjiRadioButton->setChecked(true);
+    else
+        mGui->allKanjiRadioButton->setChecked(true);
+
+    mGui->intervalSpinBox->setValue(settings.value(SettingsInterval).toInt());
+
+    static const QColor Colors[6][2] = { { "#606060", "#60808080"},
+                                         { "#606060", "#60dd0093"},
+                                         { "#606060", "#60882d9e"},
+                                         { "#606060", "#60294ddb"},
+                                         { "#606060", "#600093dd"},
+                                         { "#606060", "#60fbc042"} };
+
+    QString fontName = settings.value(SettingsFontName).toString();
+
+    mGui->fontComboBox->setCurrentText(fontName);
+    mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
+    mGui->italicsFontCheckBox->setChecked(settings.value(SettingsItalicsFont).toBool());
+
+    for (int i = 1; i <= 6; ++i) {
+        for (int j = 1; j <= 2; ++j) {
+            QPushButton *pushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget());
+            QRgb color = settings.value(SettingsColor.arg(i).arg(j), Colors[i-1][j-1].rgba()).toUInt();
+
+            setPushButtonColor(pushButton, color);
+        }
+    }
+
+    if (fontName.isEmpty()) {
+#if defined(Q_OS_WIN)
+        mGui->fontComboBox->setCurrentText("MS Mincho");
+#elif defined(Q_OS_LINUX)
+        mGui->fontComboBox->setCurrentText("Droid Sans Fallback");
+#elif defined(Q_OS_MAC)
+        mGui->fontComboBox->setCurrentText("Hiragino Mincho Pro");
+#else
+    #error Unsupported platform
+#endif
+    }
+
+    if (setWaniKaniApiKey)
+        mWaniKani.setApiKey(mGui->apiKeyValue->text());
+
+    if (pResetSettings) {
+        mInitializing = false;
+
+        updateSrsDistributionPalettes();
+
+        updateWallpaper(true);
+    }
 }
 
 //==============================================================================
@@ -164,6 +359,40 @@ void Widget::updateInterval(const int &pInterval)
     // Update our timer's interval
 
     mTimer.start(60000*pInterval);
+}
+
+//==============================================================================
+
+QString Widget::iconDataUri(const QString &pIcon, const int &pWidth,
+                            const int &pHeight, const QIcon::Mode &pMode)
+{
+    // Convert an icon, which resource name is given, to a data URI, after
+    // having resized it, if requested
+
+    QIcon icon(pIcon);
+
+    if (icon.isNull())
+        return QString();
+
+    QByteArray data;
+    QBuffer buffer(&data);
+    QSize iconSize = icon.availableSizes().first();
+
+    buffer.open(QIODevice::WriteOnly);
+    icon.pixmap((pWidth == -1)?iconSize.width():pWidth,
+                (pHeight == -1)?iconSize.height():pHeight,
+                pMode).save(&buffer, "PNG");
+
+    return QString("data:image/png;base64,%1").arg(QString(data.toBase64()));
+}
+
+//==============================================================================
+
+void Widget::updateGravatar(const QPixmap &pGravatar)
+{
+    // Update our gravatar
+
+    mGui->gravatarValue->setPixmap(pGravatar.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 //==============================================================================
@@ -202,101 +431,34 @@ void Widget::updateSrsDistributionPalettes()
 
 //==============================================================================
 
-QString Widget::iconDataUri(const QString &pIcon, const int &pWidth,
-                            const int &pHeight, const QIcon::Mode &pMode)
+void Widget::updateSrsDistributionInformation(QLabel *pLabel,
+                                              const QString &pIcon,
+                                              const SrsDistributionInformation &pInformation)
 {
-    // Convert an icon, which resource name is given, to a data URI, after
-    // having resized it, if requested
+    // Update the given SRS distribution information
 
-    QIcon icon(pIcon);
-
-    if (icon.isNull())
-        return QString();
-
-    QByteArray data;
-    QBuffer buffer(&data);
-    QSize iconSize = icon.availableSizes().first();
-
-    buffer.open(QIODevice::WriteOnly);
-    icon.pixmap((pWidth == -1)?iconSize.width():pWidth,
-                (pHeight == -1)?iconSize.height():pHeight,
-                pMode).save(&buffer, "PNG");
-
-    return QString("data:image/png;base64,%1").arg(QString(data.toBase64()));
-}
-
-//==============================================================================
-
-void Widget::updateUserInformation()
-{
-    // Retrieve the user's information
-
-    QJsonDocument json = waniKaniRequest("srs-distribution");
-    QPixmap gravatar;
-
-    if (!json.isNull()) {
-        // Retrieve the user's gravatar
-
-        QVariantMap userInformationMap = json.object().toVariantMap()["user_information"].toMap();
-        QNetworkAccessManager networkAccessManager;
-        QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+userInformationMap["gravatar"].toString()));
-        QEventLoop eventLoop;
-
-        QObject::connect(networkReply, SIGNAL(finished()),
-                         &eventLoop, SLOT(quit()));
-
-        eventLoop.exec();
-
-        QByteArray gravatarData = QByteArray();
-
-        if (networkReply->error() == QNetworkReply::NoError)
-            gravatarData = networkReply->readAll();
-
-        networkReply->deleteLater();
-
-        if (gravatarData.isEmpty())
-            gravatar = QPixmap(":/face");
-        else
-            gravatar.loadFromData(gravatarData);
-
-        // Retrieve the user's SRS distribution
-
-        QVariantMap srsDistributionMap = json.object().toVariantMap()["requested_information"].toMap();
-        QString userName = userInformationMap["username"].toString();
-
-        mGui->userInformationValue->setText("<center>"
-                                            "    <span style=\"font-size: 15pt;\"><strong><a href=\"https://www.wanikani.com/community/people/"+userName+"\" style=\""+QString(LinkStyle)+"\">"+userName+"</a></strong> of Sect <strong>"+userInformationMap["title"].toString()+"</strong></span><br/>"
-                                            "    <span style=\"font-size: 11pt;\"><strong><em>(Level "+userInformationMap["level"].toString()+")</em></strong></span>"
-                                            "</center>");
-
-        updateSrsDistributionPalettes();
-
-        mGui->apprenticeValue->setText("<img src=\""+iconDataUri(":/apprentice", 32, 32)+"\"><br/>"+srsDistributionMap["apprentice"].toMap()["total"].toString());
-        mGui->guruValue->setText("<img src=\""+iconDataUri(":/guru", 32, 32)+"\"><br/>"+srsDistributionMap["guru"].toMap()["total"].toString());
-        mGui->masterValue->setText("<img src=\""+iconDataUri(":/master", 32, 32)+"\"><br/>"+srsDistributionMap["master"].toMap()["total"].toString());
-        mGui->enlightenedValue->setText("<img src=\""+iconDataUri(":/enlightened", 32, 32)+"\"><br/>"+srsDistributionMap["enlighten"].toMap()["total"].toString());
-        mGui->burnedValue->setText("<img src=\""+iconDataUri(":/burned", 32, 32)+"\"><br/>"+srsDistributionMap["burned"].toMap()["total"].toString());
-
-        mGui->userInformationValue->show();
-        mGui->apprenticeValue->show();
-        mGui->guruValue->show();
-        mGui->masterValue->show();
-        mGui->enlightenedValue->show();
-        mGui->burnedValue->show();
-    } else {
-        // We don't have any user information, so hide a few things
-
-        gravatar = QPixmap(":/warning");
-
-        mGui->userInformationValue->hide();
-        mGui->apprenticeValue->hide();
-        mGui->guruValue->hide();
-        mGui->masterValue->hide();
-        mGui->enlightenedValue->hide();
-        mGui->burnedValue->hide();
-    }
-
-    mGui->gravatarValue->setPixmap(gravatar.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    pLabel->setText("<img src=\""+iconDataUri(pIcon, 32, 32)+"\"><br/>"+pInformation.total());
+    pLabel->setToolTip("<table>\n"
+                       "    <thead>\n"
+                       "        <tr>\n"
+                       "            <td colspan=2 align=center><strong>"+pInformation.name()+"</strong></td>\n"
+                       "        </tr>\n"
+                       "    </thead>\n"
+                       "    <tbody>\n"
+                       "        <tr>\n"
+                       "            <td>Radicals:</td>\n"
+                       "            <td align=right>"+pInformation.radicals()+"</td>\n"
+                       "        </tr>\n"
+                       "        <tr>\n"
+                       "            <td>Kanji:</td>\n"
+                       "            <td align=right>"+pInformation.kanji()+"</td>\n"
+                       "        </tr>\n"
+                       "        <tr>\n"
+                       "            <td>Vocabulary:</td>\n"
+                       "            <td align=right>"+pInformation.vocabulary()+"</td>\n"
+                       "        </tr>\n"
+                       "    </tbody>\n"
+                       "</table>\n");
 }
 
 //==============================================================================
@@ -335,7 +497,7 @@ QJsonDocument Widget::waniKaniRequest(const QString &pRequest)
 
 //==============================================================================
 
-static const QString Kanjis =
+static const QString KanjiTable =
 "一二三四五六七八九十口日月田目古吾冒朋明唱晶品呂昌早旭世胃旦胆亘凹凸旧自白百中千舌升昇丸寸専博"
 "占上下卓朝只貝貞員見児元頁頑凡負万句肌旬勺的首乙乱直具真工左右有賄貢項刀刃切召昭則副別丁町可頂"
 "子孔了女好如母貫兄克小少大多夕汐外名石肖硝砕砂削光太器臭妙省厚奇川州順水氷永泉原願泳沼沖江汁潮"
@@ -384,172 +546,130 @@ static const QString Kanjis =
 
 //==============================================================================
 
-void Widget::updateKanjis(const bool &pForceUpdate)
-{
-    // Reset some internal properties
-
-    mKanjisError = true;
-    mKanjisState = QMap<QString, QString>();
-
-    if (pForceUpdate)
-        mOldKanjisState = QMap<QString, QString>();
-
-    // Retrieve the list of Kanjis (and their state) the user has already
-    // studied
-
-    QString request = "kanji";
-
-    if (!mGui->currentKanjisRadioButton->isChecked()) {
-        request += "/1";
-
-        for (int i = 2; i <= 60; ++i)
-            request += ","+QString::number(i);
-    }
-
-    QJsonDocument json = waniKaniRequest(request);
-
-    if (!json.isNull()) {
-        mKanjisError = json.object().contains("error");
-
-        QVariantMap requestedInformationMap;
-
-        if (!mKanjisError) {
-            foreach (const QVariant &requestedInformation,
-                     json.object().toVariantMap()["requested_information"].toList()) {
-                requestedInformationMap = requestedInformation.toMap();
-
-                mKanjisState.insert(requestedInformationMap["character"].toString(),
-                                   requestedInformationMap["stats"].toMap()["srs"].toString());
-            }
-        }
-    }
-
-    // Update our wallpaper
-
-    updateWallpaper();
-}
-
-//==============================================================================
-
 void Widget::updateWallpaper(const bool &pForceUpdate)
 {
     // Generate and set the wallpaper, if needed
 
-    if (pForceUpdate || mKanjisError || (mKanjisState != mOldKanjisState)) {
+    QMap<QChar, QString> kanjiState = mGui->currentKanjiRadioButton->isChecked()?mCurrentKanjiState:mAllKanjiState;
+
+    if (   !kanjiState.isEmpty()
+        &&  (pForceUpdate || (kanjiState != mOldKanjiState))) {
+        // Keep track our needed Kanji
+
+        mOldKanjiState = kanjiState;
+
         // Default wallpaper
 
         QPixmap pixmap;
 
         pixmap.load(":/wallpaper");
 
-        if (!mKanjisError) {
-            // Generate the wallpaper
+        // Generate the wallpaper
 
-            static const int LeftBorder = 1240;
-            static const int Shift = 32;
-            static const int SmallShift = 1;
+        static const int LeftBorder = 1240;
+        static const int Shift = 32;
+        static const int SmallShift = 1;
 
-            QDesktopWidget desktopWidget;
-            QRect availableGeometry = desktopWidget.availableGeometry();
-            QRect geometry = desktopWidget.geometry();
+        QDesktopWidget desktopWidget;
+        QRect availableGeometry = desktopWidget.availableGeometry();
+        QRect geometry = desktopWidget.geometry();
 
-            int areaWidth = pixmap.width()-LeftBorder-2*Shift;
-            int areaHeight = double(availableGeometry.height())/geometry.height()*pixmap.height()-2*Shift;
+        int areaWidth = pixmap.width()-LeftBorder-2*Shift;
+        int areaHeight = double(availableGeometry.height())/geometry.height()*pixmap.height()-2*Shift;
 
-            QFont font = QFont(mGui->fontComboBox->currentText());
+        QFont font = QFont(mGui->fontComboBox->currentText());
 
-            font.setBold(mGui->boldFontCheckBox->isChecked());
-            font.setItalic(mGui->italicsFontCheckBox->isChecked());
+        font.setBold(mGui->boldFontCheckBox->isChecked());
+        font.setItalic(mGui->italicsFontCheckBox->isChecked());
 
-            int fontPixelSize = 1;
-            int charWidth = 0;
-            int charHeight = 0;
-            int nbOfRows = 0;
-            int nbOfCols = 0;
-            int descent = 0;
+        int fontPixelSize = 1;
+        int charWidth = 0;
+        int charHeight = 0;
+        int nbOfRows = 0;
+        int nbOfCols = 0;
+        int descent = 0;
 
-            forever {
-                font.setPixelSize(fontPixelSize);
+        forever {
+            font.setPixelSize(fontPixelSize);
 
-                QFontMetrics fontMetrics(font);
-                int crtCharWidth = fontMetrics.width(Kanjis.at(0));
-                int crtCharHeight = fontMetrics.height();
-                int crtNbOfCols = areaWidth/(crtCharWidth+SmallShift);
-                int crtNbOfRows =  floor(mKanjisState.size()/crtNbOfCols)
-                                  +((mKanjisState.size() % crtNbOfCols)?1:0);
+            QFontMetrics fontMetrics(font);
+            int crtCharWidth = fontMetrics.width(KanjiTable.at(0));
+            int crtCharHeight = fontMetrics.height();
+            int crtNbOfCols = areaWidth/(crtCharWidth+SmallShift);
+            int crtNbOfRows =  floor(kanjiState.size()/crtNbOfCols)
+                              +((kanjiState.size() % crtNbOfCols)?1:0);
 
-                if (crtNbOfRows*crtCharHeight+(crtNbOfRows-1)*SmallShift+fontMetrics.descent() <= areaHeight) {
-                    charWidth = crtCharWidth;
-                    charHeight = crtCharHeight;
+            if (crtNbOfRows*crtCharHeight+(crtNbOfRows-1)*SmallShift+fontMetrics.descent() <= areaHeight) {
+                charWidth = crtCharWidth;
+                charHeight = crtCharHeight;
 
-                    nbOfRows = crtNbOfRows;
-                    nbOfCols = crtNbOfCols;
+                nbOfRows = crtNbOfRows;
+                nbOfCols = crtNbOfCols;
 
-                    descent = fontMetrics.descent();
+                descent = fontMetrics.descent();
 
-                    ++fontPixelSize;
-                } else {
-                    font.setPixelSize(fontPixelSize-1);
+                ++fontPixelSize;
+            } else {
+                font.setPixelSize(fontPixelSize-1);
 
-                    break;
-                }
+                break;
             }
+        }
 
-            QPainter painter(&pixmap);
+        QPainter painter(&pixmap);
 
-            painter.setFont(font);
+        painter.setFont(font);
 
-            int xStart = LeftBorder+Shift+((areaWidth-nbOfCols*charWidth-(nbOfCols-1)*SmallShift) >> 1);
-            int x = 0;
-            int y =  double(availableGeometry.top())/geometry.height()*pixmap.height()
-                    +Shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*SmallShift) >> 1)-descent;
-            int radius = ceil(0.75*(qMax(charWidth, charHeight) >> 3));
+        int xStart = LeftBorder+Shift+((areaWidth-nbOfCols*charWidth-(nbOfCols-1)*SmallShift) >> 1);
+        int x = 0;
+        int y =  double(availableGeometry.top())/geometry.height()*pixmap.height()
+                +Shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*SmallShift) >> 1)-descent;
+        int radius = ceil(0.75*(qMax(charWidth, charHeight) >> 3));
 
-            for (int i = 0, j = 0, iMax = Kanjis.size(); i < iMax; ++i) {
-                if (mKanjisState.keys().contains(Kanjis.at(i))) {
-                    if (!(j % nbOfCols)) {
-                        x = xStart;
-                        y += charHeight+(j?SmallShift:0);
-                    }
-
-                    QString state = mKanjisState.value(Kanjis.at(i));
-                    QColor foregroundColor;
-                    QColor backgroundColor;
-
-                    if (!state.compare("apprentice")) {
-                        foregroundColor = color(2, 1);
-                        backgroundColor = color(2, 2);
-                    } else if (!state.compare("guru")) {
-                        foregroundColor = color(3, 1);
-                        backgroundColor = color(3, 2);
-                    } else if (!state.compare("master")) {
-                        foregroundColor = color(4, 1);
-                        backgroundColor = color(4, 2);
-                    } else if (!state.compare("enlighten")) {
-                        foregroundColor = color(5, 1);
-                        backgroundColor = color(5, 2);
-                    } else if (!state.compare("burned")) {
-                        foregroundColor = color(6, 1);
-                        backgroundColor = color(6, 2);
-                    } else {
-                        foregroundColor = color(1, 1);
-                        backgroundColor = color(1, 2);
-                    }
-
-                    painter.setPen(foregroundColor);
-
-                    QPainterPath path;
-
-                    path.addRoundedRect(QRectF(x, y-charHeight+descent, charWidth, charHeight),
-                                        radius, radius);
-
-                    painter.fillPath(path, QColor(backgroundColor));
-                    painter.drawText(x, y, Kanjis.at(i));
-
-                    x += charWidth+SmallShift;
-
-                    ++j;
+        for (int i = 0, j = 0, iMax = KanjiTable.size(); i < iMax; ++i) {
+            if (kanjiState.keys().contains(KanjiTable.at(i))) {
+                if (!(j % nbOfCols)) {
+                    x = xStart;
+                    y += charHeight+(j?SmallShift:0);
                 }
+
+                QString state = kanjiState.value(KanjiTable.at(i));
+                QColor foregroundColor;
+                QColor backgroundColor;
+
+                if (!state.compare("apprentice")) {
+                    foregroundColor = color(2, 1);
+                    backgroundColor = color(2, 2);
+                } else if (!state.compare("guru")) {
+                    foregroundColor = color(3, 1);
+                    backgroundColor = color(3, 2);
+                } else if (!state.compare("master")) {
+                    foregroundColor = color(4, 1);
+                    backgroundColor = color(4, 2);
+                } else if (!state.compare("enlighten")) {
+                    foregroundColor = color(5, 1);
+                    backgroundColor = color(5, 2);
+                } else if (!state.compare("burned")) {
+                    foregroundColor = color(6, 1);
+                    backgroundColor = color(6, 2);
+                } else {
+                    foregroundColor = color(1, 1);
+                    backgroundColor = color(1, 2);
+                }
+
+                painter.setPen(foregroundColor);
+
+                QPainterPath path;
+
+                path.addRoundedRect(QRectF(x, y-charHeight+descent, charWidth, charHeight),
+                                    radius, radius);
+
+                painter.fillPath(path, QColor(backgroundColor));
+                painter.drawText(x, y, KanjiTable.at(i));
+
+                x += charWidth+SmallShift;
+
+                ++j;
             }
         }
 
@@ -619,10 +739,9 @@ QColor Widget::color(const int &pRow, const int &pColumn) const
 
 void Widget::on_apiKeyValue_returnPressed()
 {
-    // Update our user's information and Kanjis (and therefore our wallpaper)
+    // Set our WaniKani API key
 
-    updateUserInformation();
-    updateKanjis(true);
+    mWaniKani.setApiKey(mGui->apiKeyValue->text());
 }
 
 //==============================================================================
@@ -639,9 +758,9 @@ void Widget::on_intervalSpinBox_valueChanged(int pInterval)
 
 void Widget::on_forceUpdateButton_clicked()
 {
-    // Update our Kanjis (and therefore our wallpaper)
+    // Update our WaniKani object
 
-    updateKanjis(true);
+    mWaniKani.update();
 }
 
 //==============================================================================
@@ -650,7 +769,7 @@ void Widget::on_fontComboBox_currentTextChanged(const QString &pFontName)
 {
     Q_UNUSED(pFontName);
 
-    // Force the update our wallpaper
+    // Force the update of our wallpaper
 
     if (!mInitializing)
         updateWallpaper(true);
@@ -660,7 +779,7 @@ void Widget::on_fontComboBox_currentTextChanged(const QString &pFontName)
 
 void Widget::on_boldFontCheckBox_clicked()
 {
-    // Force the update our wallpaper
+    // Force the update of our wallpaper
 
     if (!mInitializing)
         updateWallpaper(true);
@@ -670,7 +789,7 @@ void Widget::on_boldFontCheckBox_clicked()
 
 void Widget::on_italicsFontCheckBox_clicked()
 {
-    // Force the update our wallpaper
+    // Force the update of our wallpaper
 
     if (!mInitializing)
         updateWallpaper(true);
@@ -700,73 +819,11 @@ void Widget::on_swapPushButton_clicked()
 
 //==============================================================================
 
-void Widget::on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly)
+void Widget::on_resetAllPushButton_clicked()
 {
-    // Retrieve all of our settings after having reset some of them, if
-    // requested
+    // Retrieve all of our settings after having reset some of them
 
-    QSettings settings;
-
-    if (mInitializing) {
-        mFileName = settings.value(SettingsFileName).toString();
-
-        mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
-    }
-
-    if (!pRetrieveSettingsOnly) {
-        mInitializing = true;
-
-        settings.clear();
-    }
-
-    if (settings.value(SettingsCurrentKanjis, true).toBool())
-        mGui->currentKanjisRadioButton->setChecked(true);
-    else
-        mGui->allKanjisRadioButton->setChecked(true);
-
-    mGui->intervalSpinBox->setValue(settings.value(SettingsInterval).toInt());
-
-    static const QColor Colors[6][2] = { { "#606060", "#60808080"},
-                                         { "#606060", "#60dd0093"},
-                                         { "#606060", "#60882d9e"},
-                                         { "#606060", "#60294ddb"},
-                                         { "#606060", "#600093dd"},
-                                         { "#606060", "#60fbc042"} };
-
-    QString fontName = settings.value(SettingsFontName).toString();
-
-    mGui->fontComboBox->setCurrentText(fontName);
-    mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
-    mGui->italicsFontCheckBox->setChecked(settings.value(SettingsItalicsFont).toBool());
-
-    for (int i = 1; i <= 6; ++i) {
-        for (int j = 1; j <= 2; ++j) {
-            QPushButton *pushButton = qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget());
-            QRgb color = settings.value(SettingsColor.arg(i).arg(j), Colors[i-1][j-1].rgba()).toUInt();
-
-            setPushButtonColor(pushButton, color);
-        }
-    }
-
-    if (fontName.isEmpty()) {
-#if defined(Q_OS_WIN)
-        mGui->fontComboBox->setCurrentText("MS Mincho");
-#elif defined(Q_OS_LINUX)
-        mGui->fontComboBox->setCurrentText("Droid Sans Fallback");
-#elif defined(Q_OS_MAC)
-        mGui->fontComboBox->setCurrentText("Hiragino Mincho Pro");
-#else
-    #error Unsupported platform
-#endif
-    }
-
-    if (!pRetrieveSettingsOnly) {
-        mInitializing = false;
-
-        updateSrsDistributionPalettes();
-
-        updateKanjis(true);
-    }
+    retrieveSettings(true);
 }
 
 //==============================================================================
@@ -779,7 +836,7 @@ void Widget::on_closeToolButton_clicked()
 
     settings.setValue(SettingsFileName, mFileName);
     settings.setValue(SettingsApiKey, mGui->apiKeyValue->text());
-    settings.setValue(SettingsCurrentKanjis, mGui->currentKanjisRadioButton->isChecked());
+    settings.setValue(SettingsCurrentKanji, mGui->currentKanjiRadioButton->isChecked());
     settings.setValue(SettingsInterval, mGui->intervalSpinBox->value());
     settings.setValue(SettingsFontName, mGui->fontComboBox->currentText());
     settings.setValue(SettingsBoldFont, mGui->boldFontCheckBox->isChecked());
@@ -797,16 +854,215 @@ void Widget::on_closeToolButton_clicked()
 
 //==============================================================================
 
-void Widget::trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason)
+void Widget::waniKaniUpdated()
 {
-    // Show our menu even when we are triggered (which is already the case on
-    // Linux and macOS, but not on Windows)
+    // Retrieve the user's gravatar
 
-    if (pReason == QSystemTrayIcon::Trigger) {
-        mPosition = QCursor::pos();
+    QNetworkAccessManager networkAccessManager;
+    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+mWaniKani.gravatar()));
+    QEventLoop eventLoop;
 
-        mTrayIconMenu.exec(mPosition);
+    QObject::connect(networkReply, SIGNAL(finished()),
+                     &eventLoop, SLOT(quit()));
+
+    eventLoop.exec();
+
+    QByteArray gravatarData = QByteArray();
+
+    if (networkReply->error() == QNetworkReply::NoError)
+        gravatarData = networkReply->readAll();
+
+    networkReply->deleteLater();
+
+    QPixmap gravatar;
+
+    if (gravatarData.isEmpty())
+        gravatar = QPixmap(":/face");
+    else
+        gravatar.loadFromData(gravatarData);
+
+    // Update the GUI based on our WaniKani information
+
+    updateGravatar(gravatar);
+    updateSrsDistributionPalettes();
+
+    mGui->userInformationValue->setText("<center>"
+                                        "    <span style=\"font-size: 15px;\"><strong><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></strong> of Sect <strong>"+mWaniKani.title()+"</strong></span><br/>"
+                                        "    <span style=\"font-size: 11px;\"><strong>Level "+QString::number(mWaniKani.level())+"</strong></span>"
+                                        "</center>");
+
+    updateSrsDistributionInformation(mGui->apprenticeValue, ":/apprentice", mWaniKani.srsDistribution().apprentice());
+    updateSrsDistributionInformation(mGui->guruValue, ":/guru", mWaniKani.srsDistribution().guru());
+    updateSrsDistributionInformation(mGui->masterValue, ":/master", mWaniKani.srsDistribution().master());
+    updateSrsDistributionInformation(mGui->enlightenedValue, ":/enlightened", mWaniKani.srsDistribution().enlightened());
+    updateSrsDistributionInformation(mGui->burnedValue, ":/burned", mWaniKani.srsDistribution().burned());
+
+    mGui->userInformationValue->show();
+    mGui->apprenticeValue->show();
+    mGui->guruValue->show();
+    mGui->masterValue->show();
+    mGui->enlightenedValue->show();
+    mGui->burnedValue->show();
+    mCurrentRadicalsValue->show();
+    mCurrentKanjiValue->show();
+
+    // Retrieve the radicals from our WaniKani object, so that we can determine
+    // current level progress
+
+    int radicalsProgress = 0;
+    int radicalsTotal = 0;
+
+    foreach (const Radical &radical, mWaniKani.radicals()) {
+        if (radical.level() == mWaniKani.level()) {
+            if (radical.userSpecific().srsNumeric() >= 5)
+                ++radicalsProgress;
+
+            ++radicalsTotal;
+        }
+
+        if (radical.level() <= mWaniKani.level())
+            mCurrentKanjiState.insert(radical.character(), radical.userSpecific().srs());
+
+        mAllKanjiState.insert(radical.character(), radical.userSpecific().srs());
     }
+
+    double currentRadicalsValue = double(radicalsProgress)/radicalsTotal;
+
+    mCurrentRadicalsValue->setValue(currentRadicalsValue);
+    mCurrentRadicalsValue->setToolTip("<table>\n"
+                                      "    <thead>\n"
+                                      "        <tr>\n"
+                                      "            <td align=center><strong>Radicals Progression</strong></td>\n"
+                                      "        </tr>\n"
+                                      "    </thead>\n"
+                                      "    <tbody>\n"
+                                      "        <tr>\n"
+                                      "            <td align=center>"+QString::number(int(100*currentRadicalsValue))+"%</td>\n"
+                                      "        </tr>\n"
+                                      "    </tbody>\n"
+                                      "</table>\n");
+
+    // Retrieve the Kanji from our WaniKani object, so that we can determine
+    // current level progress, as well as generate our wallpaper
+
+    int kanjiProgress = 0;
+    int kanjiTotal = 0;
+
+    mCurrentKanjiState = QMap<QChar, QString>();
+    mAllKanjiState = QMap<QChar, QString>();
+
+    foreach (const Kanji &kanji, mWaniKani.kanjis()) {
+        if (kanji.level() == mWaniKani.level()) {
+            if (kanji.userSpecific().srsNumeric() >= 5)
+                ++kanjiProgress;
+
+            ++kanjiTotal;
+        }
+
+        if (kanji.level() <= mWaniKani.level())
+            mCurrentKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
+
+        mAllKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
+    }
+
+    double currentKanjiValue = double(kanjiProgress)/kanjiTotal;
+
+    mCurrentKanjiValue->setValue(currentKanjiValue);
+    mCurrentKanjiValue->setToolTip("<table>\n"
+                                   "    <thead>\n"
+                                   "        <tr>\n"
+                                   "            <td align=center><strong>Kanji Progression</strong></td>\n"
+                                   "        </tr>\n"
+                                   "    </thead>\n"
+                                   "    <tbody>\n"
+                                   "        <tr>\n"
+                                   "            <td align=center>"+QString::number(int(100*currentKanjiValue))+"%</td>\n"
+                                   "        </tr>\n"
+                                   "    </tbody>\n"
+                                   "</table>\n");
+
+    // Update our wallpaper
+
+    updateWallpaper();
+}
+
+//==============================================================================
+
+void Widget::waniKaniError()
+{
+    // Something went wrong, so hide a few things
+
+    updateGravatar(QPixmap(":/warning"));
+
+    mGui->userInformationValue->hide();
+    mGui->apprenticeValue->hide();
+    mGui->guruValue->hide();
+    mGui->masterValue->hide();
+    mGui->enlightenedValue->hide();
+    mGui->burnedValue->hide();
+    mCurrentRadicalsValue->hide();
+    mCurrentKanjiValue->hide();
+}
+
+//==============================================================================
+
+void Widget::trayIconActivated()
+{
+#ifndef Q_OS_MAC
+    // Make sure that we are in the centre of the screen
+
+    QDesktopWidget desktopWidget;
+    QRect availableGeometry = desktopWidget.availableGeometry();
+
+    move(availableGeometry.center()-QPoint(width() >> 1, height() >> 1));
+#endif
+
+    // Show ourselves
+    // Note: to show ourselves, one would normally use activateWindow() (and
+    //       possibly raise()), but depending on the operating system it may or
+    //       not bring our widget to the foreground, so instead we do what
+    //       follows, depending on the operating system...
+
+    show();
+
+#if defined(Q_OS_WIN)
+    // Show ourselves the Windows way
+
+    // Retrieve our window Id
+
+    HWND mainWinId = reinterpret_cast<HWND>(winId());
+
+    // Bring us to the foreground
+
+    DWORD foregroundThreadProcId = GetWindowThreadProcessId(GetForegroundWindow(), 0);
+    DWORD mainThreadProcId = GetWindowThreadProcessId(mainWinId, 0);
+
+    if (foregroundThreadProcId != mainThreadProcId) {
+        // Our thread process Id is not that of the foreground window, so attach
+        // the foreground thread to ourselves, set ourselves to the foreground,
+        // and detach the foreground thread from ourselves
+
+        AttachThreadInput(foregroundThreadProcId, mainThreadProcId, true);
+
+        SetForegroundWindow(mainWinId);
+        SetFocus(mainWinId);
+
+        AttachThreadInput(foregroundThreadProcId, mainThreadProcId, false);
+    } else {
+        // Our thread process Id is that of the foreground window, so just set
+        // ourselves to the foreground
+
+        SetForegroundWindow(mainWinId);
+    }
+#elif defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+    // We are on Linux or macOS, so we can simply activate the window and raise
+    // ourselves
+
+    activateWindow();
+    raise();
+#else
+    #error Unsupported platform
+#endif
 }
 
 //==============================================================================
@@ -816,7 +1072,7 @@ void Widget::updateLevels()
     // Update the levels to display
 
     if (!mInitializing)
-        updateKanjis(true);
+        updateWallpaper(true);
 }
 
 //==============================================================================
@@ -838,10 +1094,6 @@ void Widget::updatePushButtonColor()
 
         updateWallpaper(true);
     }
-
-    // We will have been hidden when showing the colour dialog, so show us back
-
-    mTrayIconMenu.exec(mPosition);
 }
 
 //==============================================================================
@@ -860,6 +1112,11 @@ void Widget::setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor)
                                            .arg(qGreen(pColor))
                                            .arg(qBlue(pColor))
                                            .arg(qAlpha(pColor)));
+
+    if (pPushButton == mGui->enlightenedBackgroundPushButton)
+        mCurrentRadicalsValue->setColor(pColor);
+    else if (pPushButton == mGui->apprenticeBackgroundPushButton)
+        mCurrentKanjiValue->setColor(pColor);
 }
 
 //==============================================================================

@@ -24,7 +24,11 @@ limitations under the License.
 
 //==============================================================================
 
-#include <QMenu>
+#include "wanikani.h"
+
+//==============================================================================
+
+#include <QMap>
 #include <QSystemTrayIcon>
 #include <QTimer>
 #include <QWidget>
@@ -37,7 +41,42 @@ namespace Ui {
 
 //==============================================================================
 
+class QLabel;
 class QPushButton;
+
+//==============================================================================
+
+class ReviewsTimeLineWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit ReviewsTimeLineWidget(QWidget *pParent);
+
+protected:
+    virtual void paintEvent(QPaintEvent *pEvent);
+};
+
+//==============================================================================
+
+class ProgressBarWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit ProgressBarWidget(QWidget *pParent);
+
+    void setValue(const double &pValue);
+    void setColor(const QRgb &pColor);
+
+protected:
+    virtual void paintEvent(QPaintEvent *pEvent);
+
+private:
+    double mValue;
+
+    QRgb mColor;
+};
 
 //==============================================================================
 
@@ -48,27 +87,38 @@ class Widget : public QWidget
 public:
     explicit Widget();
 
+#ifdef Q_OS_MAC
+protected:
+    virtual void keyPressEvent(QKeyEvent *pEvent);
+#endif
+
 private:
     Ui::Widget *mGui;
 
     bool mInitializing;
+
+    WaniKani mWaniKani;
 
     QString mFileName;
 
     QTimer mTimer;
 
     QSystemTrayIcon mTrayIcon;
-    QMenu mTrayIconMenu;
-
-    QPoint mPosition;
 
     QMap<QPushButton *, QRgb> mColors;
 
-    bool mKanjisError;
-    QMap<QString, QString> mKanjisState;
-    QMap<QString, QString> mOldKanjisState;
+    QMap<QChar, QString> mCurrentKanjiState;
+    QMap<QChar, QString> mAllKanjiState;
+    QMap<QChar, QString> mOldKanjiState;
 
     bool mNeedToCheckWallpaper;
+
+    ProgressBarWidget *mCurrentRadicalsValue;
+    ProgressBarWidget *mCurrentKanjiValue;
+
+    ReviewsTimeLineWidget *mReviewsTimeLine;
+
+    void retrieveSettings(const bool &pResetSettings = false);
 
     void setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor);
 
@@ -82,8 +132,10 @@ private:
                         const int &pHeight = -1,
                         const QIcon::Mode &pMode = QIcon::Normal);
 
+    void updateGravatar(const QPixmap &pGravatar);
     void updateSrsDistributionPalettes();
-    void updateUserInformation();
+    void updateSrsDistributionInformation(QLabel *pLabel, const QString &pIcon,
+                                          const SrsDistributionInformation &pInformation);
 
     void updateWallpaper(const bool &pForceUpdate = false);
 
@@ -101,16 +153,17 @@ private slots:
 
     void on_swapPushButton_clicked();
 
-    void on_resetAllPushButton_clicked(const bool &pRetrieveSettingsOnly = false);
+    void on_resetAllPushButton_clicked();
     void on_closeToolButton_clicked();
 
-    void trayIconActivated(const QSystemTrayIcon::ActivationReason &pReason);
+    void waniKaniUpdated();
+    void waniKaniError();
+
+    void trayIconActivated();
 
     void updateLevels();
 
     void updatePushButtonColor();
-
-    void updateKanjis(const bool &pForceUpdate = false);
 
     void checkWallpaper();
 };

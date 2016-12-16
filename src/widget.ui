@@ -13,7 +13,22 @@
   <property name="windowTitle">
    <string>WaniKani</string>
   </property>
-  <layout class="QVBoxLayout" name="layout" stretch="1,0,0">
+  <layout class="QVBoxLayout" name="layout" stretch="1,0,0,0">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="leftMargin">
+    <number>4</number>
+   </property>
+   <property name="topMargin">
+    <number>4</number>
+   </property>
+   <property name="rightMargin">
+    <number>4</number>
+   </property>
+   <property name="bottomMargin">
+    <number>4</number>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
      <property name="spacing">
@@ -45,6 +60,21 @@
             <string/>
            </property>
            <layout class="QVBoxLayout" name="userInformationLayout">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <property name="leftMargin">
+             <number>4</number>
+            </property>
+            <property name="topMargin">
+             <number>4</number>
+            </property>
+            <property name="rightMargin">
+             <number>4</number>
+            </property>
+            <property name="bottomMargin">
+             <number>4</number>
+            </property>
             <item>
              <widget class="QLabel" name="gravatarValue">
               <property name="alignment">
@@ -158,6 +188,21 @@
             <string>Settings</string>
            </property>
            <layout class="QVBoxLayout" name="settingsLayout">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <property name="leftMargin">
+             <number>4</number>
+            </property>
+            <property name="topMargin">
+             <number>4</number>
+            </property>
+            <property name="rightMargin">
+             <number>4</number>
+            </property>
+            <property name="bottomMargin">
+             <number>4</number>
+            </property>
             <item>
              <layout class="QHBoxLayout" name="apiKeyLayout">
               <item>
@@ -206,18 +251,18 @@
              </layout>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="kanjisLayout">
+             <layout class="QHBoxLayout" name="kanjiLayout">
               <item>
-               <widget class="QRadioButton" name="currentKanjisRadioButton">
+               <widget class="QRadioButton" name="currentKanjiRadioButton">
                 <property name="text">
-                 <string>Current Kanjis</string>
+                 <string>Current Kanji</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="allKanjisRadioButton">
+               <widget class="QRadioButton" name="allKanjiRadioButton">
                 <property name="text">
-                 <string>All Kanjis</string>
+                 <string>All Kanji</string>
                 </property>
                </widget>
               </item>
@@ -441,7 +486,14 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line">
+    <widget class="Line" name="topSeparator">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="bottomSeparator">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
