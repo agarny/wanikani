@@ -59,6 +59,32 @@ limitations under the License.
 
 //==============================================================================
 
+ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pParent) :
+    QWidget(pParent)
+{
+    // Minimum and maximum sizes for our progress bar
+
+    setMinimumSize(QSize(0, 150));
+    setMaximumSize(QSize(16777215, 150));
+}
+
+//==============================================================================
+
+void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
+{
+    // Paint ourselves
+
+    QPainter painter(this);
+
+    painter.fillRect(0, 0, width(), height(), QPalette().button());
+
+    // Accept the event
+
+    pEvent->accept();
+}
+
+//==============================================================================
+
 ProgressBarWidget::ProgressBarWidget(QWidget *pParent) :
     QWidget(pParent),
     mValue(0.0),
@@ -66,7 +92,7 @@ ProgressBarWidget::ProgressBarWidget(QWidget *pParent) :
 {
     // Minimum and maximum sizes for our progress bar
 
-    setMinimumSize(QSize(6, 6));
+    setMinimumSize(QSize(0, 6));
     setMaximumSize(QSize(16777215, 6));
 }
 
@@ -163,6 +189,10 @@ Widget::Widget() :
 
     mGui->userInformationGroupBox->layout()->addWidget(mCurrentRadicalsValue);
     mGui->userInformationGroupBox->layout()->addWidget(mCurrentKanjiValue);
+
+    mReviewsTimeLine = new ReviewsTimeLineWidget(this);
+
+    mGui->layout->insertWidget(mGui->layout->indexOf(mGui->bottomSeparator), mReviewsTimeLine);
 
     setMinimumSize(QSize(1024, 768));
 

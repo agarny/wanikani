@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>WaniKani</string>
   </property>
-  <layout class="QVBoxLayout" name="layout" stretch="1,0,0">
+  <layout class="QVBoxLayout" name="layout" stretch="1,0,0,0">
    <property name="spacing">
     <number>4</number>
    </property>
@@ -486,7 +486,14 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line">
+    <widget class="Line" name="topSeparator">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="bottomSeparator">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>

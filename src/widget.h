@@ -46,6 +46,19 @@ class QPushButton;
 
 //==============================================================================
 
+class ReviewsTimeLineWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit ReviewsTimeLineWidget(QWidget *pParent);
+
+protected:
+    virtual void paintEvent(QPaintEvent *pEvent);
+};
+
+//==============================================================================
+
 class ProgressBarWidget : public QWidget
 {
     Q_OBJECT
@@ -102,6 +115,8 @@ private:
 
     ProgressBarWidget *mCurrentRadicalsValue;
     ProgressBarWidget *mCurrentKanjiValue;
+
+    ReviewsTimeLineWidget *mReviewsTimeLine;
 
     void retrieveSettings(const bool &pResetSettings = false);
 
