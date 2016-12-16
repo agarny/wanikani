@@ -373,7 +373,7 @@ UserSpecific Radical::userSpecific() const
 
 //==============================================================================
 
-KanjiUserSpecific::KanjiUserSpecific() :
+ExtraUserSpecific::ExtraUserSpecific() :
     UserSpecific(),
     mReadingNote(QString())
 {
@@ -381,7 +381,7 @@ KanjiUserSpecific::KanjiUserSpecific() :
 
 //==============================================================================
 
-QString KanjiUserSpecific::readingNote() const
+QString ExtraUserSpecific::readingNote() const
 {
     // Return our reading note
 
@@ -396,7 +396,7 @@ Kanji::Kanji() :
     mKunyomi(QString()),
     mNanori(QString()),
     mImportantReading(QString()),
-    mUserSpecific(KanjiUserSpecific())
+    mUserSpecific(ExtraUserSpecific())
 {
 }
 
@@ -438,11 +438,29 @@ QString Kanji::imporantReading() const
 
 //==============================================================================
 
-KanjiUserSpecific Kanji::userSpecific() const
+ExtraUserSpecific Kanji::userSpecific() const
 {
     // Return our user specific information
 
     return mUserSpecific;
+}
+
+//==============================================================================
+
+Vocabulary::Vocabulary() :
+    Item(),
+    mKana(QString()),
+    mUserSpecific(ExtraUserSpecific())
+{
+}
+
+//==============================================================================
+
+QString Vocabulary::onyomi() const
+{
+    // Return our Kana reading
+
+    return mKana;
 }
 
 //==============================================================================

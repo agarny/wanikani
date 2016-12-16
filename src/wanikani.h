@@ -163,12 +163,12 @@ typedef QList<Radical> Radicals;
 
 //==============================================================================
 
-class KanjiUserSpecific : public UserSpecific
+class ExtraUserSpecific : public UserSpecific
 {
     friend class WaniKani;
 
 public:
-    explicit KanjiUserSpecific();
+    explicit ExtraUserSpecific();
 
     QString readingNote() const;
 
@@ -189,19 +189,40 @@ public:
     QString kunyomi() const;
     QString nanori() const;
     QString imporantReading() const;
-    KanjiUserSpecific userSpecific() const;
+    ExtraUserSpecific userSpecific() const;
 
 private:
     QString mOnyomi;
     QString mKunyomi;
     QString mNanori;
     QString mImportantReading;
-    KanjiUserSpecific mUserSpecific;
+    ExtraUserSpecific mUserSpecific;
 };
 
 //==============================================================================
 
 typedef QList<Kanji> Kanjis;
+
+//==============================================================================
+
+class Vocabulary : public Item
+{
+    friend class WaniKani;
+
+public:
+    explicit Vocabulary();
+
+    QString kana() const;
+    ExtraUserSpecific userSpecific() const;
+
+private:
+    QString mKana;
+    ExtraUserSpecific mUserSpecific;
+};
+
+//==============================================================================
+
+typedef QList<Vocabulary> Vocabularies;
 
 //==============================================================================
 
