@@ -58,12 +58,8 @@ public:
 
 protected:
     virtual void paintEvent(QPaintEvent *pEvent);
-    virtual void resizeEvent(QResizeEvent *pEvent);
 
 private:
-    int mWidth;
-
-    double mOldValue;
     double mValue;
 
     QRgb mColor;

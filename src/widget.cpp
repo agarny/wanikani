@@ -61,8 +61,6 @@ limitations under the License.
 
 ProgressBarWidget::ProgressBarWidget(QWidget *pParent) :
     QWidget(pParent),
-    mWidth(0),
-    mOldValue(0.0),
     mValue(0.0),
     mColor(QPalette().highlight().color().rgba())
 {
@@ -80,10 +78,10 @@ void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
 
     QPainter painter(this);
 
-    int value = mValue*(mWidth-2);
+    int value = mValue*(width()-2);
 
     painter.setPen(QPalette().mid().color());
-    painter.drawRect(0, 0, mWidth-1, height()-1);
+    painter.drawRect(0, 0, width()-1, height()-1);
 
     if (value) {
         QColor color;
@@ -100,19 +98,6 @@ void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
 
 //==============================================================================
 
-void ProgressBarWidget::resizeEvent(QResizeEvent *pEvent)
-{
-    // Default handling of the event
-
-    QWidget::resizeEvent(pEvent);
-
-    // Keep track of our new width
-
-    mWidth = pEvent->size().width();
-}
-
-//==============================================================================
-
 void ProgressBarWidget::setValue(const double &pValue)
 {
     // Update both our value and ourselves, if needed
@@ -120,15 +105,12 @@ void ProgressBarWidget::setValue(const double &pValue)
     double value = qMin(1.0, qMax(pValue, 0.0));
 
     if (value != mValue) {
+        bool needUpdate = int(mValue*width()) != int(value*width());
+
         mValue = value;
 
-        // Update ourselves, but only if necessary
-
-        if (int(mOldValue*mWidth) != int(mValue*mWidth)) {
-            mOldValue = mValue;
-
+        if (needUpdate)
             update();
-        }
     }
 }
 
