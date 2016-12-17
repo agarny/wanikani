@@ -906,8 +906,10 @@ void Widget::waniKaniUpdated()
     mCurrentRadicalsProgress->show();
     mCurrentKanjiProgress->show();
 
-    // Retrieve the radicals from our WaniKani object, so that we can determine
-    // current level progress
+    mGui->topSeparator->show();
+    mReviewsTimeLine->show();
+
+    // Retrieve various information about our radicals
 
     int radicalsProgress = 0;
     int radicalsTotal = 0;
@@ -919,12 +921,9 @@ void Widget::waniKaniUpdated()
 
             ++radicalsTotal;
         }
-
-        if (radical.level() <= mWaniKani.level())
-            mCurrentKanjiState.insert(radical.character(), radical.userSpecific().srs());
-
-        mAllKanjiState.insert(radical.character(), radical.userSpecific().srs());
     }
+
+    // Determine our radicals progression
 
     double currentRadicalsValue = double(radicalsProgress)/radicalsTotal;
 
@@ -942,8 +941,7 @@ void Widget::waniKaniUpdated()
                                          "    </tbody>\n"
                                          "</table>\n");
 
-    // Retrieve the Kanji from our WaniKani object, so that we can determine
-    // current level progress, as well as generate our wallpaper
+    // Retrieve various information about our Kanji
 
     int kanjiProgress = 0;
     int kanjiTotal = 0;
@@ -964,6 +962,8 @@ void Widget::waniKaniUpdated()
 
         mAllKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
     }
+
+    // Determine our Kanji progression
 
     double currentKanjiValue = double(kanjiProgress)/kanjiTotal;
 
@@ -1002,6 +1002,9 @@ void Widget::waniKaniError()
     mGui->burnedValue->hide();
     mCurrentRadicalsProgress->hide();
     mCurrentKanjiProgress->hide();
+
+    mGui->topSeparator->hide();
+    mReviewsTimeLine->hide();
 }
 
 //==============================================================================
