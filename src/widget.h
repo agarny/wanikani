@@ -116,6 +116,10 @@ private:
     ProgressBarWidget *mCurrentRadicalsProgress;
     ProgressBarWidget *mCurrentKanjiProgress;
 
+    QMap<QDateTime, int> mRadicalsReviews;
+    QMap<QDateTime, int> mKanjiReviews;
+    QMap<QDateTime, int> mVocabularyReviews;
+
     ReviewsTimeLineWidget *mReviewsTimeLine;
 
     void retrieveSettings(const bool &pResetSettings = false);
@@ -140,6 +144,8 @@ private:
     void updateWallpaper(const bool &pForceUpdate = false);
 
     void setWallpaper();
+
+    QString timeToString(const int &pSeconds);
 
 private slots:
     void on_apiKeyValue_returnPressed();

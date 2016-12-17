@@ -465,6 +465,15 @@ QString Vocabulary::kana() const
 
 //==============================================================================
 
+ExtraUserSpecific Vocabulary::userSpecific() const
+{
+    // Return our user specific information
+
+    return mUserSpecific;
+}
+
+//==============================================================================
+
 WaniKani::WaniKani() :
     mApiKey(QString()),
     mUserName(QString()),
@@ -587,6 +596,8 @@ void WaniKani::update()
 
         // Retrieve the radicals and their information
 
+        mRadicals = Radicals();
+
         foreach (const QVariant &radicalInformation,
                  radicalsResponse.object().toVariantMap()["requested_information"].toList()) {
             QVariantMap radicalInformationMap = radicalInformation.toMap();
@@ -620,6 +631,8 @@ void WaniKani::update()
         }
 
         // Retrieve the Kanji and their information
+
+        mKanjis = Kanjis();
 
         foreach (const QVariant &kanjiInformation,
                  kanjiResponse.object().toVariantMap()["requested_information"].toList()) {
@@ -658,6 +671,8 @@ void WaniKani::update()
         }
 
         // Retrieve the vocabularies and their information
+
+        mVocabularies = Vocabularies();
 
         foreach (const QVariant &vocabularyInformation,
                  vocabularyResponse.object().toVariantMap()["requested_information"].toList()) {
@@ -841,6 +856,15 @@ Kanjis WaniKani::kanjis() const
     // Return our list of Kanji
 
     return mKanjis;
+}
+
+//==============================================================================
+
+Vocabularies WaniKani::vocabularies() const
+{
+    // Return our list of vocabulary
+
+    return mVocabularies;
 }
 
 //==============================================================================

@@ -250,6 +250,7 @@ public:
     SrsDistribution srsDistribution() const;
     Radicals radicals() const;
     Kanjis kanjis() const;
+    Vocabularies vocabularies() const;
 
 private:
     QString mApiKey;

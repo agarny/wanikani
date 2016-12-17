@@ -178,7 +178,10 @@ Widget::Widget() :
     mCurrentKanjiState(QMap<QChar, QString>()),
     mAllKanjiState(QMap<QChar, QString>()),
     mOldKanjiState(QMap<QChar, QString>()),
-    mNeedToCheckWallpaper(true)
+    mNeedToCheckWallpaper(true),
+    mRadicalsReviews(QMap<QDateTime, int>()),
+    mKanjiReviews(QMap<QDateTime, int>()),
+    mVocabularyReviews(QMap<QDateTime, int>())
 {
     // Set up our GUI
 
@@ -854,6 +857,54 @@ void Widget::on_closeToolButton_clicked()
 
 //==============================================================================
 
+QString Widget::timeToString(const int &pSeconds)
+{
+    // Return the given number of seconds as a formatted string
+
+    if (pSeconds < 60) {
+        return "< 1 minute";
+    } else {
+        QString res = QString();
+        int weeks = pSeconds/604800;
+        int days = (pSeconds/86400)%7;
+        int hours = (pSeconds/3600)%24;
+        int minutes = (pSeconds/60)%60;
+
+        if (weeks)
+            res += (weeks == 1)?"1 week":QString("%1 weeks").arg(weeks);
+
+        if (days) {
+            if (!res.isEmpty())
+                res += ", ";
+
+            res += (days == 1)?"1 day":QString("%1 days").arg(days);
+        }
+
+        if (hours) {
+            if (!res.isEmpty())
+                res += ", ";
+
+            res += (hours == 1)?"1 hour":QString("%1 hours").arg(hours);
+        }
+
+        if (minutes) {
+            if (!res.isEmpty())
+                res += ", ";
+
+            res += (minutes == 1)?"1 minute":QString("%1 minutes").arg(minutes);
+        }
+
+        int lastCommaPosition = res.lastIndexOf(',');
+
+        if (lastCommaPosition == -1)
+            return res;
+        else
+            return res.left(lastCommaPosition)+" and"+res.right(res.length()-lastCommaPosition-1);
+    }
+}
+
+//==============================================================================
+
 void Widget::waniKaniUpdated()
 {
     // Retrieve the user's gravatar
@@ -907,6 +958,9 @@ void Widget::waniKaniUpdated()
     mCurrentKanjiProgress->show();
 
     mGui->topSeparator->show();
+    mGui->nextReviewValue->show();
+    mGui->nextHourReviewValue->show();
+    mGui->nextDayReviewValue->show();
     mReviewsTimeLine->show();
 
     // Retrieve various information about our radicals
@@ -914,12 +968,20 @@ void Widget::waniKaniUpdated()
     int radicalsProgress = 0;
     int radicalsTotal = 0;
 
+    mRadicalsReviews = QMap<QDateTime, int>();
+
     foreach (const Radical &radical, mWaniKani.radicals()) {
         if (radical.level() == mWaniKani.level()) {
             if (radical.userSpecific().srsNumeric() >= 5)
                 ++radicalsProgress;
 
             ++radicalsTotal;
+        }
+
+        if (radical.userSpecific().availableDate()) {
+            QDateTime dateTime = QDateTime::fromTime_t(radical.userSpecific().availableDate());
+
+            mRadicalsReviews.insert(dateTime, mRadicalsReviews.value(dateTime)+1);
         }
     }
 
@@ -949,6 +1011,8 @@ void Widget::waniKaniUpdated()
     mCurrentKanjiState = QMap<QChar, QString>();
     mAllKanjiState = QMap<QChar, QString>();
 
+    mKanjiReviews = QMap<QDateTime, int>();
+
     foreach (const Kanji &kanji, mWaniKani.kanjis()) {
         if (kanji.level() == mWaniKani.level()) {
             if (kanji.userSpecific().srsNumeric() >= 5)
@@ -961,6 +1025,24 @@ void Widget::waniKaniUpdated()
             mCurrentKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
 
         mAllKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
+
+        if (kanji.userSpecific().availableDate()) {
+            QDateTime dateTime = QDateTime::fromTime_t(kanji.userSpecific().availableDate());
+
+            mKanjiReviews.insert(dateTime, mKanjiReviews.value(dateTime)+1);
+        }
+    }
+
+    // Retrieve various information about our vocabulary
+
+    mVocabularyReviews = QMap<QDateTime, int>();
+
+    foreach (const Vocabulary &vocabulary, mWaniKani.vocabularies()) {
+        if (vocabulary.userSpecific().availableDate()) {
+            QDateTime dateTime = QDateTime::fromTime_t(vocabulary.userSpecific().availableDate());
+
+            mVocabularyReviews.insert(dateTime, mVocabularyReviews.value(dateTime)+1);
+        }
     }
 
     // Determine our Kanji progression
@@ -980,6 +1062,65 @@ void Widget::waniKaniUpdated()
                                       "        </tr>\n"
                                       "    </tbody>\n"
                                       "</table>\n");
+
+    // Determine the next, next hour and next day reviews
+
+    QDateTime now = QDateTime::currentDateTime();
+    int diff = INT_MAX;
+    int hourReview = 0;
+    int dayReview = 0;
+
+    foreach (const QDateTime &dateTime, mRadicalsReviews.keys()) {
+        int localDiff = now.secsTo(dateTime);
+
+        if (localDiff < diff)
+            diff = localDiff;
+
+        if (localDiff < 3600)
+            hourReview += mRadicalsReviews.value(dateTime);
+
+        if (localDiff < 86400)
+            dayReview += mRadicalsReviews.value(dateTime);
+    }
+
+    foreach (const QDateTime &dateTime, mKanjiReviews.keys()) {
+        int localDiff = now.secsTo(dateTime);
+
+        if (localDiff < diff)
+            diff = localDiff;
+
+        if (localDiff < 3600)
+            hourReview += mKanjiReviews.value(dateTime);
+
+        if (localDiff < 86400)
+            dayReview += mKanjiReviews.value(dateTime);
+    }
+
+    foreach (const QDateTime &dateTime, mVocabularyReviews.keys()) {
+        int localDiff = now.secsTo(dateTime);
+
+        if (localDiff < diff)
+            diff = localDiff;
+
+        if (localDiff < 3600)
+            hourReview += mVocabularyReviews.value(dateTime);
+
+        if (localDiff < 86400)
+            dayReview += mVocabularyReviews.value(dateTime);
+    }
+
+    mGui->nextReviewValue->setText("<center>"
+                                   "    <span style=\"font-size: 15px;\"><strong>"+((diff <= 0)?"Available Now":timeToString(diff))+"</strong></span><br/>"
+                                   "    <span style=\"font-size: 11px;\">Next Review</span>"
+                                   "</center>");
+    mGui->nextHourReviewValue->setText("<center>"
+                                       "    <span style=\"font-size: 15px;\"><strong>"+QString::number(hourReview)+"</strong></span><br/>"
+                                       "    <span style=\"font-size: 11px;\">Next Hour</span>"
+                                       "</center>");
+    mGui->nextDayReviewValue->setText("<center>"
+                                      "    <span style=\"font-size: 15px;\"><strong>"+QString::number(dayReview)+"</strong></span><br/>"
+                                      "    <span style=\"font-size: 11px;\">Next Day</span>"
+                                      "</center>");
 
     // Update our wallpaper
 
@@ -1004,6 +1145,9 @@ void Widget::waniKaniError()
     mCurrentKanjiProgress->hide();
 
     mGui->topSeparator->hide();
+    mGui->nextReviewValue->hide();
+    mGui->nextHourReviewValue->hide();
+    mGui->nextDayReviewValue->hide();
     mReviewsTimeLine->hide();
 }
 
