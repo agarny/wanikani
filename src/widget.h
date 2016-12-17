@@ -113,8 +113,8 @@ private:
 
     bool mNeedToCheckWallpaper;
 
-    ProgressBarWidget *mCurrentRadicalsValue;
-    ProgressBarWidget *mCurrentKanjiValue;
+    ProgressBarWidget *mCurrentRadicalsProgress;
+    ProgressBarWidget *mCurrentKanjiProgress;
 
     ReviewsTimeLineWidget *mReviewsTimeLine;
 

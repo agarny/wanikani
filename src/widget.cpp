@@ -184,11 +184,11 @@ Widget::Widget() :
 
     mGui->setupUi(this);
 
-    mCurrentRadicalsValue = new ProgressBarWidget(this);
-    mCurrentKanjiValue = new ProgressBarWidget(this);
+    mCurrentRadicalsProgress = new ProgressBarWidget(this);
+    mCurrentKanjiProgress = new ProgressBarWidget(this);
 
-    mGui->userInformationGroupBox->layout()->addWidget(mCurrentRadicalsValue);
-    mGui->userInformationGroupBox->layout()->addWidget(mCurrentKanjiValue);
+    mGui->userInformationGroupBox->layout()->addWidget(mCurrentRadicalsProgress);
+    mGui->userInformationGroupBox->layout()->addWidget(mCurrentKanjiProgress);
 
     mReviewsTimeLine = new ReviewsTimeLineWidget(this);
 
@@ -903,8 +903,8 @@ void Widget::waniKaniUpdated()
     mGui->masterValue->show();
     mGui->enlightenedValue->show();
     mGui->burnedValue->show();
-    mCurrentRadicalsValue->show();
-    mCurrentKanjiValue->show();
+    mCurrentRadicalsProgress->show();
+    mCurrentKanjiProgress->show();
 
     // Retrieve the radicals from our WaniKani object, so that we can determine
     // current level progress
@@ -928,19 +928,19 @@ void Widget::waniKaniUpdated()
 
     double currentRadicalsValue = double(radicalsProgress)/radicalsTotal;
 
-    mCurrentRadicalsValue->setValue(currentRadicalsValue);
-    mCurrentRadicalsValue->setToolTip("<table>\n"
-                                      "    <thead>\n"
-                                      "        <tr>\n"
-                                      "            <td align=center><strong>Radicals Progression</strong></td>\n"
-                                      "        </tr>\n"
-                                      "    </thead>\n"
-                                      "    <tbody>\n"
-                                      "        <tr>\n"
-                                      "            <td align=center>"+QString::number(int(100*currentRadicalsValue))+"%</td>\n"
-                                      "        </tr>\n"
-                                      "    </tbody>\n"
-                                      "</table>\n");
+    mCurrentRadicalsProgress->setValue(currentRadicalsValue);
+    mCurrentRadicalsProgress->setToolTip("<table>\n"
+                                         "    <thead>\n"
+                                         "        <tr>\n"
+                                         "            <td align=center><strong>Radicals Progression</strong></td>\n"
+                                         "        </tr>\n"
+                                         "    </thead>\n"
+                                         "    <tbody>\n"
+                                         "        <tr>\n"
+                                         "            <td align=center>"+QString::number(int(100*currentRadicalsValue))+"%</td>\n"
+                                         "        </tr>\n"
+                                         "    </tbody>\n"
+                                         "</table>\n");
 
     // Retrieve the Kanji from our WaniKani object, so that we can determine
     // current level progress, as well as generate our wallpaper
@@ -967,19 +967,19 @@ void Widget::waniKaniUpdated()
 
     double currentKanjiValue = double(kanjiProgress)/kanjiTotal;
 
-    mCurrentKanjiValue->setValue(currentKanjiValue);
-    mCurrentKanjiValue->setToolTip("<table>\n"
-                                   "    <thead>\n"
-                                   "        <tr>\n"
-                                   "            <td align=center><strong>Kanji Progression</strong></td>\n"
-                                   "        </tr>\n"
-                                   "    </thead>\n"
-                                   "    <tbody>\n"
-                                   "        <tr>\n"
-                                   "            <td align=center>"+QString::number(int(100*currentKanjiValue))+"%</td>\n"
-                                   "        </tr>\n"
-                                   "    </tbody>\n"
-                                   "</table>\n");
+    mCurrentKanjiProgress->setValue(currentKanjiValue);
+    mCurrentKanjiProgress->setToolTip("<table>\n"
+                                      "    <thead>\n"
+                                      "        <tr>\n"
+                                      "            <td align=center><strong>Kanji Progression</strong></td>\n"
+                                      "        </tr>\n"
+                                      "    </thead>\n"
+                                      "    <tbody>\n"
+                                      "        <tr>\n"
+                                      "            <td align=center>"+QString::number(int(100*currentKanjiValue))+"%</td>\n"
+                                      "        </tr>\n"
+                                      "    </tbody>\n"
+                                      "</table>\n");
 
     // Update our wallpaper
 
@@ -1000,8 +1000,8 @@ void Widget::waniKaniError()
     mGui->masterValue->hide();
     mGui->enlightenedValue->hide();
     mGui->burnedValue->hide();
-    mCurrentRadicalsValue->hide();
-    mCurrentKanjiValue->hide();
+    mCurrentRadicalsProgress->hide();
+    mCurrentKanjiProgress->hide();
 }
 
 //==============================================================================
@@ -1114,9 +1114,9 @@ void Widget::setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor)
                                            .arg(qAlpha(pColor)));
 
     if (pPushButton == mGui->enlightenedBackgroundPushButton)
-        mCurrentRadicalsValue->setColor(pColor);
+        mCurrentRadicalsProgress->setColor(pColor);
     else if (pPushButton == mGui->apprenticeBackgroundPushButton)
-        mCurrentKanjiValue->setColor(pColor);
+        mCurrentKanjiProgress->setColor(pColor);
 }
 
 //==============================================================================
