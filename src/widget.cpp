@@ -862,7 +862,7 @@ QString Widget::timeToString(const int &pSeconds)
     // Return the given number of seconds as a formatted string
 
     if (pSeconds < 60) {
-        return "< 1 minute";
+        return "less than 1 minute";
     } else {
         QString res = QString();
         int weeks = pSeconds/604800;
@@ -1071,6 +1071,7 @@ void Widget::waniKaniUpdated()
 
     QDateTime now = QDateTime::currentDateTime();
     int diff = INT_MAX;
+    int nextReview = 0;
     int hourReview = 0;
     int dayReview = 0;
 
@@ -1080,11 +1081,16 @@ void Widget::waniKaniUpdated()
         if (localDiff < diff)
             diff = localDiff;
 
+        int currentReview = mRadicalsReviews.value(dateTime);
+
+        if (localDiff <= 0)
+            nextReview += currentReview;
+
         if (localDiff < 3600)
-            hourReview += mRadicalsReviews.value(dateTime);
+            hourReview += currentReview;
 
         if (localDiff < 86400)
-            dayReview += mRadicalsReviews.value(dateTime);
+            dayReview += currentReview;
     }
 
     foreach (const QDateTime &dateTime, mKanjiReviews.keys()) {
@@ -1093,11 +1099,16 @@ void Widget::waniKaniUpdated()
         if (localDiff < diff)
             diff = localDiff;
 
+        int currentReview = mKanjiReviews.value(dateTime);
+
+        if (localDiff <= 0)
+            nextReview += currentReview;
+
         if (localDiff < 3600)
-            hourReview += mKanjiReviews.value(dateTime);
+            hourReview += currentReview;
 
         if (localDiff < 86400)
-            dayReview += mKanjiReviews.value(dateTime);
+            dayReview += currentReview;
     }
 
     foreach (const QDateTime &dateTime, mVocabularyReviews.keys()) {
@@ -1106,15 +1117,20 @@ void Widget::waniKaniUpdated()
         if (localDiff < diff)
             diff = localDiff;
 
+        int currentReview = mVocabularyReviews.value(dateTime);
+
+        if (localDiff <= 0)
+            nextReview += currentReview;
+
         if (localDiff < 3600)
-            hourReview += mVocabularyReviews.value(dateTime);
+            hourReview += currentReview;
 
         if (localDiff < 86400)
-            dayReview += mVocabularyReviews.value(dateTime);
+            dayReview += currentReview;
     }
 
     mGui->nextReviewValue->setText("<center>"
-                                   "    <span style=\"font-size: 15px;\"><strong>"+((diff <= 0)?"Available Now":timeToString(diff))+"</strong></span><br/>"
+                                   "    <span style=\"font-size: 15px;\"><strong>"+QString::number(nextReview)+((diff <= 0)?" now":" in "+timeToString(diff))+"</strong></span><br/>"
                                    "    <span style=\"font-size: 11px;\">Next Review</span>"
                                    "</center>");
     mGui->nextHourReviewValue->setText("<center>"
