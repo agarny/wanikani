@@ -120,9 +120,14 @@ private:
     ProgressBarWidget *mCurrentRadicalsProgress;
     ProgressBarWidget *mCurrentKanjiProgress;
 
-    Reviews mRadicalsReviews;
-    Reviews mKanjiReviews;
-    Reviews mVocabularyReviews;
+    Reviews mCurrentRadicalsReviews;
+    Reviews mAllRadicalsReviews;
+
+    Reviews mCurrentKanjiReviews;
+    Reviews mAllKanjiReviews;
+
+    Reviews mCurrentVocabularyReviews;
+    Reviews mAllVocabularyReviews;
 
     ReviewsTimeLineWidget *mReviewsTimeLine;
 
@@ -151,7 +156,8 @@ private:
 
     QString timeToString(const int &pSeconds);
 
-    void determineReviews(const Reviews &pReviews, const QDateTime &pNow,
+    void determineReviews(const Reviews &pCurrentReviews,
+                          const Reviews &pAllReviews, const QDateTime &pNow,
                           QDateTime &pNextDateTime, int &pDiff,
                           int *pNbOfReviews);
 

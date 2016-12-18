@@ -179,9 +179,12 @@ Widget::Widget() :
     mAllKanjiState(QMap<QChar, QString>()),
     mOldKanjiState(QMap<QChar, QString>()),
     mNeedToCheckWallpaper(true),
-    mRadicalsReviews(Reviews()),
-    mKanjiReviews(Reviews()),
-    mVocabularyReviews(Reviews())
+    mCurrentRadicalsReviews(Reviews()),
+    mAllRadicalsReviews(Reviews()),
+    mCurrentKanjiReviews(Reviews()),
+    mAllKanjiReviews(Reviews()),
+    mCurrentVocabularyReviews(Reviews()),
+    mAllVocabularyReviews(Reviews())
 {
     // Set up our GUI
 
@@ -446,24 +449,25 @@ void Widget::updateSrsDistributionInformation(QLabel *pLabel,
     // Update the given SRS distribution information
 
     pLabel->setText("<img src=\""+iconDataUri(pIcon, 32, 32)+"\"><br/>"+pInformation.total());
-    pLabel->setToolTip("<table>\n"
-                       "    <thead>\n"
-                       "        <tr>\n"
-                       "            <td colspan=2 align=center><strong>"+pInformation.name()+"</strong></td>\n"
-                       "        </tr>\n"
-                       "    </thead>\n"
+    pLabel->setToolTip("<center>\n"
+                       "    <strong>"+pInformation.name()+"</strong>\n"
+                       "</center>\n"
+                       "<table>\n"
                        "    <tbody>\n"
                        "        <tr>\n"
                        "            <td>Radicals:</td>\n"
-                       "            <td align=right>"+pInformation.radicals()+"</td>\n"
+                       "            <td style=\"width: 4px;\"></td>\n"
+                       "            <td align=center>"+pInformation.radicals()+"</td>\n"
                        "        </tr>\n"
                        "        <tr>\n"
                        "            <td>Kanji:</td>\n"
-                       "            <td align=right>"+pInformation.kanji()+"</td>\n"
+                       "            <td style=\"width: 4px;\"></td>\n"
+                       "            <td align=center>"+pInformation.kanji()+"</td>\n"
                        "        </tr>\n"
                        "        <tr>\n"
                        "            <td>Vocabulary:</td>\n"
-                       "            <td align=right>"+pInformation.vocabulary()+"</td>\n"
+                       "            <td style=\"width: 4px;\"></td>\n"
+                       "            <td align=center>"+pInformation.vocabulary()+"</td>\n"
                        "        </tr>\n"
                        "    </tbody>\n"
                        "</table>\n");
@@ -910,13 +914,14 @@ QString Widget::timeToString(const int &pSeconds)
 
 //==============================================================================
 
-void Widget::determineReviews(const Reviews &pReviews, const QDateTime &pNow,
+void Widget::determineReviews(const Reviews &pCurrentReviews,
+                              const Reviews &pAllReviews, const QDateTime &pNow,
                               QDateTime &pNextDateTime, int &pDiff,
                               int *pNbOfReviews)
 {
-    // Determine the reviews for the given set of data
+    // Determine all the given reviews
 
-    foreach (const QDateTime &dateTime, pReviews.keys()) {
+    foreach (const QDateTime &dateTime, pAllReviews.keys()) {
         int localDiff = pNow.secsTo(dateTime);
 
         if (localDiff < pDiff) {
@@ -925,16 +930,23 @@ void Widget::determineReviews(const Reviews &pReviews, const QDateTime &pNow,
             pNextDateTime = dateTime;
         }
 
-        int currentReview = pReviews.value(dateTime);
+        int currentReviews = pCurrentReviews.value(dateTime);
+        int allReviews = pAllReviews.value(dateTime);
 
-        if (localDiff <= 0)
-            pNbOfReviews[0] += currentReview;
+        if (localDiff <= 0) {
+            pNbOfReviews[0] += currentReviews;
+            pNbOfReviews[1] += allReviews;
+        }
 
-        if (localDiff < 3600)
-            pNbOfReviews[1] += currentReview;
+        if (localDiff < 3600) {
+            pNbOfReviews[2] += currentReviews;
+            pNbOfReviews[3] += allReviews;
+        }
 
-        if (localDiff < 86400)
-            pNbOfReviews[2] += currentReview;
+        if (localDiff < 86400) {
+            pNbOfReviews[4] += currentReviews;
+            pNbOfReviews[5] += allReviews;
+        }
     }
 }
 
@@ -972,10 +984,10 @@ void Widget::waniKaniUpdated()
     updateGravatar(gravatar);
     updateSrsDistributionPalettes();
 
-    mGui->userInformationValue->setText("<center>"
-                                        "    <span style=\"font-size: 15px;\"><strong><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></strong> of Sect <strong>"+mWaniKani.title()+"</strong></span><br/>"
-                                        "    <span style=\"font-size: 11px;\"><strong>Level "+QString::number(mWaniKani.level())+"</strong></span>"
-                                        "</center>");
+    mGui->userInformationValue->setText("<center>\n"
+                                        "    <span style=\"font-size: 15px;\"><strong><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></strong> of Sect <strong>"+mWaniKani.title()+"</strong></span><br/>\n"
+                                        "    <span style=\"font-size: 11px;\"><strong>Level "+QString::number(mWaniKani.level())+"</strong></span>\n"
+                                        "</center>\n");
 
     updateSrsDistributionInformation(mGui->apprenticeValue, ":/apprentice", mWaniKani.srsDistribution().apprentice());
     updateSrsDistributionInformation(mGui->guruValue, ":/guru", mWaniKani.srsDistribution().guru());
@@ -1003,7 +1015,8 @@ void Widget::waniKaniUpdated()
     int radicalsProgress = 0;
     int radicalsTotal = 0;
 
-    mRadicalsReviews = Reviews();
+    mCurrentRadicalsReviews = Reviews();
+    mAllRadicalsReviews = Reviews();
 
     foreach (const Radical &radical, mWaniKani.radicals()) {
         if (radical.level() == mWaniKani.level()) {
@@ -1016,7 +1029,10 @@ void Widget::waniKaniUpdated()
         if (radical.userSpecific().availableDate()) {
             QDateTime dateTime = QDateTime::fromTime_t(radical.userSpecific().availableDate());
 
-            mRadicalsReviews.insert(dateTime, mRadicalsReviews.value(dateTime)+1);
+            if (radical.level() == mWaniKani.level())
+                mCurrentRadicalsReviews.insert(dateTime, mCurrentRadicalsReviews.value(dateTime)+1);
+
+            mAllRadicalsReviews.insert(dateTime, mAllRadicalsReviews.value(dateTime)+1);
         }
     }
 
@@ -1028,7 +1044,8 @@ void Widget::waniKaniUpdated()
     mCurrentKanjiState = QMap<QChar, QString>();
     mAllKanjiState = QMap<QChar, QString>();
 
-    mKanjiReviews = Reviews();
+    mCurrentKanjiReviews = Reviews();
+    mAllKanjiReviews = Reviews();
 
     foreach (const Kanji &kanji, mWaniKani.kanjis()) {
         if (kanji.level() == mWaniKani.level()) {
@@ -1046,19 +1063,26 @@ void Widget::waniKaniUpdated()
         if (kanji.userSpecific().availableDate()) {
             QDateTime dateTime = QDateTime::fromTime_t(kanji.userSpecific().availableDate());
 
-            mKanjiReviews.insert(dateTime, mKanjiReviews.value(dateTime)+1);
+            if (kanji.level() == mWaniKani.level())
+                mCurrentKanjiReviews.insert(dateTime, mCurrentKanjiReviews.value(dateTime)+1);
+
+            mAllKanjiReviews.insert(dateTime, mAllKanjiReviews.value(dateTime)+1);
         }
     }
 
     // Retrieve various information about our vocabulary
 
-    mVocabularyReviews = Reviews();
+    mCurrentVocabularyReviews = Reviews();
+    mAllVocabularyReviews = Reviews();
 
     foreach (const Vocabulary &vocabulary, mWaniKani.vocabularies()) {
         if (vocabulary.userSpecific().availableDate()) {
             QDateTime dateTime = QDateTime::fromTime_t(vocabulary.userSpecific().availableDate());
 
-            mVocabularyReviews.insert(dateTime, mVocabularyReviews.value(dateTime)+1);
+            if (vocabulary.level() == mWaniKani.level())
+                mCurrentVocabularyReviews.insert(dateTime, mCurrentVocabularyReviews.value(dateTime)+1);
+
+            mAllVocabularyReviews.insert(dateTime, mAllVocabularyReviews.value(dateTime)+1);
         }
     }
 
@@ -1097,58 +1121,78 @@ void Widget::waniKaniUpdated()
     QDateTime now = QDateTime::currentDateTime();
     QDateTime nextDateTime = now;
     int diff = INT_MAX;
-    int nbOfRadicalsReviews[3] = {0, 0, 0};
-    int nbOfKanjiReviews[3] = {0, 0, 0};
-    int nbOfVocabularyReviews[3] = {0, 0, 0};
+    int nbOfRadicalsReviews[6] = {0, 0, 0, 0, 0, 0};
+    int nbOfKanjiReviews[6] = {0, 0, 0, 0, 0, 0};
+    int nbOfVocabularyReviews[6] = {0, 0, 0, 0, 0, 0};
 
-    determineReviews(mRadicalsReviews, now, nextDateTime, diff, nbOfRadicalsReviews);
-    determineReviews(mKanjiReviews, now, nextDateTime, diff, nbOfKanjiReviews);
-    determineReviews(mVocabularyReviews, now, nextDateTime, diff, nbOfVocabularyReviews);
+    determineReviews(mCurrentRadicalsReviews, mAllRadicalsReviews, now,
+                     nextDateTime, diff, nbOfRadicalsReviews);
+    determineReviews(mCurrentKanjiReviews, mAllKanjiReviews, now, nextDateTime,
+                     diff, nbOfKanjiReviews);
+    determineReviews(mCurrentVocabularyReviews, mAllVocabularyReviews, now,
+                     nextDateTime, diff, nbOfVocabularyReviews);
 
     if (!nbOfRadicalsReviews[0] && !nbOfKanjiReviews[0] && !nbOfVocabularyReviews[0]) {
-        nbOfRadicalsReviews[0] =  mRadicalsReviews.value(nextDateTime);
-        nbOfKanjiReviews[0] = mKanjiReviews.value(nextDateTime);
-        nbOfVocabularyReviews[0] = mVocabularyReviews.value(nextDateTime);
+        nbOfRadicalsReviews[0] = mAllRadicalsReviews.value(nextDateTime);
+        nbOfRadicalsReviews[1] = mCurrentRadicalsReviews.value(nextDateTime);
+
+        nbOfKanjiReviews[0] = mAllKanjiReviews.value(nextDateTime);
+        nbOfKanjiReviews[1] = mCurrentKanjiReviews.value(nextDateTime);
+
+        nbOfVocabularyReviews[0] = mAllVocabularyReviews.value(nextDateTime);
+        nbOfVocabularyReviews[1] = mCurrentVocabularyReviews.value(nextDateTime);
     }
 
-    static const QString ReviewText = "<center>"
-                                      "    <span style=\"font-size: 15px;\"><strong>%1%2</strong></span><br/>"
-                                      "    <span style=\"font-size: 11px;\">Next Review</span>"
-                                      "</center>";
+    static const QString ReviewText = "<center>\n"
+                                      "    <span style=\"font-size: 15px;\"><strong>%1 (%2)</strong></span><br/>\n"
+                                      "    <span style=\"font-size: 11px;\">%3</span>\n"
+                                      "</center>\n";
     static const QString ReviewToolTip = "<table>\n"
                                          "    <tbody>\n"
                                          "        <tr>\n"
                                          "            <td>Radicals:</td>\n"
-                                         "            <td align=right>%1</td>\n"
+                                         "            <td style=\"width: 4px;\"></td>\n"
+                                         "            <td align=center>%1</td>\n"
+                                         "            <td style=\"width: 4px;\"></td>\n"
+                                         "            <td align=center>(%2)</td>\n"
                                          "        </tr>\n"
                                          "        <tr>\n"
                                          "            <td>Kanji:</td>\n"
-                                         "            <td align=right>%2</td>\n"
+                                         "            <td style=\"width: 4px;\"></td>\n"
+                                         "            <td align=center>%3</td>\n"
+                                         "            <td style=\"width: 4px;\"></td>\n"
+                                         "            <td align=center>(%4)</td>\n"
                                          "        </tr>\n"
                                          "        <tr>\n"
                                          "            <td>Vocabulary:</td>\n"
-                                         "            <td align=right>%3</td>\n"
+                                         "            <td style=\"width: 4px;\"></td>\n"
+                                         "            <td align=center>%5</td>\n"
+                                         "            <td style=\"width: 4px;\"></td>\n"
+                                         "            <td align=center>(%6)</td>\n"
                                          "        </tr>\n"
                                          "    </tbody>\n"
                                          "</table>\n";
 
-    mGui->nextReviewValue->setText(ReviewText.arg(nbOfRadicalsReviews[0]+nbOfRadicalsReviews[1]+nbOfRadicalsReviews[2])
-                                             .arg((diff <= 0)?" now":" in "+timeToString(diff)));
-    mGui->nextReviewValue->setToolTip(ReviewToolTip.arg(nbOfRadicalsReviews[0])
-                                                   .arg(nbOfRadicalsReviews[1])
-                                                   .arg(nbOfRadicalsReviews[2]));
+    mGui->nextReviewValue->setText(ReviewText.arg(nbOfRadicalsReviews[1]+nbOfKanjiReviews[1]+nbOfVocabularyReviews[1])
+                                             .arg(nbOfRadicalsReviews[0]+nbOfKanjiReviews[0]+nbOfVocabularyReviews[0])
+                                             .arg((diff <= 0)?"Now":"In "+timeToString(diff)));
+    mGui->nextReviewValue->setToolTip(ReviewToolTip.arg(nbOfRadicalsReviews[1]).arg(nbOfRadicalsReviews[0])
+                                                   .arg(nbOfKanjiReviews[1]).arg(nbOfKanjiReviews[0])
+                                                   .arg(nbOfVocabularyReviews[1]).arg(nbOfVocabularyReviews[0]));
 
-    mGui->nextHourReviewValue->setText(ReviewText.arg(nbOfKanjiReviews[0]+nbOfKanjiReviews[1]+nbOfKanjiReviews[2])
-                                                 .arg(QString()));
-    mGui->nextHourReviewValue->setToolTip(ReviewToolTip.arg(nbOfKanjiReviews[0])
-                                                       .arg(nbOfKanjiReviews[1])
-                                                       .arg(nbOfKanjiReviews[2]));
+    mGui->nextHourReviewValue->setText(ReviewText.arg(nbOfRadicalsReviews[3]+nbOfKanjiReviews[3]+nbOfVocabularyReviews[3])
+                                                 .arg(nbOfRadicalsReviews[2]+nbOfKanjiReviews[2]+nbOfVocabularyReviews[2])
+                                                 .arg("Within the next hour"));
+    mGui->nextHourReviewValue->setToolTip(ReviewToolTip.arg(nbOfRadicalsReviews[3]).arg(nbOfRadicalsReviews[2])
+                                                       .arg(nbOfKanjiReviews[3]).arg(nbOfKanjiReviews[2])
+                                                       .arg(nbOfVocabularyReviews[3]).arg(nbOfVocabularyReviews[2]));
 
-    mGui->nextDayReviewValue->setText(ReviewText.arg(nbOfVocabularyReviews[0]+nbOfVocabularyReviews[1]+nbOfVocabularyReviews[2])
-                                                .arg(QString()));
-    mGui->nextDayReviewValue->setToolTip(ReviewToolTip.arg(nbOfVocabularyReviews[0])
-                                                      .arg(nbOfVocabularyReviews[1])
-                                                      .arg(nbOfVocabularyReviews[2]));
+    mGui->nextDayReviewValue->setText(ReviewText.arg(nbOfRadicalsReviews[5]+nbOfKanjiReviews[5]+nbOfVocabularyReviews[5])
+                                                .arg(nbOfRadicalsReviews[4]+nbOfKanjiReviews[4]+nbOfVocabularyReviews[4])
+                                                .arg("Within the next day"));
+    mGui->nextDayReviewValue->setToolTip(ReviewToolTip.arg(nbOfRadicalsReviews[5]).arg(nbOfRadicalsReviews[4])
+                                                      .arg(nbOfKanjiReviews[5]).arg(nbOfKanjiReviews[4])
+                                                      .arg(nbOfVocabularyReviews[5]).arg(nbOfVocabularyReviews[4]));
 
     // Update our wallpaper
 
