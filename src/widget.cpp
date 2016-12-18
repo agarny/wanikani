@@ -1070,77 +1070,149 @@ void Widget::waniKaniUpdated()
     // Determine the next, next hour and next day reviews
 
     QDateTime now = QDateTime::currentDateTime();
+    QDateTime nextDateTime = now;
     int diff = INT_MAX;
-    int nextReview = 0;
-    int hourReview = 0;
-    int dayReview = 0;
+    int nextRadicalsReview = 0;
+    int nextKanjiReview = 0;
+    int nextVocabularyReview = 0;
+    int hourRadicalsReview = 0;
+    int hourKanjiReview = 0;
+    int hourVocabularyReview = 0;
+    int dayRadicalsReview = 0;
+    int dayKanjiReview = 0;
+    int dayVocabularyReview = 0;
 
     foreach (const QDateTime &dateTime, mRadicalsReviews.keys()) {
         int localDiff = now.secsTo(dateTime);
 
-        if (localDiff < diff)
+        if (localDiff < diff) {
             diff = localDiff;
+
+            nextDateTime = dateTime;
+        }
 
         int currentReview = mRadicalsReviews.value(dateTime);
 
         if (localDiff <= 0)
-            nextReview += currentReview;
+            nextRadicalsReview += currentReview;
 
         if (localDiff < 3600)
-            hourReview += currentReview;
+            hourRadicalsReview += currentReview;
 
         if (localDiff < 86400)
-            dayReview += currentReview;
+            dayRadicalsReview += currentReview;
     }
 
     foreach (const QDateTime &dateTime, mKanjiReviews.keys()) {
         int localDiff = now.secsTo(dateTime);
 
-        if (localDiff < diff)
+        if (localDiff < diff) {
             diff = localDiff;
+
+            nextDateTime = dateTime;
+        }
 
         int currentReview = mKanjiReviews.value(dateTime);
 
         if (localDiff <= 0)
-            nextReview += currentReview;
+            nextKanjiReview += currentReview;
 
         if (localDiff < 3600)
-            hourReview += currentReview;
+            hourKanjiReview += currentReview;
 
         if (localDiff < 86400)
-            dayReview += currentReview;
+            dayKanjiReview += currentReview;
     }
 
     foreach (const QDateTime &dateTime, mVocabularyReviews.keys()) {
         int localDiff = now.secsTo(dateTime);
 
-        if (localDiff < diff)
+        if (localDiff < diff) {
             diff = localDiff;
+
+            nextDateTime = dateTime;
+        }
 
         int currentReview = mVocabularyReviews.value(dateTime);
 
         if (localDiff <= 0)
-            nextReview += currentReview;
+            nextVocabularyReview += currentReview;
 
         if (localDiff < 3600)
-            hourReview += currentReview;
+            hourVocabularyReview += currentReview;
 
         if (localDiff < 86400)
-            dayReview += currentReview;
+            dayVocabularyReview += currentReview;
+    }
+
+    if (!nextRadicalsReview && !nextKanjiReview && !nextVocabularyReview) {
+        nextRadicalsReview =  mRadicalsReviews.value(nextDateTime);
+        nextKanjiReview = mKanjiReviews.value(nextDateTime);
+        nextVocabularyReview = mVocabularyReviews.value(nextDateTime);
     }
 
     mGui->nextReviewValue->setText("<center>"
-                                   "    <span style=\"font-size: 15px;\"><strong>"+QString::number(nextReview)+((diff <= 0)?" now":" in "+timeToString(diff))+"</strong></span><br/>"
+                                   "    <span style=\"font-size: 15px;\"><strong>"+QString::number(nextRadicalsReview+nextKanjiReview+nextVocabularyReview)+((diff <= 0)?" now":" in "+timeToString(diff))+"</strong></span><br/>"
                                    "    <span style=\"font-size: 11px;\">Next Review</span>"
                                    "</center>");
+    mGui->nextReviewValue->setToolTip("<table>\n"
+                                      "    <tbody>\n"
+                                      "        <tr>\n"
+                                      "            <td>Radicals:</td>\n"
+                                      "            <td align=right>"+QString::number(nextRadicalsReview)+"</td>\n"
+                                      "        </tr>\n"
+                                      "        <tr>\n"
+                                      "            <td>Kanji:</td>\n"
+                                      "            <td align=right>"+QString::number(nextKanjiReview)+"</td>\n"
+                                      "        </tr>\n"
+                                      "        <tr>\n"
+                                      "            <td>Vocabulary:</td>\n"
+                                      "            <td align=right>"+QString::number(nextVocabularyReview)+"</td>\n"
+                                      "        </tr>\n"
+                                      "    </tbody>\n"
+                                      "</table>\n");
+
     mGui->nextHourReviewValue->setText("<center>"
-                                       "    <span style=\"font-size: 15px;\"><strong>"+QString::number(hourReview)+"</strong></span><br/>"
+                                       "    <span style=\"font-size: 15px;\"><strong>"+QString::number(hourRadicalsReview+hourKanjiReview+hourVocabularyReview)+"</strong></span><br/>"
                                        "    <span style=\"font-size: 11px;\">Next Hour</span>"
                                        "</center>");
+    mGui->nextHourReviewValue->setToolTip("<table>\n"
+                                          "    <tbody>\n"
+                                          "        <tr>\n"
+                                          "            <td>Radicals:</td>\n"
+                                          "            <td align=right>"+QString::number(hourRadicalsReview)+"</td>\n"
+                                          "        </tr>\n"
+                                          "        <tr>\n"
+                                          "            <td>Kanji:</td>\n"
+                                          "            <td align=right>"+QString::number(hourKanjiReview)+"</td>\n"
+                                          "        </tr>\n"
+                                          "        <tr>\n"
+                                          "            <td>Vocabulary:</td>\n"
+                                          "            <td align=right>"+QString::number(hourVocabularyReview)+"</td>\n"
+                                          "        </tr>\n"
+                                          "    </tbody>\n"
+                                          "</table>\n");
+
     mGui->nextDayReviewValue->setText("<center>"
-                                      "    <span style=\"font-size: 15px;\"><strong>"+QString::number(dayReview)+"</strong></span><br/>"
+                                      "    <span style=\"font-size: 15px;\"><strong>"+QString::number(dayRadicalsReview+dayKanjiReview+dayVocabularyReview)+"</strong></span><br/>"
                                       "    <span style=\"font-size: 11px;\">Next Day</span>"
                                       "</center>");
+    mGui->nextDayReviewValue->setToolTip("<table>\n"
+                                         "    <tbody>\n"
+                                         "        <tr>\n"
+                                         "            <td>Radicals:</td>\n"
+                                         "            <td align=right>"+QString::number(dayRadicalsReview)+"</td>\n"
+                                         "        </tr>\n"
+                                         "        <tr>\n"
+                                         "            <td>Kanji:</td>\n"
+                                         "            <td align=right>"+QString::number(dayKanjiReview)+"</td>\n"
+                                         "        </tr>\n"
+                                         "        <tr>\n"
+                                         "            <td>Vocabulary:</td>\n"
+                                         "            <td align=right>"+QString::number(dayVocabularyReview)+"</td>\n"
+                                         "        </tr>\n"
+                                         "    </tbody>\n"
+                                         "</table>\n");
 
     // Update our wallpaper
 
