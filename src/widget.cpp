@@ -179,9 +179,9 @@ Widget::Widget() :
     mAllKanjiState(QMap<QChar, QString>()),
     mOldKanjiState(QMap<QChar, QString>()),
     mNeedToCheckWallpaper(true),
-    mRadicalsReviews(QMap<QDateTime, int>()),
-    mKanjiReviews(QMap<QDateTime, int>()),
-    mVocabularyReviews(QMap<QDateTime, int>())
+    mRadicalsReviews(Reviews()),
+    mKanjiReviews(Reviews()),
+    mVocabularyReviews(Reviews())
 {
     // Set up our GUI
 
@@ -219,6 +219,9 @@ Widget::Widget() :
 
     // Some about information
 
+    static const QString About = "<span style=\"font-size: 19px;\"><strong><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> %1</strong></span><br/>"
+                                 "© 2016%2 <a href=\"https://github.com/agarny\""+QString(LinkStyle)+">Alan Garny</a>";
+
     QFile versionFile(":/version");
 
     versionFile.open(QIODevice::ReadOnly);
@@ -230,8 +233,10 @@ Widget::Widget() :
 
     int currentYear = QDate::currentDate().year();
 
-    mGui->aboutValue->setText("<span style=\"font-size: 19px;\"><strong><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> "+version+"</strong></span><br/>"
-                              "© 2016"+((currentYear > 2016)?QString("-%1").arg(currentYear):QString())+" <a href=\"https://github.com/agarny\""+QString(LinkStyle)+">Alan Garny</a>");
+    mGui->aboutValue->setText(About.arg(version,
+                                        (currentYear > 2016)?
+                                            QString("-%1").arg(currentYear):
+                                            QString()));
 
     // Handle signals from our WaniKani object
 
@@ -905,6 +910,36 @@ QString Widget::timeToString(const int &pSeconds)
 
 //==============================================================================
 
+void Widget::determineReviews(const Reviews &pReviews, const QDateTime &pNow,
+                              QDateTime &pNextDateTime, int &pDiff,
+                              int *pNbOfReviews)
+{
+    // Determine the reviews for the given set of data
+
+    foreach (const QDateTime &dateTime, pReviews.keys()) {
+        int localDiff = pNow.secsTo(dateTime);
+
+        if (localDiff < pDiff) {
+            pDiff = localDiff;
+
+            pNextDateTime = dateTime;
+        }
+
+        int currentReview = pReviews.value(dateTime);
+
+        if (localDiff <= 0)
+            pNbOfReviews[0] += currentReview;
+
+        if (localDiff < 3600)
+            pNbOfReviews[1] += currentReview;
+
+        if (localDiff < 86400)
+            pNbOfReviews[2] += currentReview;
+    }
+}
+
+//==============================================================================
+
 void Widget::waniKaniUpdated()
 {
     // Retrieve the user's gravatar
@@ -968,7 +1003,7 @@ void Widget::waniKaniUpdated()
     int radicalsProgress = 0;
     int radicalsTotal = 0;
 
-    mRadicalsReviews = QMap<QDateTime, int>();
+    mRadicalsReviews = Reviews();
 
     foreach (const Radical &radical, mWaniKani.radicals()) {
         if (radical.level() == mWaniKani.level()) {
@@ -985,26 +1020,6 @@ void Widget::waniKaniUpdated()
         }
     }
 
-    // Determine our radicals progression
-
-    double currentRadicalsValue = double(radicalsProgress)/radicalsTotal;
-
-    mCurrentRadicalsProgress->setValue(currentRadicalsValue);
-    mCurrentRadicalsProgress->setToolTip(QString("<table>\n"
-                                                 "    <thead>\n"
-                                                 "        <tr>\n"
-                                                 "            <td align=center><strong>Radicals Progression</strong></td>\n"
-                                                 "        </tr>\n"
-                                                 "    </thead>\n"
-                                                 "    <tbody>\n"
-                                                 "        <tr>\n"
-                                                 "            <td align=center>%1/%2 (%3%)</td>\n"
-                                                 "        </tr>\n"
-                                                 "    </tbody>\n"
-                                                 "</table>\n").arg(radicalsProgress)
-                                                              .arg(radicalsTotal)
-                                                              .arg(int(100*currentRadicalsValue)));
-
     // Retrieve various information about our Kanji
 
     int kanjiProgress = 0;
@@ -1013,7 +1028,7 @@ void Widget::waniKaniUpdated()
     mCurrentKanjiState = QMap<QChar, QString>();
     mAllKanjiState = QMap<QChar, QString>();
 
-    mKanjiReviews = QMap<QDateTime, int>();
+    mKanjiReviews = Reviews();
 
     foreach (const Kanji &kanji, mWaniKani.kanjis()) {
         if (kanji.level() == mWaniKani.level()) {
@@ -1037,7 +1052,7 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our vocabulary
 
-    mVocabularyReviews = QMap<QDateTime, int>();
+    mVocabularyReviews = Reviews();
 
     foreach (const Vocabulary &vocabulary, mWaniKani.vocabularies()) {
         if (vocabulary.userSpecific().availableDate()) {
@@ -1047,172 +1062,93 @@ void Widget::waniKaniUpdated()
         }
     }
 
-    // Determine our Kanji progression
+    // Determine our radicals and Kanji progressions
 
+    static const QString ProgressToolTip = "<table>\n"
+                                           "    <thead>\n"
+                                           "        <tr>\n"
+                                           "            <td align=center><strong>%1</strong></td>\n"
+                                           "        </tr>\n"
+                                           "    </thead>\n"
+                                           "    <tbody>\n"
+                                           "        <tr>\n"
+                                           "            <td align=center>%2/%3 (%4%)</td>\n"
+                                           "        </tr>\n"
+                                           "    </tbody>\n"
+                                           "</table>\n";
+
+    double currentRadicalsValue = double(radicalsProgress)/radicalsTotal;
     double currentKanjiValue = double(kanjiProgress)/kanjiTotal;
 
+    mCurrentRadicalsProgress->setValue(currentRadicalsValue);
+    mCurrentRadicalsProgress->setToolTip(ProgressToolTip.arg("Radicals Progress")
+                                                        .arg(radicalsProgress)
+                                                        .arg(radicalsTotal)
+                                                        .arg(int(100*currentRadicalsValue)));
+
     mCurrentKanjiProgress->setValue(currentKanjiValue);
-    mCurrentKanjiProgress->setToolTip(QString("<table>\n"
-                                              "    <thead>\n"
-                                              "        <tr>\n"
-                                              "            <td align=center><strong>Kanji Progression</strong></td>\n"
-                                              "        </tr>\n"
-                                              "    </thead>\n"
-                                              "    <tbody>\n"
-                                              "        <tr>\n"
-                                              "            <td align=center>%1/%2 (%3%)</td>\n"
-                                              "        </tr>\n"
-                                              "    </tbody>\n"
-                                              "</table>\n").arg(kanjiProgress)
-                                                           .arg(kanjiTotal)
-                                                           .arg(int(100*currentKanjiValue)));
+    mCurrentKanjiProgress->setToolTip(ProgressToolTip.arg("Kanji Progression")
+                                                     .arg(kanjiProgress)
+                                                     .arg(kanjiTotal)
+                                                     .arg(int(100*currentKanjiValue)));
 
     // Determine the next, next hour and next day reviews
 
     QDateTime now = QDateTime::currentDateTime();
     QDateTime nextDateTime = now;
     int diff = INT_MAX;
-    int nextRadicalsReview = 0;
-    int nextKanjiReview = 0;
-    int nextVocabularyReview = 0;
-    int hourRadicalsReview = 0;
-    int hourKanjiReview = 0;
-    int hourVocabularyReview = 0;
-    int dayRadicalsReview = 0;
-    int dayKanjiReview = 0;
-    int dayVocabularyReview = 0;
+    int nbOfRadicalsReviews[3] = {0, 0, 0};
+    int nbOfKanjiReviews[3] = {0, 0, 0};
+    int nbOfVocabularyReviews[3] = {0, 0, 0};
 
-    foreach (const QDateTime &dateTime, mRadicalsReviews.keys()) {
-        int localDiff = now.secsTo(dateTime);
+    determineReviews(mRadicalsReviews, now, nextDateTime, diff, nbOfRadicalsReviews);
+    determineReviews(mKanjiReviews, now, nextDateTime, diff, nbOfKanjiReviews);
+    determineReviews(mVocabularyReviews, now, nextDateTime, diff, nbOfVocabularyReviews);
 
-        if (localDiff < diff) {
-            diff = localDiff;
-
-            nextDateTime = dateTime;
-        }
-
-        int currentReview = mRadicalsReviews.value(dateTime);
-
-        if (localDiff <= 0)
-            nextRadicalsReview += currentReview;
-
-        if (localDiff < 3600)
-            hourRadicalsReview += currentReview;
-
-        if (localDiff < 86400)
-            dayRadicalsReview += currentReview;
+    if (!nbOfRadicalsReviews[0] && !nbOfKanjiReviews[0] && !nbOfVocabularyReviews[0]) {
+        nbOfRadicalsReviews[0] =  mRadicalsReviews.value(nextDateTime);
+        nbOfKanjiReviews[0] = mKanjiReviews.value(nextDateTime);
+        nbOfVocabularyReviews[0] = mVocabularyReviews.value(nextDateTime);
     }
 
-    foreach (const QDateTime &dateTime, mKanjiReviews.keys()) {
-        int localDiff = now.secsTo(dateTime);
-
-        if (localDiff < diff) {
-            diff = localDiff;
-
-            nextDateTime = dateTime;
-        }
-
-        int currentReview = mKanjiReviews.value(dateTime);
-
-        if (localDiff <= 0)
-            nextKanjiReview += currentReview;
-
-        if (localDiff < 3600)
-            hourKanjiReview += currentReview;
-
-        if (localDiff < 86400)
-            dayKanjiReview += currentReview;
-    }
-
-    foreach (const QDateTime &dateTime, mVocabularyReviews.keys()) {
-        int localDiff = now.secsTo(dateTime);
-
-        if (localDiff < diff) {
-            diff = localDiff;
-
-            nextDateTime = dateTime;
-        }
-
-        int currentReview = mVocabularyReviews.value(dateTime);
-
-        if (localDiff <= 0)
-            nextVocabularyReview += currentReview;
-
-        if (localDiff < 3600)
-            hourVocabularyReview += currentReview;
-
-        if (localDiff < 86400)
-            dayVocabularyReview += currentReview;
-    }
-
-    if (!nextRadicalsReview && !nextKanjiReview && !nextVocabularyReview) {
-        nextRadicalsReview =  mRadicalsReviews.value(nextDateTime);
-        nextKanjiReview = mKanjiReviews.value(nextDateTime);
-        nextVocabularyReview = mVocabularyReviews.value(nextDateTime);
-    }
-
-    mGui->nextReviewValue->setText("<center>"
-                                   "    <span style=\"font-size: 15px;\"><strong>"+QString::number(nextRadicalsReview+nextKanjiReview+nextVocabularyReview)+((diff <= 0)?" now":" in "+timeToString(diff))+"</strong></span><br/>"
-                                   "    <span style=\"font-size: 11px;\">Next Review</span>"
-                                   "</center>");
-    mGui->nextReviewValue->setToolTip("<table>\n"
-                                      "    <tbody>\n"
-                                      "        <tr>\n"
-                                      "            <td>Radicals:</td>\n"
-                                      "            <td align=right>"+QString::number(nextRadicalsReview)+"</td>\n"
-                                      "        </tr>\n"
-                                      "        <tr>\n"
-                                      "            <td>Kanji:</td>\n"
-                                      "            <td align=right>"+QString::number(nextKanjiReview)+"</td>\n"
-                                      "        </tr>\n"
-                                      "        <tr>\n"
-                                      "            <td>Vocabulary:</td>\n"
-                                      "            <td align=right>"+QString::number(nextVocabularyReview)+"</td>\n"
-                                      "        </tr>\n"
-                                      "    </tbody>\n"
-                                      "</table>\n");
-
-    mGui->nextHourReviewValue->setText("<center>"
-                                       "    <span style=\"font-size: 15px;\"><strong>"+QString::number(hourRadicalsReview+hourKanjiReview+hourVocabularyReview)+"</strong></span><br/>"
-                                       "    <span style=\"font-size: 11px;\">Next Hour</span>"
-                                       "</center>");
-    mGui->nextHourReviewValue->setToolTip("<table>\n"
-                                          "    <tbody>\n"
-                                          "        <tr>\n"
-                                          "            <td>Radicals:</td>\n"
-                                          "            <td align=right>"+QString::number(hourRadicalsReview)+"</td>\n"
-                                          "        </tr>\n"
-                                          "        <tr>\n"
-                                          "            <td>Kanji:</td>\n"
-                                          "            <td align=right>"+QString::number(hourKanjiReview)+"</td>\n"
-                                          "        </tr>\n"
-                                          "        <tr>\n"
-                                          "            <td>Vocabulary:</td>\n"
-                                          "            <td align=right>"+QString::number(hourVocabularyReview)+"</td>\n"
-                                          "        </tr>\n"
-                                          "    </tbody>\n"
-                                          "</table>\n");
-
-    mGui->nextDayReviewValue->setText("<center>"
-                                      "    <span style=\"font-size: 15px;\"><strong>"+QString::number(dayRadicalsReview+dayKanjiReview+dayVocabularyReview)+"</strong></span><br/>"
-                                      "    <span style=\"font-size: 11px;\">Next Day</span>"
-                                      "</center>");
-    mGui->nextDayReviewValue->setToolTip("<table>\n"
+    static const QString ReviewText = "<center>"
+                                      "    <span style=\"font-size: 15px;\"><strong>%1%2</strong></span><br/>"
+                                      "    <span style=\"font-size: 11px;\">Next Review</span>"
+                                      "</center>";
+    static const QString ReviewToolTip = "<table>\n"
                                          "    <tbody>\n"
                                          "        <tr>\n"
                                          "            <td>Radicals:</td>\n"
-                                         "            <td align=right>"+QString::number(dayRadicalsReview)+"</td>\n"
+                                         "            <td align=right>%1</td>\n"
                                          "        </tr>\n"
                                          "        <tr>\n"
                                          "            <td>Kanji:</td>\n"
-                                         "            <td align=right>"+QString::number(dayKanjiReview)+"</td>\n"
+                                         "            <td align=right>%2</td>\n"
                                          "        </tr>\n"
                                          "        <tr>\n"
                                          "            <td>Vocabulary:</td>\n"
-                                         "            <td align=right>"+QString::number(dayVocabularyReview)+"</td>\n"
+                                         "            <td align=right>%3</td>\n"
                                          "        </tr>\n"
                                          "    </tbody>\n"
-                                         "</table>\n");
+                                         "</table>\n";
+
+    mGui->nextReviewValue->setText(ReviewText.arg(nbOfRadicalsReviews[0]+nbOfRadicalsReviews[1]+nbOfRadicalsReviews[2])
+                                             .arg((diff <= 0)?" now":" in "+timeToString(diff)));
+    mGui->nextReviewValue->setToolTip(ReviewToolTip.arg(nbOfRadicalsReviews[0])
+                                                   .arg(nbOfRadicalsReviews[1])
+                                                   .arg(nbOfRadicalsReviews[2]));
+
+    mGui->nextHourReviewValue->setText(ReviewText.arg(nbOfKanjiReviews[0]+nbOfKanjiReviews[1]+nbOfKanjiReviews[2])
+                                                 .arg(QString()));
+    mGui->nextHourReviewValue->setToolTip(ReviewToolTip.arg(nbOfKanjiReviews[0])
+                                                       .arg(nbOfKanjiReviews[1])
+                                                       .arg(nbOfKanjiReviews[2]));
+
+    mGui->nextDayReviewValue->setText(ReviewText.arg(nbOfVocabularyReviews[0]+nbOfVocabularyReviews[1]+nbOfVocabularyReviews[2])
+                                                .arg(QString()));
+    mGui->nextDayReviewValue->setToolTip(ReviewToolTip.arg(nbOfVocabularyReviews[0])
+                                                      .arg(nbOfVocabularyReviews[1])
+                                                      .arg(nbOfVocabularyReviews[2]));
 
     // Update our wallpaper
 
@@ -1341,16 +1277,18 @@ void Widget::setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor)
 {
     // Set the background of the given push button to the given colour
 
+    static const QString PushButtonStyle = "QPushButton#%1 {"
+                                           "    border: 1px solid gray;"
+                                           "    background-color: rgba(%2, %3, %4, %5);"
+                                           "}";
+
     mColors.insert(pPushButton, pColor);
 
-    pPushButton->setStyleSheet(QString("QPushButton#%1 {"
-                                       "    border: 1px solid gray;"
-                                       "    background-color: rgba(%2, %3, %4, %5);"
-                                       "}").arg(pPushButton->objectName())
-                                           .arg(qRed(pColor))
-                                           .arg(qGreen(pColor))
-                                           .arg(qBlue(pColor))
-                                           .arg(qAlpha(pColor)));
+    pPushButton->setStyleSheet(PushButtonStyle.arg(pPushButton->objectName())
+                                              .arg(qRed(pColor))
+                                              .arg(qGreen(pColor))
+                                              .arg(qBlue(pColor))
+                                              .arg(qAlpha(pColor)));
 
     if (pPushButton == mGui->enlightenedBackgroundPushButton)
         mCurrentRadicalsProgress->setColor(pColor);

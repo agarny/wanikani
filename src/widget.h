@@ -80,6 +80,10 @@ private:
 
 //==============================================================================
 
+typedef QMap<QDateTime, int> Reviews;
+
+//==============================================================================
+
 class Widget : public QWidget
 {
     Q_OBJECT
@@ -116,9 +120,9 @@ private:
     ProgressBarWidget *mCurrentRadicalsProgress;
     ProgressBarWidget *mCurrentKanjiProgress;
 
-    QMap<QDateTime, int> mRadicalsReviews;
-    QMap<QDateTime, int> mKanjiReviews;
-    QMap<QDateTime, int> mVocabularyReviews;
+    Reviews mRadicalsReviews;
+    Reviews mKanjiReviews;
+    Reviews mVocabularyReviews;
 
     ReviewsTimeLineWidget *mReviewsTimeLine;
 
@@ -146,6 +150,10 @@ private:
     void setWallpaper();
 
     QString timeToString(const int &pSeconds);
+
+    void determineReviews(const Reviews &pReviews, const QDateTime &pNow,
+                          QDateTime &pNextDateTime, int &pDiff,
+                          int *pNbOfReviews);
 
 private slots:
     void on_apiKeyValue_returnPressed();
