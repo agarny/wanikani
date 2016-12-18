@@ -1132,15 +1132,15 @@ void Widget::waniKaniUpdated()
     determineReviews(mCurrentVocabularyReviews, mAllVocabularyReviews, now,
                      nextDateTime, diff, nbOfVocabularyReviews);
 
-    if (!nbOfRadicalsReviews[0] && !nbOfKanjiReviews[0] && !nbOfVocabularyReviews[0]) {
-        nbOfRadicalsReviews[0] = mAllRadicalsReviews.value(nextDateTime);
-        nbOfRadicalsReviews[1] = mCurrentRadicalsReviews.value(nextDateTime);
+    if (!nbOfRadicalsReviews[1] && !nbOfKanjiReviews[1] && !nbOfVocabularyReviews[1]) {
+        nbOfRadicalsReviews[0] = mCurrentRadicalsReviews.value(nextDateTime);
+        nbOfRadicalsReviews[1] = mAllRadicalsReviews.value(nextDateTime);
 
-        nbOfKanjiReviews[0] = mAllKanjiReviews.value(nextDateTime);
-        nbOfKanjiReviews[1] = mCurrentKanjiReviews.value(nextDateTime);
+        nbOfKanjiReviews[0] = mCurrentKanjiReviews.value(nextDateTime);
+        nbOfKanjiReviews[1] = mAllKanjiReviews.value(nextDateTime);
 
-        nbOfVocabularyReviews[0] = mAllVocabularyReviews.value(nextDateTime);
-        nbOfVocabularyReviews[1] = mCurrentVocabularyReviews.value(nextDateTime);
+        nbOfVocabularyReviews[0] = mCurrentVocabularyReviews.value(nextDateTime);
+        nbOfVocabularyReviews[1] = mAllVocabularyReviews.value(nextDateTime);
     }
 
     static const QString ReviewText = "<center>\n"
