@@ -990,18 +990,20 @@ void Widget::waniKaniUpdated()
     double currentRadicalsValue = double(radicalsProgress)/radicalsTotal;
 
     mCurrentRadicalsProgress->setValue(currentRadicalsValue);
-    mCurrentRadicalsProgress->setToolTip("<table>\n"
-                                         "    <thead>\n"
-                                         "        <tr>\n"
-                                         "            <td align=center><strong>Radicals Progression</strong></td>\n"
-                                         "        </tr>\n"
-                                         "    </thead>\n"
-                                         "    <tbody>\n"
-                                         "        <tr>\n"
-                                         "            <td align=center>"+QString::number(int(100*currentRadicalsValue))+"%</td>\n"
-                                         "        </tr>\n"
-                                         "    </tbody>\n"
-                                         "</table>\n");
+    mCurrentRadicalsProgress->setToolTip(QString("<table>\n"
+                                                 "    <thead>\n"
+                                                 "        <tr>\n"
+                                                 "            <td align=center><strong>Radicals Progression</strong></td>\n"
+                                                 "        </tr>\n"
+                                                 "    </thead>\n"
+                                                 "    <tbody>\n"
+                                                 "        <tr>\n"
+                                                 "            <td align=center>%1/%2 (%3%)</td>\n"
+                                                 "        </tr>\n"
+                                                 "    </tbody>\n"
+                                                 "</table>\n").arg(radicalsProgress)
+                                                              .arg(radicalsTotal)
+                                                              .arg(int(100*currentRadicalsValue)));
 
     // Retrieve various information about our Kanji
 
@@ -1050,18 +1052,20 @@ void Widget::waniKaniUpdated()
     double currentKanjiValue = double(kanjiProgress)/kanjiTotal;
 
     mCurrentKanjiProgress->setValue(currentKanjiValue);
-    mCurrentKanjiProgress->setToolTip("<table>\n"
-                                      "    <thead>\n"
-                                      "        <tr>\n"
-                                      "            <td align=center><strong>Kanji Progression</strong></td>\n"
-                                      "        </tr>\n"
-                                      "    </thead>\n"
-                                      "    <tbody>\n"
-                                      "        <tr>\n"
-                                      "            <td align=center>"+QString::number(int(100*currentKanjiValue))+"%</td>\n"
-                                      "        </tr>\n"
-                                      "    </tbody>\n"
-                                      "</table>\n");
+    mCurrentKanjiProgress->setToolTip(QString("<table>\n"
+                                              "    <thead>\n"
+                                              "        <tr>\n"
+                                              "            <td align=center><strong>Kanji Progression</strong></td>\n"
+                                              "        </tr>\n"
+                                              "    </thead>\n"
+                                              "    <tbody>\n"
+                                              "        <tr>\n"
+                                              "            <td align=center>%1/%2 (%3%)</td>\n"
+                                              "        </tr>\n"
+                                              "    </tbody>\n"
+                                              "</table>\n").arg(kanjiProgress)
+                                                           .arg(kanjiTotal)
+                                                           .arg(int(100*currentKanjiValue)));
 
     // Determine the next, next hour and next day reviews
 
