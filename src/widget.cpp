@@ -200,7 +200,7 @@ Widget::Widget() :
 
     mGui->layout->insertWidget(mGui->layout->indexOf(mGui->bottomSeparator), mReviewsTimeLine);
 
-    setMinimumSize(QSize(1024, 768));
+    setMinimumSize(0.8*QDesktopWidget().availableGeometry().size());
 
 #ifdef Q_OS_MAC
     setWindowFlags(Qt::FramelessWindowHint);
@@ -1227,14 +1227,12 @@ void Widget::waniKaniError()
 
 void Widget::trayIconActivated()
 {
-#ifndef Q_OS_MAC
     // Make sure that we are in the centre of the screen
 
     QDesktopWidget desktopWidget;
     QRect availableGeometry = desktopWidget.availableGeometry();
 
     move(availableGeometry.center()-QPoint(width() >> 1, height() >> 1));
-#endif
 
     // Show ourselves
     // Note: to show ourselves, one would normally use activateWindow() (and
