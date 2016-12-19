@@ -28,6 +28,7 @@ limitations under the License.
 
 //==============================================================================
 
+#include <QDateTime>
 #include <QMap>
 #include <QSystemTrayIcon>
 #include <QTimer>
