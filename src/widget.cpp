@@ -1005,9 +1005,10 @@ void Widget::waniKaniUpdated()
     mCurrentKanjiProgress->show();
 
     mGui->topSeparator->show();
-    mGui->nextReviewValue->show();
-    mGui->nextHourReviewValue->show();
-    mGui->nextDayReviewValue->show();
+    mGui->nextLessonsValue->show();
+    mGui->nextReviewsValue->show();
+    mGui->nextHourReviewsValue->show();
+    mGui->nextDayReviewsValue->show();
     mReviewsTimeLine->show();
 
     // Retrieve various information about our radicals
@@ -1143,56 +1144,79 @@ void Widget::waniKaniUpdated()
         nbOfVocabularyReviews[1] = mAllVocabularyReviews.value(nextDateTime);
     }
 
-    static const QString ReviewText = "<center>\n"
-                                      "    <span style=\"font-size: 15px;\"><strong>%1 (%2)</strong></span><br/>\n"
-                                      "    <span style=\"font-size: 11px;\">%3</span>\n"
-                                      "</center>\n";
-    static const QString ReviewToolTip = "<table>\n"
-                                         "    <tbody>\n"
-                                         "        <tr>\n"
-                                         "            <td>Radicals:</td>\n"
-                                         "            <td style=\"width: 4px;\"></td>\n"
-                                         "            <td align=center>%1</td>\n"
-                                         "            <td style=\"width: 4px;\"></td>\n"
-                                         "            <td align=center>(%2)</td>\n"
-                                         "        </tr>\n"
-                                         "        <tr>\n"
-                                         "            <td>Kanji:</td>\n"
-                                         "            <td style=\"width: 4px;\"></td>\n"
-                                         "            <td align=center>%3</td>\n"
-                                         "            <td style=\"width: 4px;\"></td>\n"
-                                         "            <td align=center>(%4)</td>\n"
-                                         "        </tr>\n"
-                                         "        <tr>\n"
-                                         "            <td>Vocabulary:</td>\n"
-                                         "            <td style=\"width: 4px;\"></td>\n"
-                                         "            <td align=center>%5</td>\n"
-                                         "            <td style=\"width: 4px;\"></td>\n"
-                                         "            <td align=center>(%6)</td>\n"
-                                         "        </tr>\n"
-                                         "    </tbody>\n"
-                                         "</table>\n";
+    static const QString LessonsText = "<center>\n"
+                                       "    <span style=\"font-size: 15px;\"><strong>%1</strong></span><br/>\n"
+                                       "</center>\n";
+    static const QString ReviewsText = "<center>\n"
+                                       "    <span style=\"font-size: 15px;\"><strong>%1</strong></span><br/>\n"
+                                       "    <span style=\"font-size: 11px;\">%2</span>\n"
+                                       "</center>\n";
+    static const QString ReviewsToolTip = "<table>\n"
+                                          "    <tbody>\n"
+                                          "        <tr>\n"
+                                          "            <td>Radicals:</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>%1</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>(%2)</td>\n"
+                                          "        </tr>\n"
+                                          "        <tr>\n"
+                                          "            <td>Kanji:</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>%3</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>(%4)</td>\n"
+                                          "        </tr>\n"
+                                          "        <tr>\n"
+                                          "            <td>Vocabulary:</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>%5</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>(%6)</td>\n"
+                                          "        </tr>\n"
+                                          "    </tbody>\n"
+                                          "</table>\n";
+    static const QString Reviews = "%1 (%2) reviews";
+    static const QString NoReviews = "No reviews";
 
-    mGui->nextReviewValue->setText(ReviewText.arg(nbOfRadicalsReviews[1]+nbOfKanjiReviews[1]+nbOfVocabularyReviews[1])
-                                             .arg(nbOfRadicalsReviews[0]+nbOfKanjiReviews[0]+nbOfVocabularyReviews[0])
-                                             .arg((diff <= 0)?"Now":"In "+timeToString(diff)));
-    mGui->nextReviewValue->setToolTip(ReviewToolTip.arg(nbOfRadicalsReviews[1]).arg(nbOfRadicalsReviews[0])
-                                                   .arg(nbOfKanjiReviews[1]).arg(nbOfKanjiReviews[0])
-                                                   .arg(nbOfVocabularyReviews[1]).arg(nbOfVocabularyReviews[0]));
+    mGui->nextLessonsValue->setText(LessonsText.arg(mWaniKani.studyQueue().lessonsAvailable()?
+                                                        QString("<a href=\"https://www.wanikani.com/lesson\""+QString(LinkStyle)+">%1 lessons</a>").arg(mWaniKani.studyQueue().lessonsAvailable()):
+                                                        "0 lessons"));
 
-    mGui->nextHourReviewValue->setText(ReviewText.arg(nbOfRadicalsReviews[3]+nbOfKanjiReviews[3]+nbOfVocabularyReviews[3])
-                                                 .arg(nbOfRadicalsReviews[2]+nbOfKanjiReviews[2]+nbOfVocabularyReviews[2])
-                                                 .arg("Within the next hour"));
-    mGui->nextHourReviewValue->setToolTip(ReviewToolTip.arg(nbOfRadicalsReviews[3]).arg(nbOfRadicalsReviews[2])
-                                                       .arg(nbOfKanjiReviews[3]).arg(nbOfKanjiReviews[2])
-                                                       .arg(nbOfVocabularyReviews[3]).arg(nbOfVocabularyReviews[2]));
+    int nbOfReviews = nbOfRadicalsReviews[1]+nbOfKanjiReviews[1]+nbOfVocabularyReviews[1];
+    int nbOfCurrentReviews = nbOfRadicalsReviews[0]+nbOfKanjiReviews[0]+nbOfVocabularyReviews[0];
 
-    mGui->nextDayReviewValue->setText(ReviewText.arg(nbOfRadicalsReviews[5]+nbOfKanjiReviews[5]+nbOfVocabularyReviews[5])
-                                                .arg(nbOfRadicalsReviews[4]+nbOfKanjiReviews[4]+nbOfVocabularyReviews[4])
-                                                .arg("Within the next day"));
-    mGui->nextDayReviewValue->setToolTip(ReviewToolTip.arg(nbOfRadicalsReviews[5]).arg(nbOfRadicalsReviews[4])
-                                                      .arg(nbOfKanjiReviews[5]).arg(nbOfKanjiReviews[4])
-                                                      .arg(nbOfVocabularyReviews[5]).arg(nbOfVocabularyReviews[4]));
+    mGui->nextReviewsValue->setText(ReviewsText.arg(nbOfReviews?
+                                                        (diff <= 0)?
+                                                            QString("<a href=\"https://www.wanikani.com/review\""+QString(LinkStyle)+">"+Reviews+"</a>").arg(nbOfReviews).arg(nbOfCurrentReviews):
+                                                            Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
+                                                        NoReviews)
+                                               .arg((diff <= 0)?"now":"in "+timeToString(diff)));
+    mGui->nextReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[1]).arg(nbOfRadicalsReviews[0])
+                                                     .arg(nbOfKanjiReviews[1]).arg(nbOfKanjiReviews[0])
+                                                     .arg(nbOfVocabularyReviews[1]).arg(nbOfVocabularyReviews[0]));
+
+    nbOfReviews = nbOfRadicalsReviews[3]+nbOfKanjiReviews[3]+nbOfVocabularyReviews[3];
+    nbOfCurrentReviews = nbOfRadicalsReviews[2]+nbOfKanjiReviews[2]+nbOfVocabularyReviews[2];
+
+    mGui->nextHourReviewsValue->setText(ReviewsText.arg(nbOfReviews?
+                                                            Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
+                                                            NoReviews)
+                                                   .arg("within the next hour"));
+    mGui->nextHourReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[3]).arg(nbOfRadicalsReviews[2])
+                                                         .arg(nbOfKanjiReviews[3]).arg(nbOfKanjiReviews[2])
+                                                         .arg(nbOfVocabularyReviews[3]).arg(nbOfVocabularyReviews[2]));
+
+    nbOfReviews = nbOfRadicalsReviews[5]+nbOfKanjiReviews[5]+nbOfVocabularyReviews[5];
+    nbOfCurrentReviews = nbOfRadicalsReviews[4]+nbOfKanjiReviews[4]+nbOfVocabularyReviews[4];
+
+    mGui->nextDayReviewsValue->setText(ReviewsText.arg(nbOfReviews?
+                                                           Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
+                                                           NoReviews)
+                                                  .arg("within the next day"));
+    mGui->nextDayReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[5]).arg(nbOfRadicalsReviews[4])
+                                                        .arg(nbOfKanjiReviews[5]).arg(nbOfKanjiReviews[4])
+                                                        .arg(nbOfVocabularyReviews[5]).arg(nbOfVocabularyReviews[4]));
 
     // Update our wallpaper
 
@@ -1217,9 +1241,10 @@ void Widget::waniKaniError()
     mCurrentKanjiProgress->hide();
 
     mGui->topSeparator->hide();
-    mGui->nextReviewValue->hide();
-    mGui->nextHourReviewValue->hide();
-    mGui->nextDayReviewValue->hide();
+    mGui->nextLessonsValue->hide();
+    mGui->nextReviewsValue->hide();
+    mGui->nextHourReviewsValue->hide();
+    mGui->nextDayReviewsValue->hide();
     mReviewsTimeLine->hide();
 }
 

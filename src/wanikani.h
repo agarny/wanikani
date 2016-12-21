@@ -32,6 +32,29 @@ limitations under the License.
 
 //==============================================================================
 
+class StudyQueue
+{
+    friend class WaniKani;
+
+public:
+    explicit StudyQueue();
+
+    int lessonsAvailable() const;
+    int reviewsAvailable() const;
+    int nextReviewDate() const;
+    int reviewsAvailableNextHour() const;
+    int reviewsAvailableNextDay() const;
+
+private:
+    int mLessonsAvailable;
+    int mReviewsAvailable;
+    int mNextReviewDate;
+    int mReviewsAvailableNextHour;
+    int mReviewsAvailableNextDay;
+};
+
+//==============================================================================
+
 class SrsDistributionInformation
 {
     friend class WaniKani;
@@ -247,6 +270,7 @@ public:
     int creationDate() const;
     int vacationDate() const;
 
+    StudyQueue studyQueue() const;
     SrsDistribution srsDistribution() const;
     Radicals radicals() const;
     Kanjis kanjis() const;
@@ -267,6 +291,7 @@ private:
     int mCreationDate;
     int mVacationDate;
 
+    StudyQueue mStudyQueue;
     SrsDistribution mSrsDistribution;
     Radicals mRadicals;
     Kanjis mKanjis;

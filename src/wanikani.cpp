@@ -32,6 +32,62 @@ limitations under the License.
 
 //==============================================================================
 
+StudyQueue::StudyQueue() :
+    mLessonsAvailable(0),
+    mReviewsAvailable(0),
+    mNextReviewDate(0),
+    mReviewsAvailableNextHour(0),
+    mReviewsAvailableNextDay(0)
+{
+}
+
+//==============================================================================
+
+int StudyQueue::lessonsAvailable() const
+{
+    // Return our number of lessons available
+
+    return mLessonsAvailable;
+}
+
+//==============================================================================
+
+int StudyQueue::reviewsAvailable() const
+{
+    // Return our number of reviews available
+
+    return mReviewsAvailable;
+}
+
+//==============================================================================
+
+int StudyQueue::nextReviewDate() const
+{
+    // Return our next review date
+
+    return mNextReviewDate;
+}
+
+//==============================================================================
+
+int StudyQueue::reviewsAvailableNextHour() const
+{
+    // Return our number of reviews available within the next hour
+
+    return mReviewsAvailableNextHour;
+}
+
+//==============================================================================
+
+int StudyQueue::reviewsAvailableNextDay() const
+{
+    // Return our number of reviews available within the next day
+
+    return mReviewsAvailableNextDay;
+}
+
+//==============================================================================
+
 SrsDistributionInformation::SrsDistributionInformation() :
     mName(QString()),
     mRadicals(QString()),
@@ -547,12 +603,17 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
 void WaniKani::update()
 {
     // Retrieve
-    //  - the user's information and his/her SRS distribution
+    //  - the user's information and study queue
+    //  - the user's SRS distribution
     //  - the user's list of radicals (and their information)
     //  - the user's list of Kanji (and their information)
     //  - the user's list of vocabulary (and their information)
 
-    QJsonDocument srsDistributionResponse = waniKaniRequest("srs-distribution");
+    QJsonDocument studyQueueResponse = waniKaniRequest("study-queue");
+    QJsonDocument srsDistributionResponse = (   studyQueueResponse.isNull()
+                                             || studyQueueResponse.object().contains("error"))?
+                                                    QJsonDocument():
+                                                    waniKaniRequest("srs-distribution");
     QJsonDocument radicalsResponse = (   srsDistributionResponse.isNull()
                                       || srsDistributionResponse.object().contains("error"))?
                                              QJsonDocument():
@@ -570,7 +631,7 @@ void WaniKani::update()
         && !vocabularyResponse.object().contains("error")) {
         // Retrieve some of the user's information
 
-        QVariantMap userInformationMap = srsDistributionResponse.object().toVariantMap()["user_information"].toMap();
+        QVariantMap userInformationMap = studyQueueResponse.object().toVariantMap()["user_information"].toMap();
 
         mUserName = userInformationMap["username"].toString();
         mGravatar = userInformationMap["gravatar"].toString();
@@ -583,6 +644,16 @@ void WaniKani::update()
         mPostsCount = userInformationMap["posts_count"].toInt();
         mCreationDate = userInformationMap["creation_date"].toInt();
         mVacationDate = userInformationMap["vacation_date"].toInt();
+
+        // Retrieve the user's study queue
+
+        QVariantMap studyQueueMap = studyQueueResponse.object().toVariantMap()["requested_information"].toMap();
+
+        mStudyQueue.mLessonsAvailable = studyQueueMap["lessons_available"].toInt();
+        mStudyQueue.mReviewsAvailable = studyQueueMap["reviews_available"].toInt();
+        mStudyQueue.mNextReviewDate = studyQueueMap["next_review_date"].toInt();
+        mStudyQueue.mReviewsAvailableNextHour = studyQueueMap["reviews_available_next_hour"].toInt();
+        mStudyQueue.mReviewsAvailableNextDay = studyQueueMap["reviews_available_next_day"].toInt();
 
         // Retrieve the user's SRS distribution
 
@@ -829,6 +900,15 @@ int WaniKani::vacationDate() const
     // Return our vacation date
 
     return mVacationDate;
+}
+
+//==============================================================================
+
+StudyQueue WaniKani::studyQueue() const
+{
+    // Return our study queue
+
+    return mStudyQueue;
 }
 
 //==============================================================================

@@ -500,7 +500,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="bottomLayout" stretch="1,1,1,1,0">
+    <layout class="QHBoxLayout" name="bottomLayout" stretch="1,1,1,1,1,0">
      <property name="spacing">
       <number>0</number>
      </property>
@@ -515,21 +515,34 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="nextReviewValue">
+      <widget class="QLabel" name="nextLessonsValue">
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="nextReviewsValue">
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="nextHourReviewsValue">
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="nextHourReviewValue">
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="nextDayReviewValue">
+      <widget class="QLabel" name="nextDayReviewsValue">
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
