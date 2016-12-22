@@ -1176,6 +1176,7 @@ void Widget::waniKaniUpdated()
                                           "        </tr>\n"
                                           "    </tbody>\n"
                                           "</table>\n";
+    static const QString ReviewsLink = "<a href=\"https://www.wanikani.com/review\""+QString(LinkStyle)+">%1</a>";
     static const QString Reviews = "%1 (%2) reviews";
     static const QString NoReviews = "No reviews";
 
@@ -1188,10 +1189,10 @@ void Widget::waniKaniUpdated()
 
     mGui->nextReviewsValue->setText(ReviewsText.arg(nbOfReviews?
                                                         (diff <= 0)?
-                                                            QString("<a href=\"https://www.wanikani.com/review\""+QString(LinkStyle)+">"+Reviews+"</a>").arg(nbOfReviews).arg(nbOfCurrentReviews):
+                                                            QString(ReviewsLink.arg(Reviews)).arg(nbOfReviews).arg(nbOfCurrentReviews):
                                                             Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
                                                         NoReviews)
-                                               .arg((diff <= 0)?"now":"in "+timeToString(diff)));
+                                               .arg((diff <= 0)?ReviewsLink.arg("now"):"in "+timeToString(diff)));
     mGui->nextReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[1]).arg(nbOfRadicalsReviews[0])
                                                      .arg(nbOfKanjiReviews[1]).arg(nbOfKanjiReviews[0])
                                                      .arg(nbOfVocabularyReviews[1]).arg(nbOfVocabularyReviews[0]));
