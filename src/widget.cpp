@@ -220,6 +220,11 @@ Widget::Widget() :
         }
     }
 
+#ifdef Q_OS_MAC
+    mGui->apiKeyValue->setAttribute(Qt::WA_MacShowFocusRect, false);
+    mGui->intervalSpinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+#endif
+
     // Some about information
 
     static const QString About = "<span style=\"font-size: 19px;\"><strong><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> %1</strong></span><br/>"
@@ -1176,12 +1181,12 @@ void Widget::waniKaniUpdated()
                                           "        </tr>\n"
                                           "    </tbody>\n"
                                           "</table>\n";
-    static const QString ReviewsLink = "<a href=\"https://www.wanikani.com/review\""+QString(LinkStyle)+">%1</a>";
+    static const QString ReviewsLink = "<a href=\"https://www.wanikani.com/review/session\""+QString(LinkStyle)+">%1</a>";
     static const QString Reviews = "%1 (%2) reviews";
     static const QString NoReviews = "No reviews";
 
     mGui->nextLessonsValue->setText(LessonsText.arg(mWaniKani.studyQueue().lessonsAvailable()?
-                                                        QString("<a href=\"https://www.wanikani.com/lesson\""+QString(LinkStyle)+">%1 lessons</a>").arg(mWaniKani.studyQueue().lessonsAvailable()):
+                                                        QString("<a href=\"https://www.wanikani.com/lesson/session\""+QString(LinkStyle)+">%1 lessons</a>").arg(mWaniKani.studyQueue().lessonsAvailable()):
                                                         "0 lessons"));
 
     int nbOfReviews = nbOfRadicalsReviews[1]+nbOfKanjiReviews[1]+nbOfVocabularyReviews[1];
