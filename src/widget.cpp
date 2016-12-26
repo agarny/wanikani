@@ -404,11 +404,17 @@ QString Widget::iconDataUri(const QString &pIcon, const int &pWidth,
 
 //==============================================================================
 
+static const int GravatarSize = 80;
+
+//==============================================================================
+
 void Widget::updateGravatar(const QPixmap &pGravatar)
 {
     // Update our gravatar
 
-    mGui->gravatarValue->setPixmap(pGravatar.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    mGui->gravatarValue->setPixmap(pGravatar.scaled(GravatarSize, GravatarSize,
+                                                    Qt::KeepAspectRatio,
+                                                    Qt::SmoothTransformation));
 }
 
 //==============================================================================
@@ -962,7 +968,8 @@ void Widget::waniKaniUpdated()
     // Retrieve the user's gravatar
 
     QNetworkAccessManager networkAccessManager;
-    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest("https://www.gravatar.com/avatar/"+mWaniKani.gravatar()));
+    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(QString("https://www.gravatar.com/avatar/%1?s=%2&d=404").arg(mWaniKani.gravatar())
+                                                                                                                                   .arg(GravatarSize)));
     QEventLoop eventLoop;
 
     QObject::connect(networkReply, SIGNAL(finished()),
