@@ -1197,7 +1197,11 @@ void Widget::waniKaniUpdated()
                                                             QString(ReviewsLink.arg(Reviews)).arg(nbOfReviews).arg(nbOfCurrentReviews):
                                                             Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
                                                         NoReviews)
-                                               .arg((diff <= 0)?ReviewsLink.arg("now"):"in "+timeToString(diff)));
+                                               .arg(mWaniKani.vacationDate()?
+                                                        QString():
+                                                        (diff <= 0)?
+                                                            ReviewsLink.arg("now"):
+                                                            "in "+timeToString(diff)));
     mGui->nextReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[1]).arg(nbOfRadicalsReviews[0])
                                                      .arg(nbOfKanjiReviews[1]).arg(nbOfKanjiReviews[0])
                                                      .arg(nbOfVocabularyReviews[1]).arg(nbOfVocabularyReviews[0]));
