@@ -180,7 +180,7 @@
              </layout>
             </item>
             <item>
-             <widget class="QLabel" name="levelUpValue"/>
+             <widget class="QLabel" name="levelStatisticsValue"/>
             </item>
            </layout>
           </widget>

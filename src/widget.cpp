@@ -196,8 +196,8 @@ Widget::Widget() :
     mGui->userInformationGroupBox->layout()->addWidget(mCurrentRadicalsProgress);
     mGui->userInformationGroupBox->layout()->addWidget(mCurrentKanjiProgress);
 
-    mGui->userInformationGroupBox->layout()->removeWidget(mGui->levelUpValue);
-    mGui->userInformationGroupBox->layout()->addWidget(mGui->levelUpValue);
+    mGui->userInformationGroupBox->layout()->removeWidget(mGui->levelStatisticsValue);
+    mGui->userInformationGroupBox->layout()->addWidget(mGui->levelStatisticsValue);
 
     mReviewsTimeLine = new ReviewsTimeLineWidget(this);
 
@@ -888,13 +888,9 @@ QString Widget::timeToString(const int &pSeconds)
         return "less than 1 minute";
     } else {
         QString res = QString();
-        int weeks = pSeconds/604800;
-        int days = (pSeconds/86400)%7;
+        int days = pSeconds/86400;
         int hours = (pSeconds/3600)%24;
         int minutes = (pSeconds/60)%60;
-
-        if (weeks)
-            res += (weeks == 1)?"1 week":QString("%1 weeks").arg(weeks);
 
         if (days) {
             if (!res.isEmpty())
@@ -1053,6 +1049,7 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our radicals
 
+    int levelStartTime = 0;
     QList<int> radicalGuruTimes = QList<int>();
     int radicalsProgress = 0;
     int radicalsTotal = 0;
@@ -1076,6 +1073,11 @@ void Widget::waniKaniUpdated()
                 ++radicalsProgress;
 
             ++radicalsTotal;
+
+            // Retrieve, if needed, when we started our current level
+
+            if (!levelStartTime)
+                levelStartTime = radical.userSpecific().unlockedDate();
         }
 
         if (radical.userSpecific().availableDate()) {
@@ -1134,13 +1136,35 @@ void Widget::waniKaniUpdated()
     std::sort(radicalGuruTimes.begin(), radicalGuruTimes.end());
     std::sort(kanjiGuruTimes.begin(), kanjiGuruTimes.end());
 
-    static const QString LevelUpText = "<center>\n"
-                                       "    <span style=\"font-size: 15px;\"><strong>Level up</strong></span><br/>\n"
-                                       "    <span style=\"font-size: 11px;\">in %1</span>\n"
-                                       "</center>\n";
+    static const QString LevelStatisticsText = "<center>\n"
+                                               "    <table style=\"font-size: 11px;\">\n"
+                                               "        <tbody>\n"
+                                               "            <tr>\n"
+                                               "                <td align=right>Start:</td>\n"
+                                               "                <td style=\"width: 4px;\"></td>\n"
+                                               "                <td>%1</td>\n"
+                                               "            </tr>\n"
+                                               "            <tr>\n"
+                                               "                <td align=right>Finish:</td>\n"
+                                               "                <td style=\"width: 4px;\"></td>\n"
+                                               "                <td>%2</td>\n"
+                                               "            </tr>\n"
+                                               "            <tr>\n"
+                                               "                <td align=right>Total:</td>\n"
+                                               "                <td style=\"width: 4px;\"></td>\n"
+                                               "                <td>%3</td>\n"
+                                               "            </tr>\n"
+                                               "        </tbody>\n"
+                                               "    </table>\n"
+                                               "</center>";
 
-    mGui->levelUpValue->setText(LevelUpText.arg(timeToString( radicalGuruTimes[0.9*radicalGuruTimes.count()-1]
-                                                             +kanjiGuruTimes[0.9*kanjiGuruTimes.count()-1])));
+    int start = nowTime-levelStartTime;
+    int finish =  radicalGuruTimes[0.9*radicalGuruTimes.count()-1]
+                 +kanjiGuruTimes[0.9*kanjiGuruTimes.count()-1];
+
+    mGui->levelStatisticsValue->setText(LevelStatisticsText.arg(timeToString(start),
+                                                                timeToString(finish),
+                                                                timeToString(start+finish)));
 
     // Retrieve various information about our vocabulary
 
