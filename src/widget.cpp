@@ -196,6 +196,9 @@ Widget::Widget() :
     mGui->userInformationGroupBox->layout()->addWidget(mCurrentRadicalsProgress);
     mGui->userInformationGroupBox->layout()->addWidget(mCurrentKanjiProgress);
 
+    mGui->userInformationGroupBox->layout()->removeWidget(mGui->levelUpValue);
+    mGui->userInformationGroupBox->layout()->addWidget(mGui->levelUpValue);
+
     mReviewsTimeLine = new ReviewsTimeLineWidget(this);
 
     mGui->layout->insertWidget(mGui->layout->indexOf(mGui->bottomSeparator), mReviewsTimeLine);
@@ -963,6 +966,31 @@ void Widget::determineReviews(const Reviews &pCurrentReviews,
 
 //==============================================================================
 
+int Widget::guruTime(const int &pSrsLevel, const int &pNextReview)
+{
+    // Make sure that we are not yet at the Guru level
+
+    if (pSrsLevel >= 5)
+        return 0;
+
+    // Compute and return the Guru time for the item which SRS level and next
+    // review time are given
+
+    static const int SrsIntervals[2][4] = { { 2, 4, 8, 23 },
+                                            { 4, 8, 23, 47 } };
+
+    int res = pSrsLevel?pNextReview:0;
+
+    if (pSrsLevel != 4) {
+        for (int i = 0; i < 4; ++i)
+            res += (pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i]*3600;
+    }
+
+    return res;
+}
+
+//==============================================================================
+
 void Widget::waniKaniUpdated()
 {
     // Retrieve the user's gravatar
@@ -1025,15 +1053,26 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our radicals
 
+    QList<int> radicalGuruTimes = QList<int>();
     int radicalsProgress = 0;
     int radicalsTotal = 0;
+    QDateTime now = QDateTime::currentDateTime();
+    uint nowTime = now.toTime_t();
 
     mCurrentRadicalsReviews = Reviews();
     mAllRadicalsReviews = Reviews();
 
     foreach (const Radical &radical, mWaniKani.radicals()) {
         if (radical.level() == mWaniKani.level()) {
-            if (radical.userSpecific().srsNumeric() >= 5)
+            // A radical from our current level, so determine how soon it can
+            // reach Guru level
+
+            radicalGuruTimes << guruTime(radical.userSpecific().srsNumeric(),
+                                         radical.userSpecific().availableDate()-nowTime);
+
+            // Keep track of our radical progress
+
+            if (radical.userSpecific().srsNumeric() == 5)
                 ++radicalsProgress;
 
             ++radicalsTotal;
@@ -1051,6 +1090,7 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our Kanji
 
+    QList<int> kanjiGuruTimes = QList<int>();
     int kanjiProgress = 0;
     int kanjiTotal = 0;
 
@@ -1062,7 +1102,15 @@ void Widget::waniKaniUpdated()
 
     foreach (const Kanji &kanji, mWaniKani.kanjis()) {
         if (kanji.level() == mWaniKani.level()) {
-            if (kanji.userSpecific().srsNumeric() >= 5)
+            // A Kanji from our current level, so determine how soon it can
+            // reach Guru level
+
+            kanjiGuruTimes << guruTime(kanji.userSpecific().srsNumeric(),
+                                       kanji.userSpecific().availableDate()-nowTime);
+
+            // Keep track of our Kanji progress
+
+            if (kanji.userSpecific().srsNumeric() == 5)
                 ++kanjiProgress;
 
             ++kanjiTotal;
@@ -1082,6 +1130,17 @@ void Widget::waniKaniUpdated()
             mAllKanjiReviews.insert(dateTime, mAllKanjiReviews.value(dateTime)+1);
         }
     }
+
+    std::sort(radicalGuruTimes.begin(), radicalGuruTimes.end());
+    std::sort(kanjiGuruTimes.begin(), kanjiGuruTimes.end());
+
+    static const QString LevelUpText = "<center>\n"
+                                       "    <span style=\"font-size: 15px;\"><strong>Level up</strong></span><br/>\n"
+                                       "    <span style=\"font-size: 11px;\">in %1</span>\n"
+                                       "</center>\n";
+
+    mGui->levelUpValue->setText(LevelUpText.arg(timeToString( radicalGuruTimes[0.9*radicalGuruTimes.count()-1]
+                                                             +kanjiGuruTimes[0.9*kanjiGuruTimes.count()-1])));
 
     // Retrieve various information about our vocabulary
 
@@ -1131,7 +1190,6 @@ void Widget::waniKaniUpdated()
 
     // Determine the next, next hour and next day reviews
 
-    QDateTime now = QDateTime::currentDateTime();
     QDateTime nextDateTime = now;
     int diff = INT_MAX;
     int nbOfRadicalsReviews[6] = {0, 0, 0, 0, 0, 0};

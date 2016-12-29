@@ -162,6 +162,8 @@ private:
                           QDateTime &pNextDateTime, int &pDiff,
                           int *pNbOfReviews);
 
+    int guruTime(const int &pSrsLevel, const int &pNextReview);
+
 private slots:
     void on_apiKeyValue_returnPressed();
 

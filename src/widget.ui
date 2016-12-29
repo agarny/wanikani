@@ -179,6 +179,9 @@
               </item>
              </layout>
             </item>
+            <item>
+             <widget class="QLabel" name="levelUpValue"/>
+            </item>
            </layout>
           </widget>
          </item>
