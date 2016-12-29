@@ -155,14 +155,15 @@ void ProgressBarWidget::setColor(const QRgb &pColor)
 
 //==============================================================================
 
-static const auto SettingsFileName     = QStringLiteral("FileName");
-static const auto SettingsApiKey       = QStringLiteral("ApiKey");
-static const auto SettingsCurrentKanji = QStringLiteral("CurrentKanji");
-static const auto SettingsInterval     = QStringLiteral("Interval");
-static const auto SettingsFontName     = QStringLiteral("FontName");
-static const auto SettingsBoldFont     = QStringLiteral("BoldFont");
-static const auto SettingsItalicsFont  = QStringLiteral("ItalicsFont");
-static const auto SettingsColor        = QStringLiteral("Color%1%2");
+static const auto SettingsFileName        = QStringLiteral("FileName");
+static const auto SettingsApiKey          = QStringLiteral("ApiKey");
+static const auto SettingsCurrentKanji    = QStringLiteral("CurrentKanji");
+static const auto SettingsInterval        = QStringLiteral("Interval");
+static const auto SettingsFontName        = QStringLiteral("FontName");
+static const auto SettingsBoldFont        = QStringLiteral("BoldFont");
+static const auto SettingsItalicsFont     = QStringLiteral("ItalicsFont");
+static const auto SettingsColor           = QStringLiteral("Color%1%2");
+static const auto SettingsReviewsTimeLine = QStringLiteral("ReviewsTimeLine");
 
 //==============================================================================
 
@@ -337,6 +338,7 @@ void Widget::retrieveSettings(const bool &pResetSettings)
     mGui->fontComboBox->setCurrentText(fontName);
     mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
     mGui->italicsFontCheckBox->setChecked(settings.value(SettingsItalicsFont).toBool());
+    mGui->reviewsTimeLineSlider->setValue(settings.value(SettingsReviewsTimeLine, 36).toInt());
 
     for (int i = 1; i <= 6; ++i) {
         for (int j = 1; j <= 2; ++j) {
@@ -867,6 +869,7 @@ void Widget::on_closeToolButton_clicked()
     settings.setValue(SettingsFontName, mGui->fontComboBox->currentText());
     settings.setValue(SettingsBoldFont, mGui->boldFontCheckBox->isChecked());
     settings.setValue(SettingsItalicsFont, mGui->italicsFontCheckBox->isChecked());
+    settings.setValue(SettingsReviewsTimeLine, mGui->reviewsTimeLineSlider->value());
 
     for (int i = 1; i <= 6; ++i) {
         for (int j = 1; j <= 2; ++j)
