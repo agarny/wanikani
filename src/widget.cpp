@@ -120,6 +120,12 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
             majorStep *= 2;
     }
 
+    double minorStep = (majorStep == 1)?
+                           0.25:
+                           (majorStep == 12)?
+                               3.0:
+                               1.0;
+
     QPen pen = painter.pen();
 
     pen.setColor(Qt::lightGray);
@@ -129,9 +135,24 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     painter.drawRect(0, 0, canvasWidth-1, canvasHeight-1);
 
-    double xDayShift = -(startTime.time().hour()+startTime.time().minute()/60.0)/mRange*canvasWidth;
+    pen.setStyle(Qt::DotLine);
 
-    for (double i = 0, iMax = mRange+startTime.time().hour(); i <= iMax; i += majorStep) {
+    painter.setPen(pen);
+
+    int startTimeHour = startTime.time().hour();
+    double startTimeHourAndMinutes = startTimeHour+startTime.time().minute()/60.0;
+    double xDayShift = -startTimeHourAndMinutes/mRange*canvasWidth;
+
+    for (double i = 0, iMax = mRange+startTimeHourAndMinutes; i <= iMax; i += minorStep) {
+        double x = xDayShift+i*canvasWidthOverRange;
+
+        if (x >= 0)
+            painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1));
+    }
+
+    pen.setStyle(Qt::SolidLine);
+
+    for (double i = 0, iMax = mRange+startTimeHour; i <= iMax; i += majorStep) {
         double x = xDayShift+i*canvasWidthOverRange;
 
         if (x >= 0) {
@@ -358,6 +379,8 @@ Widget::Widget() :
     connect(&mReviewsTimeLineTimer, SIGNAL(timeout()),
             this, SLOT(updateReviewsTimeLine()));
 
+    mReviewsTimeLineTimer.start(1000);
+
     // Create and show our system tray icon
     // Note: activation of the tray icon doesn't (currently) work on Linux, so
     //       we achieve the same result through a 'fake' context menu...
@@ -499,13 +522,6 @@ void Widget::updateInterval(const int &pInterval)
     // Update our timer's interval
 
     mWaniKaniTimer.start(60000*pInterval);
-
-    // En/disable our other timer, if needed
-
-    if (pInterval == 1)
-        mReviewsTimeLineTimer.stop();
-    else
-        mReviewsTimeLineTimer.start(60000);
 }
 
 //==============================================================================
@@ -1558,6 +1574,8 @@ void Widget::updateReviewsTimeLine(const int &pRange)
     static const QString ReviewsTimeLineText = "<center>\n"
                                                "    <span style=\"font-size: 11px;\">%1 within the next %2</span>\n"
                                                "</center>";
+
+    mNow = QDateTime::currentDateTime();
 
     int nbOfReviews = 0;
     int nbOfCurrentReviews = 0;
