@@ -1560,6 +1560,7 @@ void Widget::updateReviewsTimeLine(const int &pRange)
                                                "</center>";
 
     int nbOfReviews = 0;
+    int nbOfCurrentReviews = 0;
     int from = mNow.toTime_t();
     int to = from+3600*nbOfHours;
 
@@ -1574,13 +1575,19 @@ void Widget::updateReviewsTimeLine(const int &pRange)
         int t = dateTime.toTime_t();
 
         if ((t >= from) && (t <= to)) {
+            nbOfCurrentReviews +=  mCurrentRadicalsReviews.value(dateTime)
+                                  +mCurrentKanjiReviews.value(dateTime)
+                                  +mCurrentVocabularyReviews.value(dateTime);
             nbOfReviews +=  mAllRadicalsReviews.value(dateTime)
                            +mAllKanjiReviews.value(dateTime)
                            +mAllVocabularyReviews.value(dateTime);
         }
     }
 
-    mGui->reviewsTimeLineLabel->setText(ReviewsTimeLineText.arg((nbOfReviews == 1)?"1 review":QString("%1 reviews").arg(nbOfReviews))
+    mGui->reviewsTimeLineLabel->setText(ReviewsTimeLineText.arg(QString((nbOfReviews == 1)?
+                                                                            "%1 (%2) review":
+                                                                            "%1 (%2) reviews").arg(nbOfReviews)
+                                                                                              .arg(nbOfCurrentReviews))
                                                            .arg((nbOfHours < 24)?
                                                                     QString("%1 hours").arg(nbOfHours):
                                                                     (nbOfHours == 24)?
