@@ -175,9 +175,8 @@ private:
     QString timeToString(const int &pSeconds);
 
     void determineReviews(const Reviews &pCurrentReviews,
-                          const Reviews &pAllReviews, const QDateTime &pNow,
-                          QDateTime &pNextDateTime, int &pDiff,
-                          int *pNbOfReviews);
+                          const Reviews &pAllReviews, QDateTime &pNextDateTime,
+                          int &pDiff, int *pNbOfReviews);
 
     int guruTime(const int &pSrsLevel, const int &pNextReview);
 

@@ -1054,14 +1054,14 @@ QString Widget::timeToString(const int &pSeconds)
 //==============================================================================
 
 void Widget::determineReviews(const Reviews &pCurrentReviews,
-                              const Reviews &pAllReviews, const QDateTime &pNow,
+                              const Reviews &pAllReviews,
                               QDateTime &pNextDateTime, int &pDiff,
                               int *pNbOfReviews)
 {
     // Determine all the given reviews
 
     foreach (const QDateTime &dateTime, pAllReviews.keys()) {
-        int localDiff = pNow.secsTo(dateTime);
+        int localDiff = mNow.secsTo(dateTime);
 
         if (localDiff < pDiff) {
             pDiff = localDiff;
@@ -1363,11 +1363,11 @@ void Widget::waniKaniUpdated()
     int nbOfKanjiReviews[6] = {0, 0, 0, 0, 0, 0};
     int nbOfVocabularyReviews[6] = {0, 0, 0, 0, 0, 0};
 
-    determineReviews(mCurrentRadicalsReviews, mAllRadicalsReviews, mNow,
-                     nextDateTime, diff, nbOfRadicalsReviews);
-    determineReviews(mCurrentKanjiReviews, mAllKanjiReviews, mNow, nextDateTime,
-                     diff, nbOfKanjiReviews);
-    determineReviews(mCurrentVocabularyReviews, mAllVocabularyReviews, mNow,
+    determineReviews(mCurrentRadicalsReviews, mAllRadicalsReviews, nextDateTime,
+                     diff, nbOfRadicalsReviews);
+    determineReviews(mCurrentKanjiReviews, mAllKanjiReviews, nextDateTime, diff,
+                     nbOfKanjiReviews);
+    determineReviews(mCurrentVocabularyReviews, mAllVocabularyReviews,
                      nextDateTime, diff, nbOfVocabularyReviews);
 
     if (!nbOfRadicalsReviews[1] && !nbOfKanjiReviews[1] && !nbOfVocabularyReviews[1]) {
