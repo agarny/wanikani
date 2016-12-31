@@ -59,8 +59,10 @@ limitations under the License.
 
 //==============================================================================
 
-ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pParent) :
-    QWidget(pParent)
+ReviewsTimeLineWidget::ReviewsTimeLineWidget(Widget *pWidget) :
+    QWidget(pWidget),
+    mWidget(pWidget),
+    mRange(6)
 {
     // Minimum and maximum sizes for our progress bar
 
@@ -70,13 +72,86 @@ ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pParent) :
 
 //==============================================================================
 
+void ReviewsTimeLineWidget::setRange(const int &pRange)
+{
+    // Set the new range
+
+    if (pRange != mRange) {
+        mRange = pRange;
+
+        update();
+    }
+}
+
+//==============================================================================
+
 void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 {
     // Paint ourselves
 
     QPainter painter(this);
+    QFontMetrics fontMetrics = painter.fontMetrics();
+    int xShift = 0;
+    int yShift = fontMetrics.height();
+    int canvasWidth = width()-xShift;
+    int canvasHeight = height()-yShift;
 
     painter.fillRect(0, 0, width(), height(), QPalette().button());
+
+    painter.translate(xShift, yShift);
+
+    QDateTime startTime = QDateTime(mWidget->now().date(), QTime(mWidget->now().time().hour(),
+                                                                 (mWidget->now().time().minute() < 15)?
+                                                                     0:
+                                                                     (mWidget->now().time().minute() < 30)?
+                                                                         15:
+                                                                         (mWidget->now().time().minute() < 45)?
+                                                                             30:
+                                                                             45));
+
+    double canvasWidthOverRange = double(canvasWidth)/mRange;
+    int majorStep = 1;
+
+    while (majorStep*canvasWidthOverRange < 72.0) {
+        if (majorStep == 1)
+            majorStep = 3;
+        else
+            majorStep *= 2;
+    }
+
+    QPen pen = painter.pen();
+
+    pen.setColor(Qt::lightGray);
+    pen.setStyle(Qt::SolidLine);
+
+    painter.setPen(pen);
+
+    painter.drawRect(0, 0, canvasWidth-1, canvasHeight-1);
+
+    double xDayShift = -(startTime.time().hour()+startTime.time().minute()/60.0)/mRange*canvasWidth;
+
+    for (double i = 0, iMax = mRange+startTime.time().hour(); i <= iMax; i += majorStep) {
+        double x = xDayShift+i*canvasWidthOverRange;
+
+        if (x >= 0) {
+            int dayHour = fmod(i, 24.0);
+
+            pen.setColor(dayHour?Qt::lightGray:Qt::red);
+
+            painter.setPen(pen);
+
+            painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1));
+
+            pen.setColor(dayHour?Qt::black:Qt::red);
+
+            painter.setPen(pen);
+
+            painter.drawText(QPointF(x+4, -4),
+                             dayHour?
+                                 QTime(dayHour, 0).toString("ha"):
+                                 startTime.addDays(i?i/24:0).toString("ddd"));
+        }
+    }
 
     // Accept the event
 
@@ -185,7 +260,8 @@ Widget::Widget() :
     mCurrentKanjiReviews(Reviews()),
     mAllKanjiReviews(Reviews()),
     mCurrentVocabularyReviews(Reviews()),
-    mAllVocabularyReviews(Reviews())
+    mAllVocabularyReviews(Reviews()),
+    mNow(QDateTime())
 {
     // Set up our GUI
 
@@ -224,6 +300,9 @@ Widget::Widget() :
         }
     }
 
+    connect(mGui->reviewsTimeLineSlider, SIGNAL(valueChanged(int)),
+            this, SLOT(updateReviewsTimeLine(const int &)));
+
 #ifdef Q_OS_MAC
     mGui->apiKeyValue->setAttribute(Qt::WA_MacShowFocusRect, false);
     mGui->intervalSpinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -254,8 +333,13 @@ Widget::Widget() :
 
     connect(&mWaniKani, SIGNAL(updated()),
             this, SLOT(waniKaniUpdated()));
+    connect(&mWaniKani, SIGNAL(updated()),
+            this, SLOT(updateReviewsTimeLine()));
+
     connect(&mWaniKani, SIGNAL(error()),
             this, SLOT(waniKaniError()));
+    connect(&mWaniKani, SIGNAL(error()),
+            this, SLOT(updateReviewsTimeLine()));
 
     // Retrieve our settings
 
@@ -294,6 +378,15 @@ void Widget::keyPressEvent(QKeyEvent *pEvent)
         QWidget::keyPressEvent(pEvent);
 }
 #endif
+
+//==============================================================================
+
+QDateTime Widget::now() const
+{
+    // Return our current date/time
+
+    return mNow;
+}
 
 //==============================================================================
 
@@ -338,7 +431,7 @@ void Widget::retrieveSettings(const bool &pResetSettings)
     mGui->fontComboBox->setCurrentText(fontName);
     mGui->boldFontCheckBox->setChecked(settings.value(SettingsBoldFont).toBool());
     mGui->italicsFontCheckBox->setChecked(settings.value(SettingsItalicsFont).toBool());
-    mGui->reviewsTimeLineSlider->setValue(settings.value(SettingsReviewsTimeLine, 36).toInt());
+    mGui->reviewsTimeLineSlider->setValue(settings.value(SettingsReviewsTimeLine, 6).toInt());
 
     for (int i = 1; i <= 6; ++i) {
         for (int j = 1; j <= 2; ++j) {
@@ -1042,6 +1135,7 @@ void Widget::waniKaniUpdated()
     mGui->burnedValue->show();
     mCurrentRadicalsProgress->show();
     mCurrentKanjiProgress->show();
+    mGui->levelStatisticsValue->show();
 
     mGui->topSeparator->show();
     mGui->nextLessonsValue->show();
@@ -1056,8 +1150,10 @@ void Widget::waniKaniUpdated()
     QList<int> radicalGuruTimes = QList<int>();
     int radicalsProgress = 0;
     int radicalsTotal = 0;
-    QDateTime now = QDateTime::currentDateTime();
-    uint nowTime = now.toTime_t();
+
+    mNow = QDateTime::currentDateTime();
+
+    uint nowTime = mNow.toTime_t();
 
     mCurrentRadicalsReviews = Reviews();
     mAllRadicalsReviews = Reviews();
@@ -1217,17 +1313,17 @@ void Widget::waniKaniUpdated()
 
     // Determine the next, next hour and next day reviews
 
-    QDateTime nextDateTime = now;
+    QDateTime nextDateTime = mNow;
     int diff = INT_MAX;
     int nbOfRadicalsReviews[6] = {0, 0, 0, 0, 0, 0};
     int nbOfKanjiReviews[6] = {0, 0, 0, 0, 0, 0};
     int nbOfVocabularyReviews[6] = {0, 0, 0, 0, 0, 0};
 
-    determineReviews(mCurrentRadicalsReviews, mAllRadicalsReviews, now,
+    determineReviews(mCurrentRadicalsReviews, mAllRadicalsReviews, mNow,
                      nextDateTime, diff, nbOfRadicalsReviews);
-    determineReviews(mCurrentKanjiReviews, mAllKanjiReviews, now, nextDateTime,
+    determineReviews(mCurrentKanjiReviews, mAllKanjiReviews, mNow, nextDateTime,
                      diff, nbOfKanjiReviews);
-    determineReviews(mCurrentVocabularyReviews, mAllVocabularyReviews, now,
+    determineReviews(mCurrentVocabularyReviews, mAllVocabularyReviews, mNow,
                      nextDateTime, diff, nbOfVocabularyReviews);
 
     if (!nbOfRadicalsReviews[1] && !nbOfKanjiReviews[1] && !nbOfVocabularyReviews[1]) {
@@ -1341,6 +1437,7 @@ void Widget::waniKaniError()
     mGui->burnedValue->hide();
     mCurrentRadicalsProgress->hide();
     mCurrentKanjiProgress->hide();
+    mGui->levelStatisticsValue->hide();
 
     mGui->topSeparator->hide();
     mGui->nextLessonsValue->hide();
@@ -1417,6 +1514,47 @@ void Widget::updateLevels()
 
     if (!mInitializing)
         updateWallpaper(true);
+}
+
+//==============================================================================
+
+void Widget::updateReviewsTimeLine(const int &pRange)
+{
+    // Update our reviews time line
+
+    int nbOfHours = 6*((pRange == -1)?mGui->reviewsTimeLineSlider->value():pRange);
+
+    mReviewsTimeLine->setRange(nbOfHours);
+
+    static const QString ReviewsTimeLineText = "<center>\n"
+                                               "    <span style=\"font-size: 11px;\">%1 in %2</span>\n"
+                                               "</center>";
+
+    int nbOfReviews = 0;
+    int from = mNow.toTime_t();
+    int to = from+3600*nbOfHours;
+
+    QList<QDateTime> dateTimes = mReviewsTimeLine->isVisible()?
+                                     QList<QDateTime>() << mAllRadicalsReviews.keys()
+                                                        << mAllKanjiReviews.keys()
+                                                        << mAllVocabularyReviews.keys():
+                                     QList<QDateTime>();
+
+    std::sort(dateTimes.begin(), dateTimes.end());
+    dateTimes.erase(std::unique(dateTimes.begin(), dateTimes.end()), dateTimes.end());
+
+    foreach (const QDateTime &dateTime, dateTimes) {
+        int t = dateTime.toTime_t();
+
+        if ((t >= from) && (t <= to)) {
+            nbOfReviews +=  mAllRadicalsReviews.value(dateTime)
+                           +mAllKanjiReviews.value(dateTime)
+                           +mAllVocabularyReviews.value(dateTime);
+        }
+    }
+
+    mGui->reviewsTimeLineLabel->setText(ReviewsTimeLineText.arg((nbOfReviews == 1)?"1 review":QString("%1 reviews").arg(nbOfReviews))
+                                                           .arg((nbOfHours == 24)?"1 day":QString("%1 days").arg(nbOfHours/24.0)));
 }
 
 //==============================================================================

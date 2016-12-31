@@ -47,15 +47,26 @@ class QPushButton;
 
 //==============================================================================
 
+class Widget;
+
+//==============================================================================
+
 class ReviewsTimeLineWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ReviewsTimeLineWidget(QWidget *pParent);
+    explicit ReviewsTimeLineWidget(Widget *pWidget);
+
+    void setRange(const int &pRange);
 
 protected:
     virtual void paintEvent(QPaintEvent *pEvent);
+
+private:
+    Widget *mWidget;
+
+    int mRange;
 };
 
 //==============================================================================
@@ -91,6 +102,8 @@ class Widget : public QWidget
 
 public:
     explicit Widget();
+
+    QDateTime now() const;
 
 #ifdef Q_OS_MAC
 protected:
@@ -131,6 +144,8 @@ private:
     Reviews mAllVocabularyReviews;
 
     ReviewsTimeLineWidget *mReviewsTimeLine;
+
+    QDateTime mNow;
 
     void retrieveSettings(const bool &pResetSettings = false);
 
@@ -185,6 +200,8 @@ private slots:
     void trayIconActivated();
 
     void updateLevels();
+
+    void updateReviewsTimeLine(const int &pRange = -1);
 
     void updatePushButtonColor();
 

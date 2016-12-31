@@ -457,27 +457,21 @@
              </layout>
             </item>
             <item>
+             <widget class="QLabel" name="reviewsTimeLineLabel"/>
+            </item>
+            <item>
              <widget class="QSlider" name="reviewsTimeLineSlider">
               <property name="minimum">
-               <number>6</number>
+               <number>1</number>
               </property>
               <property name="maximum">
-               <number>168</number>
-              </property>
-              <property name="singleStep">
-               <number>6</number>
+               <number>28</number>
               </property>
               <property name="pageStep">
-               <number>24</number>
-              </property>
-              <property name="value">
-               <number>36</number>
+               <number>4</number>
               </property>
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="tickInterval">
-               <number>6</number>
               </property>
              </widget>
             </item>
