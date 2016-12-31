@@ -107,6 +107,7 @@ public:
 
 #ifdef Q_OS_MAC
 protected:
+    virtual void closeEvent(QCloseEvent *pEvent);
     virtual void keyPressEvent(QKeyEvent *pEvent);
 #endif
 

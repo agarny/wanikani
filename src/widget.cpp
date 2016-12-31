@@ -368,6 +368,17 @@ Widget::Widget() :
 //==============================================================================
 
 #ifdef Q_OS_MAC
+void Widget::closeEvent(QCloseEvent *pEvent)
+{
+    // Prevent ourselves from closing when pressing Cmd+Q
+
+    pEvent->ignore();
+}
+#endif
+
+//==============================================================================
+
+#ifdef Q_OS_MAC
 void Widget::keyPressEvent(QKeyEvent *pEvent)
 {
     // Hide ourselves if the user presses the escape key
