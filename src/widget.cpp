@@ -33,6 +33,9 @@ limitations under the License.
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QKeyEvent>
+#ifdef Q_OS_LINUX
+#include <QMenu>
+#endif
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -280,7 +283,7 @@ Widget::Widget() :
 
     mGui->layout->insertWidget(mGui->layout->indexOf(mGui->bottomSeparator), mReviewsTimeLine);
 
-    setMinimumSize(0.8*QDesktopWidget().availableGeometry().size());
+    setMinimumSize(0.95*QDesktopWidget().availableGeometry().size());
 
 #ifdef Q_OS_MAC
     setWindowFlags(Qt::FramelessWindowHint);
@@ -353,12 +356,21 @@ Widget::Widget() :
     updateInterval(mGui->intervalSpinBox->value());
 
     // Create and show our system tray icon
+    // Note: activation of the tray icon doesn't (currently) work on Linux, so
+    //       we achieve the same result through a 'fake' context menu...
 
     mTrayIcon.setIcon(QIcon(":/icon"));
     mTrayIcon.setToolTip("WaniKani");
 
+#ifdef Q_OS_LINUX
+    mTrayIcon.setContextMenu(new QMenu());
+
+    connect(mTrayIcon.contextMenu(), SIGNAL(aboutToShow()),
+            this, SLOT(trayIconActivated()));
+#else
     connect(&mTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayIconActivated()));
+#endif
 
     mTrayIcon.show();
 
