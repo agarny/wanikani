@@ -58,7 +58,7 @@ class ReviewsTimeLineWidget : public QWidget
 public:
     explicit ReviewsTimeLineWidget(Widget *pWidget);
 
-    void setRange(const int &pRange);
+    void update(const int &pRange);
 
 protected:
     virtual void paintEvent(QPaintEvent *pEvent);

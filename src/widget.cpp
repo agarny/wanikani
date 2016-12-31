@@ -75,13 +75,13 @@ ReviewsTimeLineWidget::ReviewsTimeLineWidget(Widget *pWidget) :
 
 //==============================================================================
 
-void ReviewsTimeLineWidget::setRange(const int &pRange)
+void ReviewsTimeLineWidget::update(const int &pRange)
 {
     // Set our new range and update ourselves
 
     mRange = pRange;
 
-    update();
+    QWidget::update();
 }
 
 //==============================================================================
@@ -1569,7 +1569,7 @@ void Widget::updateReviewsTimeLine(const int &pRange)
 
     int nbOfHours = 6*((pRange == -1)?mGui->reviewsTimeLineSlider->value():pRange);
 
-    mReviewsTimeLine->setRange(nbOfHours);
+    mReviewsTimeLine->update(nbOfHours);
 
     static const QString ReviewsTimeLineText = "<center>\n"
                                                "    <span style=\"font-size: 11px;\">%1 within the next %2</span>\n"
