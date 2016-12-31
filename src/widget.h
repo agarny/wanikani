@@ -105,6 +105,10 @@ public:
 
     QDateTime now() const;
 
+    Reviews allRadicalsReviews() const;
+    Reviews allKanjiReviews() const;
+    Reviews allVocabularyReviews() const;
+
 #ifdef Q_OS_MAC
 protected:
     virtual void closeEvent(QCloseEvent *pEvent);

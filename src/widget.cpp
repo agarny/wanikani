@@ -88,11 +88,37 @@ void ReviewsTimeLineWidget::update(const int &pRange)
 
 void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 {
+    // Determine the number of reviews for a given time slot
+
+    QList<QDateTime> dateTimes = QList<QDateTime>() << mWidget->allRadicalsReviews().keys()
+                                                    << mWidget->allKanjiReviews().keys()
+                                                    << mWidget->allVocabularyReviews().keys();
+
+    std::sort(dateTimes.begin(), dateTimes.end());
+    dateTimes.erase(std::unique(dateTimes.begin(), dateTimes.end()), dateTimes.end());
+
+    QList<int> reviews = QList<int>();
+    int from = mWidget->now().toTime_t();
+    int to = from+3600*mRange;
+
+    foreach (const QDateTime &dateTime, dateTimes) {
+        int t = dateTime.toTime_t();
+
+        if ((t >= from) && (t <= to)) {
+            reviews <<  mWidget->allRadicalsReviews().value(dateTime)
+                       +mWidget->allKanjiReviews().value(dateTime)
+                       +mWidget->allVocabularyReviews().value(dateTime);
+        }
+    }
+
+    int reviewsRange = 10*(int(0.1*(*std::max_element(reviews.begin(), reviews.end())))+1);
+    int reviewsStep = (reviewsRange > 10)?10:2;
+
     // Paint ourselves
 
     QPainter painter(this);
     QFontMetrics fontMetrics = painter.fontMetrics();
-    int xShift = 0;
+    int xShift = fontMetrics.width(QString::number(*std::max_element(reviews.begin(), reviews.end())));
     int yShift = fontMetrics.height();
     int canvasWidth = width()-xShift;
     int canvasHeight = height()-yShift;
@@ -110,21 +136,21 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                                                              30:
                                                                              45));
 
-    double canvasWidthOverRange = double(canvasWidth)/mRange;
-    int majorStep = 1;
+    double canvasWidthOverRange = double(canvasWidth-1)/mRange;
+    int timeMajorStep = 1;
 
-    while (majorStep*canvasWidthOverRange < 72.0) {
-        if (majorStep == 1)
-            majorStep = 3;
+    while (timeMajorStep*canvasWidthOverRange < 72.0) {
+        if (timeMajorStep == 1)
+            timeMajorStep = 3;
         else
-            majorStep *= 2;
+            timeMajorStep *= 2;
     }
 
-    double minorStep = (majorStep == 1)?
-                           0.25:
-                           (majorStep == 12)?
-                               3.0:
-                               1.0;
+    double timeMinorStep = (timeMajorStep == 1)?
+                               0.25:
+                               (timeMajorStep == 12)?
+                                   3.0:
+                                   1.0;
 
     QPen pen = painter.pen();
 
@@ -143,16 +169,16 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     double startTimeHourAndMinutes = startTimeHour+startTime.time().minute()/60.0;
     double xDayShift = -startTimeHourAndMinutes/mRange*canvasWidth;
 
-    for (double i = 0, iMax = mRange+startTimeHourAndMinutes; i <= iMax; i += minorStep) {
+    for (double i = 0.0, iMax = mRange+startTimeHourAndMinutes; i <= iMax; i += timeMinorStep) {
         double x = xDayShift+i*canvasWidthOverRange;
 
         if (x >= 0)
-            painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1));
+            painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1.0));
     }
 
     pen.setStyle(Qt::SolidLine);
 
-    for (double i = 0, iMax = mRange+startTimeHour; i <= iMax; i += majorStep) {
+    for (double i = 0.0, iMax = mRange+startTimeHour; i <= iMax; i += timeMajorStep) {
         double x = xDayShift+i*canvasWidthOverRange;
 
         if (x >= 0) {
@@ -162,17 +188,30 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
             painter.setPen(pen);
 
-            painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1));
+            painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1.0));
 
             pen.setColor(dayHour?Qt::black:Qt::red);
 
             painter.setPen(pen);
 
-            painter.drawText(QPointF(x+4, -4),
+            painter.drawText(QPointF(x+4.0, -4.0),
                              dayHour?
                                  QTime(dayHour, 0).toString("ha"):
                                  startTime.addDays(i?i/24:0).toString("ddd"));
         }
+    }
+
+    double canvasHeightOverRange = double(canvasHeight-1)/reviewsRange;
+
+    pen.setColor(Qt::lightGray);
+    pen.setStyle(Qt::DotLine);
+
+    painter.setPen(pen);
+
+    for (double j = 0.0; j <= reviewsRange; j += reviewsStep) {
+        double y = canvasHeight-j*canvasHeightOverRange-1.0;
+
+        painter.drawLine(QPointF(0.0, y), QPointF(canvasWidth-1.0, y));
     }
 
     // Accept the event
@@ -435,6 +474,33 @@ QDateTime Widget::now() const
     // Return our current date/time
 
     return mNow;
+}
+
+//==============================================================================
+
+Reviews Widget::allRadicalsReviews() const
+{
+    // Return all our radicals reviews
+
+    return mAllRadicalsReviews;
+}
+
+//==============================================================================
+
+Reviews Widget::allKanjiReviews() const
+{
+    // Return all our Kanji reviews
+
+    return mAllKanjiReviews;
+}
+
+//==============================================================================
+
+Reviews Widget::allVocabularyReviews() const
+{
+    // Return all our vocabulary reviews
+
+    return mAllVocabularyReviews;
 }
 
 //==============================================================================
