@@ -120,7 +120,8 @@ private:
 
     QString mFileName;
 
-    QTimer mTimer;
+    QTimer mWaniKaniTimer;
+    QTimer mReviewsTimeLineTimer;
 
     QSystemTrayIcon mTrayIcon;
 
@@ -179,6 +180,8 @@ private:
                           int *pNbOfReviews);
 
     int guruTime(const int &pSrsLevel, const int &pNextReview);
+
+    void resetInternals(const bool &pVisible = true);
 
 private slots:
     void on_apiKeyValue_returnPressed();

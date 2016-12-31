@@ -77,13 +77,11 @@ ReviewsTimeLineWidget::ReviewsTimeLineWidget(Widget *pWidget) :
 
 void ReviewsTimeLineWidget::setRange(const int &pRange)
 {
-    // Set the new range
+    // Set our new range and update ourselves
 
-    if (pRange != mRange) {
-        mRange = pRange;
+    mRange = pRange;
 
-        update();
-    }
+    update();
 }
 
 //==============================================================================
@@ -264,7 +262,7 @@ Widget::Widget() :
     mAllKanjiReviews(Reviews()),
     mCurrentVocabularyReviews(Reviews()),
     mAllVocabularyReviews(Reviews()),
-    mNow(QDateTime())
+    mNow(QDateTime::currentDateTime())
 {
     // Set up our GUI
 
@@ -350,10 +348,15 @@ Widget::Widget() :
 
     // Use our timer to update our WaniKani object
 
-    connect(&mTimer, SIGNAL(timeout()),
+    connect(&mWaniKaniTimer, SIGNAL(timeout()),
             &mWaniKani, SLOT(update()));
 
     updateInterval(mGui->intervalSpinBox->value());
+
+    // User our other timer to update our reviews time line
+
+    connect(&mReviewsTimeLineTimer, SIGNAL(timeout()),
+            this, SLOT(updateReviewsTimeLine()));
 
     // Create and show our system tray icon
     // Note: activation of the tray icon doesn't (currently) work on Linux, so
@@ -495,7 +498,14 @@ void Widget::updateInterval(const int &pInterval)
 {
     // Update our timer's interval
 
-    mTimer.start(60000*pInterval);
+    mWaniKaniTimer.start(60000*pInterval);
+
+    // En/disable our other timer, if needed
+
+    if (pInterval == 1)
+        mReviewsTimeLineTimer.stop();
+    else
+        mReviewsTimeLineTimer.start(60000);
 }
 
 //==============================================================================
@@ -1106,6 +1116,44 @@ int Widget::guruTime(const int &pSrsLevel, const int &pNextReview)
 
 //==============================================================================
 
+void Widget::resetInternals(const bool &pVisible)
+{
+    // Reset some of our internals
+
+    mGui->userInformationValue->setVisible(pVisible);
+    mGui->apprenticeValue->setVisible(pVisible);
+    mGui->guruValue->setVisible(pVisible);
+    mGui->masterValue->setVisible(pVisible);
+    mGui->enlightenedValue->setVisible(pVisible);
+    mGui->burnedValue->setVisible(pVisible);
+    mCurrentRadicalsProgress->setVisible(pVisible);
+    mCurrentKanjiProgress->setVisible(pVisible);
+    mGui->levelStatisticsValue->setVisible(pVisible);
+
+    mGui->topSeparator->setVisible(pVisible);
+    mGui->nextLessonsValue->setVisible(pVisible);
+    mGui->nextReviewsValue->setVisible(pVisible);
+    mGui->nextHourReviewsValue->setVisible(pVisible);
+    mGui->nextDayReviewsValue->setVisible(pVisible);
+    mReviewsTimeLine->setVisible(pVisible);
+
+    mNow = QDateTime::currentDateTime();
+
+    mCurrentRadicalsReviews = Reviews();
+    mAllRadicalsReviews = Reviews();
+
+    mCurrentKanjiState = QMap<QChar, QString>();
+    mAllKanjiState = QMap<QChar, QString>();
+
+    mCurrentKanjiReviews = Reviews();
+    mAllKanjiReviews = Reviews();
+
+    mCurrentVocabularyReviews = Reviews();
+    mAllVocabularyReviews = Reviews();
+}
+
+//==============================================================================
+
 void Widget::waniKaniUpdated()
 {
     // Retrieve the user's gravatar
@@ -1150,22 +1198,9 @@ void Widget::waniKaniUpdated()
     updateSrsDistributionInformation(mGui->enlightenedValue, ":/enlightened", mWaniKani.srsDistribution().enlightened());
     updateSrsDistributionInformation(mGui->burnedValue, ":/burned", mWaniKani.srsDistribution().burned());
 
-    mGui->userInformationValue->show();
-    mGui->apprenticeValue->show();
-    mGui->guruValue->show();
-    mGui->masterValue->show();
-    mGui->enlightenedValue->show();
-    mGui->burnedValue->show();
-    mCurrentRadicalsProgress->show();
-    mCurrentKanjiProgress->show();
-    mGui->levelStatisticsValue->show();
+    // Reset some of our internals
 
-    mGui->topSeparator->show();
-    mGui->nextLessonsValue->show();
-    mGui->nextReviewsValue->show();
-    mGui->nextHourReviewsValue->show();
-    mGui->nextDayReviewsValue->show();
-    mReviewsTimeLine->show();
+    resetInternals();
 
     // Retrieve various information about our radicals
 
@@ -1174,12 +1209,7 @@ void Widget::waniKaniUpdated()
     int radicalsProgress = 0;
     int radicalsTotal = 0;
 
-    mNow = QDateTime::currentDateTime();
-
     uint nowTime = mNow.toTime_t();
-
-    mCurrentRadicalsReviews = Reviews();
-    mAllRadicalsReviews = Reviews();
 
     foreach (const Radical &radical, mWaniKani.radicals()) {
         if (radical.level() == mWaniKani.level()) {
@@ -1217,12 +1247,6 @@ void Widget::waniKaniUpdated()
     QList<int> kanjiGuruTimes = QList<int>();
     int kanjiProgress = 0;
     int kanjiTotal = 0;
-
-    mCurrentKanjiState = QMap<QChar, QString>();
-    mAllKanjiState = QMap<QChar, QString>();
-
-    mCurrentKanjiReviews = Reviews();
-    mAllKanjiReviews = Reviews();
 
     foreach (const Kanji &kanji, mWaniKani.kanjis()) {
         if (kanji.level() == mWaniKani.level()) {
@@ -1289,9 +1313,6 @@ void Widget::waniKaniUpdated()
                                                                 timeToString(start+finish)));
 
     // Retrieve various information about our vocabulary
-
-    mCurrentVocabularyReviews = Reviews();
-    mAllVocabularyReviews = Reviews();
 
     foreach (const Vocabulary &vocabulary, mWaniKani.vocabularies()) {
         if (vocabulary.userSpecific().availableDate()) {
@@ -1452,22 +1473,7 @@ void Widget::waniKaniError()
 
     updateGravatar(QPixmap(":/warning"));
 
-    mGui->userInformationValue->hide();
-    mGui->apprenticeValue->hide();
-    mGui->guruValue->hide();
-    mGui->masterValue->hide();
-    mGui->enlightenedValue->hide();
-    mGui->burnedValue->hide();
-    mCurrentRadicalsProgress->hide();
-    mCurrentKanjiProgress->hide();
-    mGui->levelStatisticsValue->hide();
-
-    mGui->topSeparator->hide();
-    mGui->nextLessonsValue->hide();
-    mGui->nextReviewsValue->hide();
-    mGui->nextHourReviewsValue->hide();
-    mGui->nextDayReviewsValue->hide();
-    mReviewsTimeLine->hide();
+    resetInternals(false);
 }
 
 //==============================================================================
@@ -1550,18 +1556,16 @@ void Widget::updateReviewsTimeLine(const int &pRange)
     mReviewsTimeLine->setRange(nbOfHours);
 
     static const QString ReviewsTimeLineText = "<center>\n"
-                                               "    <span style=\"font-size: 11px;\">%1 in %2</span>\n"
+                                               "    <span style=\"font-size: 11px;\">%1 within the next %2</span>\n"
                                                "</center>";
 
     int nbOfReviews = 0;
     int from = mNow.toTime_t();
     int to = from+3600*nbOfHours;
 
-    QList<QDateTime> dateTimes = mReviewsTimeLine->isVisible()?
-                                     QList<QDateTime>() << mAllRadicalsReviews.keys()
-                                                        << mAllKanjiReviews.keys()
-                                                        << mAllVocabularyReviews.keys():
-                                     QList<QDateTime>();
+    QList<QDateTime> dateTimes = QList<QDateTime>() << mAllRadicalsReviews.keys()
+                                                    << mAllKanjiReviews.keys()
+                                                    << mAllVocabularyReviews.keys();
 
     std::sort(dateTimes.begin(), dateTimes.end());
     dateTimes.erase(std::unique(dateTimes.begin(), dateTimes.end()), dateTimes.end());
@@ -1577,7 +1581,11 @@ void Widget::updateReviewsTimeLine(const int &pRange)
     }
 
     mGui->reviewsTimeLineLabel->setText(ReviewsTimeLineText.arg((nbOfReviews == 1)?"1 review":QString("%1 reviews").arg(nbOfReviews))
-                                                           .arg((nbOfHours == 24)?"1 day":QString("%1 days").arg(nbOfHours/24.0)));
+                                                           .arg((nbOfHours < 24)?
+                                                                    QString("%1 hours").arg(nbOfHours):
+                                                                    (nbOfHours == 24)?
+                                                                        "day":
+                                                                        QString("%1 days").arg(nbOfHours/24.0)));
 }
 
 //==============================================================================
