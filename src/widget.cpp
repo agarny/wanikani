@@ -116,12 +116,14 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     // Paint ourselves
 
+    static const int Space = 4;
+
     QPainter painter(this);
     QFontMetrics fontMetrics = painter.fontMetrics();
-    int xShift = fontMetrics.width(QString::number(*std::max_element(reviews.begin(), reviews.end())));
+    int xShift = fontMetrics.width(QString::number(*std::max_element(reviews.begin(), reviews.end())))+Space;
     int yShift = fontMetrics.height();
     int canvasWidth = width()-xShift;
-    int canvasHeight = height()-yShift;
+    int canvasHeight = height()-yShift-Space;
 
     painter.fillRect(0, 0, width(), height(), QPalette().button());
 
@@ -194,7 +196,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
             painter.setPen(pen);
 
-            painter.drawText(QPointF(x+4.0, -4.0),
+            painter.drawText(QPointF(x+Space, -Space),
                              dayHour?
                                  QTime(dayHour, 0).toString("ha"):
                                  startTime.addDays(i?i/24:0).toString("ddd"));
@@ -203,15 +205,27 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     double canvasHeightOverRange = double(canvasHeight-1)/reviewsRange;
 
-    pen.setColor(Qt::lightGray);
     pen.setStyle(Qt::DotLine);
 
-    painter.setPen(pen);
+    QTextOption textOption = QTextOption();
+
+    textOption.setAlignment(Qt::AlignRight);
 
     for (double j = 0.0; j <= reviewsRange; j += reviewsStep) {
         double y = canvasHeight-j*canvasHeightOverRange-1.0;
 
+        pen.setColor(Qt::lightGray);
+
+        painter.setPen(pen);
+
         painter.drawLine(QPointF(0.0, y), QPointF(canvasWidth-1.0, y));
+
+        pen.setColor(Qt::black);
+
+        painter.setPen(pen);
+
+        painter.drawText(QRectF(QPointF(-xShift-Space, y-0.6*yShift), QSizeF(xShift, yShift)),
+                         QString::number(j), textOption);
     }
 
     // Accept the event
