@@ -120,7 +120,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     QPainter painter(this);
     QFontMetrics fontMetrics = painter.fontMetrics();
-    int xShift = fontMetrics.width(QString::number(*std::max_element(reviews.begin(), reviews.end())))+Space;
+    int xShift = fontMetrics.width(QString::number(reviewsRange))+Space;
     int yShift = fontMetrics.height();
     int canvasWidth = width()-xShift;
     int canvasHeight = height()-yShift-Space;
