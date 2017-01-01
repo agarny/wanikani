@@ -1382,17 +1382,17 @@ void Widget::waniKaniUpdated()
                                                "    <table style=\"font-size: 11px;\">\n"
                                                "        <tbody>\n"
                                                "            <tr>\n"
-                                               "                <td align=right>Start:</td>\n"
+                                               "                <td align=right><strong>Start:</strong></td>\n"
                                                "                <td style=\"width: 4px;\"></td>\n"
                                                "                <td>%1</td>\n"
                                                "            </tr>\n"
                                                "            <tr>\n"
-                                               "                <td align=right>Finish:</td>\n"
+                                               "                <td align=right><strong>Finish:</strong></td>\n"
                                                "                <td style=\"width: 4px;\"></td>\n"
                                                "                <td>%2</td>\n"
                                                "            </tr>\n"
                                                "            <tr>\n"
-                                               "                <td align=right>Total:</td>\n"
+                                               "                <td align=right><strong>Total:</strong></td>\n"
                                                "                <td style=\"width: 4px;\"></td>\n"
                                                "                <td>%3</td>\n"
                                                "            </tr>\n"
@@ -1652,7 +1652,7 @@ void Widget::updateReviewsTimeLine(const int &pRange)
     mReviewsTimeLine->update(nbOfHours);
 
     static const QString ReviewsTimeLineText = "<center>\n"
-                                               "    <span style=\"font-size: 11px;\">%1 within the next %2</span>\n"
+                                               "    <span style=\"font-size: 11px;\"><strong>%1</strong><br/>within the next %2</span>\n"
                                                "</center>";
 
     mNow = QDateTime::currentDateTime();
