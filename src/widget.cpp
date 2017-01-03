@@ -355,7 +355,7 @@ Widget::Widget() :
 
     mGui->layout->insertWidget(mGui->layout->indexOf(mGui->bottomSeparator), mReviewsTimeLine);
 
-    setMinimumSize(0.95*QDesktopWidget().availableGeometry().size());
+    setMinimumSize(1440, 900);
 
 #ifdef Q_OS_MAC
     setWindowFlags(Qt::FramelessWindowHint);
