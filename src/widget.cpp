@@ -114,7 +114,8 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     int reviewsRange = 10*(int(0.1*(*std::max_element(reviews.begin(), reviews.end())))+1);
     int reviewsStep = (reviewsRange > 10)?10:2;
 
-    // Paint ourselves
+    // Determine where to start painting things, as well as the time and reviews
+    // major/minor lines
 
     static const int Space = 4;
 
@@ -154,6 +155,8 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                    3.0:
                                    1.0;
 
+    // Paint the minor time lines
+
     QPen pen = painter.pen();
 
     pen.setColor(Qt::lightGray);
@@ -177,6 +180,8 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
         if (x >= 0)
             painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1.0));
     }
+
+    // Paint the major time lines
 
     pen.setStyle(Qt::SolidLine);
 
@@ -202,6 +207,8 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                  startTime.addDays(i?i/24:0).toString("ddd"));
         }
     }
+
+    // Paint the reviews lines
 
     double canvasHeightOverRange = double(canvasHeight-1)/reviewsRange;
 
