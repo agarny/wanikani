@@ -393,7 +393,7 @@ Widget::Widget() :
     // Some about information
 
     static const QString About = "<span style=\"font-size: 19px;\"><strong><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> %1</strong></span><br/>"
-                                 "© 2016%2 <a href=\"https://github.com/agarny\""+QString(LinkStyle)+">Alan Garny</a>";
+                                 "© 2016-%2 <a href=\"https://github.com/agarny\""+QString(LinkStyle)+">Alan Garny</a>";
 
     QFile versionFile(":/version");
 
@@ -404,12 +404,7 @@ Widget::Widget() :
 
     versionFile.close();
 
-    int currentYear = QDate::currentDate().year();
-
-    mGui->aboutValue->setText(About.arg(version,
-                                        (currentYear > 2016)?
-                                            QString("-%1").arg(currentYear):
-                                            QString()));
+    mGui->aboutValue->setText(About.arg(version).arg(QDate::currentDate().year()));
 
     // Handle signals from our WaniKani object
 
