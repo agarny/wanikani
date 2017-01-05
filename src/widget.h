@@ -79,7 +79,7 @@ public:
     explicit ProgressBarWidget(QWidget *pParent);
 
     void setValue(const double &pValue);
-    void setColor(const QRgb &pColor);
+    void setColor(const QColor &pColor);
 
 protected:
     virtual void paintEvent(QPaintEvent *pEvent);
@@ -87,7 +87,7 @@ protected:
 private:
     double mValue;
 
-    QRgb mColor;
+    QColor mColor;
 };
 
 //==============================================================================

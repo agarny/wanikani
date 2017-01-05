@@ -245,7 +245,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 ProgressBarWidget::ProgressBarWidget(QWidget *pParent) :
     QWidget(pParent),
     mValue(0.0),
-    mColor(QPalette().highlight().color().rgba())
+    mColor(QPalette().highlight().color())
 {
     // Minimum and maximum sizes for our progress bar
 
@@ -266,13 +266,8 @@ void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
     painter.setPen(QPalette().mid().color());
     painter.drawRect(0, 0, width()-1, height()-1);
 
-    if (value) {
-        QColor color;
-
-        color.setRgba(mColor);
-
-        painter.fillRect(1, 1, value, height()-2, color);
-    }
+    if (value)
+        painter.fillRect(1, 1, value, height()-2, mColor);
 
     // Accept the event
 
@@ -299,7 +294,7 @@ void ProgressBarWidget::setValue(const double &pValue)
 
 //==============================================================================
 
-void ProgressBarWidget::setColor(const QRgb &pColor)
+void ProgressBarWidget::setColor(const QColor &pColor)
 {
     // Update our color, if needed
 
