@@ -161,6 +161,12 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     static const int Space = 4;
 
     QPainter painter(this);
+    QFont font = painter.font();
+
+    font.setPixelSize(11);
+
+    painter.setFont(font);
+
     QFontMetrics fontMetrics = painter.fontMetrics();
     int xShift = fontMetrics.width(QString::number(reviewsRange))+Space;
     int yShift = fontMetrics.height();
