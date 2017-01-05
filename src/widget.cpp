@@ -134,13 +134,18 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     dateTimes.erase(std::unique(dateTimes.begin(), dateTimes.end()), dateTimes.end());
 
     QList<int> reviews = QList<int>();
-    int from = mWidget->now().toTime_t();
-    int to = from+3600*mRange;
+    QDateTime startTime = QDateTime(mWidget->now().date(), QTime(mWidget->now().time().hour(),
+                                                                 (mWidget->now().time().minute() < 15)?
+                                                                     0:
+                                                                     (mWidget->now().time().minute() < 30)?
+                                                                         15:
+                                                                         (mWidget->now().time().minute() < 45)?
+                                                                             30:
+                                                                             45));
+    QDateTime endTime = startTime.addSecs(3600*mRange);
 
     foreach (const QDateTime &dateTime, dateTimes) {
-        int t = dateTime.toTime_t();
-
-        if ((t >= from) && (t <= to)) {
+        if ((dateTime >= startTime) && (dateTime < endTime)) {
             reviews <<  mWidget->allRadicalsReviews().value(dateTime)
                        +mWidget->allKanjiReviews().value(dateTime)
                        +mWidget->allVocabularyReviews().value(dateTime);
@@ -161,20 +166,6 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     int yShift = fontMetrics.height();
     int canvasWidth = width()-xShift;
     int canvasHeight = height()-yShift-Space;
-
-    painter.fillRect(0, 0, width(), height(), QPalette().button());
-
-    painter.translate(xShift, yShift);
-
-    QDateTime startTime = QDateTime(mWidget->now().date(), QTime(mWidget->now().time().hour(),
-                                                                 (mWidget->now().time().minute() < 15)?
-                                                                     0:
-                                                                     (mWidget->now().time().minute() < 30)?
-                                                                         15:
-                                                                         (mWidget->now().time().minute() < 45)?
-                                                                             30:
-                                                                             45));
-
     double canvasWidthOverRange = double(canvasWidth-1)/mRange;
     int timeMajorStep = 1;
 
@@ -193,6 +184,10 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     // Paint the minor time lines
 
+    painter.fillRect(0, 0, width(), height(), QPalette().button());
+
+    painter.translate(xShift, yShift);
+
     QPen pen = painter.pen();
 
     pen.setColor(Qt::lightGray);
@@ -208,7 +203,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     int startTimeHour = startTime.time().hour();
     double startTimeHourAndMinutes = startTimeHour+startTime.time().minute()/60.0;
-    double xDayShift = -startTimeHourAndMinutes/mRange*canvasWidth;
+    double xDayShift = -startTimeHourAndMinutes/mRange*(canvasWidth-1);
 
     for (double i = 0.0, iMax = mRange+startTimeHourAndMinutes; i <= iMax; i += timeMinorStep) {
         double x = xDayShift+i*canvasWidthOverRange;
