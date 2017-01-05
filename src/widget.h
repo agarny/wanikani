@@ -152,6 +152,10 @@ private:
     ReviewsTimeLineWidget *mReviewsTimeLine;
 
     QDateTime mNow;
+    uint mLevelStartTime;
+
+    QList<int> mRadicalGuruTimes;
+    QList<int> mKanjiGuruTimes;
 
     void retrieveSettings(const bool &pResetSettings = false);
 
@@ -208,7 +212,7 @@ private slots:
 
     void updateLevels();
 
-    void updateReviewsTimeLine(const int &pRange = -1);
+    void updateTimeRelatedInformation(const int &pRange = -1);
 
     void updatePushButtonColor();
 

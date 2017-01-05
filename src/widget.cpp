@@ -343,7 +343,10 @@ Widget::Widget() :
     mAllKanjiReviews(Reviews()),
     mCurrentVocabularyReviews(Reviews()),
     mAllVocabularyReviews(Reviews()),
-    mNow(QDateTime::currentDateTime())
+    mNow(QDateTime::currentDateTime()),
+    mLevelStartTime(0),
+    mRadicalGuruTimes(QList<int>()),
+    mKanjiGuruTimes(QList<int>())
 {
     // Set up our GUI
 
@@ -383,7 +386,7 @@ Widget::Widget() :
     }
 
     connect(mGui->reviewsTimeLineSlider, SIGNAL(valueChanged(int)),
-            this, SLOT(updateReviewsTimeLine(const int &)));
+            this, SLOT(updateTimeRelatedInformation(const int &)));
 
 #ifdef Q_OS_MAC
     mGui->apiKeyValue->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -411,12 +414,12 @@ Widget::Widget() :
     connect(&mWaniKani, SIGNAL(updated()),
             this, SLOT(waniKaniUpdated()));
     connect(&mWaniKani, SIGNAL(updated()),
-            this, SLOT(updateReviewsTimeLine()));
+            this, SLOT(updateTimeRelatedInformation()));
 
     connect(&mWaniKani, SIGNAL(error()),
             this, SLOT(waniKaniError()));
     connect(&mWaniKani, SIGNAL(error()),
-            this, SLOT(updateReviewsTimeLine()));
+            this, SLOT(updateTimeRelatedInformation()));
 
     // Retrieve our settings
 
@@ -432,7 +435,7 @@ Widget::Widget() :
     // User our other timer to update our reviews time line
 
     connect(&mReviewsTimeLineTimer, SIGNAL(timeout()),
-            this, SLOT(updateReviewsTimeLine()));
+            this, SLOT(updateTimeRelatedInformation()));
 
     mReviewsTimeLineTimer.start(1000);
 
@@ -1302,20 +1305,20 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our radicals
 
-    int levelStartTime = 0;
-    QList<int> radicalGuruTimes = QList<int>();
     int radicalsProgress = 0;
     int radicalsTotal = 0;
-
     uint nowTime = mNow.toTime_t();
+
+    mLevelStartTime = 0;
+    mRadicalGuruTimes = QList<int>();
 
     foreach (const Radical &radical, mWaniKani.radicals()) {
         if (radical.level() == mWaniKani.level()) {
             // A radical from our current level, so determine how soon it can
             // reach Guru level
 
-            radicalGuruTimes << guruTime(radical.userSpecific().srsNumeric(),
-                                         radical.userSpecific().availableDate()-nowTime);
+            mRadicalGuruTimes << guruTime(radical.userSpecific().srsNumeric(),
+                                          radical.userSpecific().availableDate()-nowTime);
 
             // Keep track of our radical progress
 
@@ -1326,8 +1329,8 @@ void Widget::waniKaniUpdated()
 
             // Retrieve, if needed, when we started our current level
 
-            if (!levelStartTime)
-                levelStartTime = radical.userSpecific().unlockedDate();
+            if (!mLevelStartTime)
+                mLevelStartTime = radical.userSpecific().unlockedDate();
         }
 
         if (radical.userSpecific().availableDate()) {
@@ -1342,17 +1345,18 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our Kanji
 
-    QList<int> kanjiGuruTimes = QList<int>();
     int kanjiProgress = 0;
     int kanjiTotal = 0;
+
+    mKanjiGuruTimes = QList<int>();
 
     foreach (const Kanji &kanji, mWaniKani.kanjis()) {
         if (kanji.level() == mWaniKani.level()) {
             // A Kanji from our current level, so determine how soon it can
             // reach Guru level
 
-            kanjiGuruTimes << guruTime(kanji.userSpecific().srsNumeric(),
-                                       kanji.userSpecific().availableDate()-nowTime);
+            mKanjiGuruTimes << guruTime(kanji.userSpecific().srsNumeric(),
+                                        kanji.userSpecific().availableDate()-nowTime);
 
             // Keep track of our Kanji progress
 
@@ -1377,38 +1381,8 @@ void Widget::waniKaniUpdated()
         }
     }
 
-    std::sort(radicalGuruTimes.begin(), radicalGuruTimes.end());
-    std::sort(kanjiGuruTimes.begin(), kanjiGuruTimes.end());
-
-    static const QString LevelStatisticsText = "<center>\n"
-                                               "    <table style=\"font-size: 11px;\">\n"
-                                               "        <tbody>\n"
-                                               "            <tr>\n"
-                                               "                <td align=right><strong>Start:</strong></td>\n"
-                                               "                <td style=\"width: 4px;\"></td>\n"
-                                               "                <td>%1</td>\n"
-                                               "            </tr>\n"
-                                               "            <tr>\n"
-                                               "                <td align=right><strong>Finish:</strong></td>\n"
-                                               "                <td style=\"width: 4px;\"></td>\n"
-                                               "                <td>%2</td>\n"
-                                               "            </tr>\n"
-                                               "            <tr>\n"
-                                               "                <td align=right><strong>Total:</strong></td>\n"
-                                               "                <td style=\"width: 4px;\"></td>\n"
-                                               "                <td>%3</td>\n"
-                                               "            </tr>\n"
-                                               "        </tbody>\n"
-                                               "    </table>\n"
-                                               "</center>";
-
-    int start = nowTime-levelStartTime;
-    int finish =  radicalGuruTimes[0.9*radicalGuruTimes.count()-1]
-                 +kanjiGuruTimes[0.9*kanjiGuruTimes.count()-1];
-
-    mGui->levelStatisticsValue->setText(LevelStatisticsText.arg(timeToString(start),
-                                                                timeToString(finish),
-                                                                timeToString(start+finish)));
+    std::sort(mRadicalGuruTimes.begin(), mRadicalGuruTimes.end());
+    std::sort(mKanjiGuruTimes.begin(), mKanjiGuruTimes.end());
 
     // Retrieve various information about our vocabulary
 
@@ -1645,8 +1619,46 @@ void Widget::updateLevels()
 
 //==============================================================================
 
-void Widget::updateReviewsTimeLine(const int &pRange)
+void Widget::updateTimeRelatedInformation(const int &pRange)
 {
+    // Update our level statistics
+
+    mNow = QDateTime::currentDateTime();
+
+    uint nowTime = mNow.toTime_t();
+
+    if (!mRadicalGuruTimes.isEmpty() && !mKanjiGuruTimes.isEmpty()) {
+        static const QString LevelStatisticsText = "<center>\n"
+                                                   "    <table style=\"font-size: 11px;\">\n"
+                                                   "        <tbody>\n"
+                                                   "            <tr>\n"
+                                                   "                <td align=right><strong>Start:</strong></td>\n"
+                                                   "                <td style=\"width: 4px;\"></td>\n"
+                                                   "                <td>%1</td>\n"
+                                                   "            </tr>\n"
+                                                   "            <tr>\n"
+                                                   "                <td align=right><strong>Finish:</strong></td>\n"
+                                                   "                <td style=\"width: 4px;\"></td>\n"
+                                                   "                <td>%2</td>\n"
+                                                   "            </tr>\n"
+                                                   "            <tr>\n"
+                                                   "                <td align=right><strong>Total:</strong></td>\n"
+                                                   "                <td style=\"width: 4px;\"></td>\n"
+                                                   "                <td>%3</td>\n"
+                                                   "            </tr>\n"
+                                                   "        </tbody>\n"
+                                                   "    </table>\n"
+                                                   "</center>";
+
+        int start = nowTime-mLevelStartTime;
+        int finish =  mRadicalGuruTimes[0.9*mRadicalGuruTimes.count()-1]
+                     +mKanjiGuruTimes[0.9*mKanjiGuruTimes.count()-1];
+
+        mGui->levelStatisticsValue->setText(LevelStatisticsText.arg(mLevelStartTime?timeToString(start):"now",
+                                                                    timeToString(finish),
+                                                                    mLevelStartTime?timeToString(start+finish):timeToString(finish)));
+    }
+
     // Update our reviews time line
 
     int nbOfHours = 6*((pRange == -1)?mGui->reviewsTimeLineSlider->value():pRange);
@@ -1657,12 +1669,10 @@ void Widget::updateReviewsTimeLine(const int &pRange)
                                                "    <span style=\"font-size: 11px;\"><strong>%1</strong><br/>within the next %2</span>\n"
                                                "</center>";
 
-    mNow = QDateTime::currentDateTime();
-
     int nbOfReviews = 0;
     int nbOfCurrentReviews = 0;
-    int from = mNow.toTime_t();
-    int to = from+3600*nbOfHours;
+    uint from = nowTime;
+    uint to = from+3600*nbOfHours;
 
     QList<QDateTime> dateTimes = QList<QDateTime>() << mAllRadicalsReviews.keys()
                                                     << mAllKanjiReviews.keys()
@@ -1672,7 +1682,7 @@ void Widget::updateReviewsTimeLine(const int &pRange)
     dateTimes.erase(std::unique(dateTimes.begin(), dateTimes.end()), dateTimes.end());
 
     foreach (const QDateTime &dateTime, dateTimes) {
-        int t = dateTime.toTime_t();
+        uint t = dateTime.toTime_t();
 
         if ((t >= from) && (t <= to)) {
             nbOfCurrentReviews +=  mCurrentRadicalsReviews.value(dateTime)
