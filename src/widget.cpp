@@ -218,6 +218,33 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
             painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1.0));
     }
 
+    // Paint the reviews lines
+
+    double canvasHeightOverRange = double(canvasHeight-1)/reviewsRange;
+
+    pen.setStyle(Qt::DotLine);
+
+    QTextOption textOption = QTextOption();
+
+    textOption.setAlignment(Qt::AlignRight);
+
+    for (double j = 0.0; j <= reviewsRange; j += reviewsStep) {
+        double y = canvasHeight-j*canvasHeightOverRange-1.0;
+
+        pen.setColor(Qt::lightGray);
+
+        painter.setPen(pen);
+
+        painter.drawLine(QPointF(0.0, y), QPointF(canvasWidth-1.0, y));
+
+        pen.setColor(Qt::black);
+
+        painter.setPen(pen);
+
+        painter.drawText(QRectF(QPointF(-xShift-Space, y-0.6*yShift), QSizeF(xShift, yShift)),
+                         QString::number(j), textOption);
+    }
+
     // Paint the major time lines
 
     pen.setStyle(Qt::SolidLine);
@@ -245,31 +272,28 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
         }
     }
 
-    // Paint the reviews lines
+    // Paint the various reviews for the different time slots
 
-    double canvasHeightOverRange = double(canvasHeight-1)/reviewsRange;
+    double timeMultiplier = canvasWidthOverRange*mRange/(endTime.toTime_t()-startTime.toTime_t());
 
-    pen.setStyle(Qt::DotLine);
+    foreach (const QDateTime &dateTime, dateTimes) {
+        if ((dateTime >= startTime) && (dateTime < endTime)) {
+            double x = (dateTime.toTime_t()-startTime.toTime_t())*timeMultiplier;
+            double xWidth = 900.0*timeMultiplier;
+            double radicalsReviewsHeight = mWidget->allRadicalsReviews().value(dateTime)*canvasHeightOverRange;
+            double kanjiReviewsHeight = mWidget->allKanjiReviews().value(dateTime)*canvasHeightOverRange;
+            double vocabularyReviewsHeight = mWidget->allVocabularyReviews().value(dateTime)*canvasHeightOverRange;
 
-    QTextOption textOption = QTextOption();
-
-    textOption.setAlignment(Qt::AlignRight);
-
-    for (double j = 0.0; j <= reviewsRange; j += reviewsStep) {
-        double y = canvasHeight-j*canvasHeightOverRange-1.0;
-
-        pen.setColor(Qt::lightGray);
-
-        painter.setPen(pen);
-
-        painter.drawLine(QPointF(0.0, y), QPointF(canvasWidth-1.0, y));
-
-        pen.setColor(Qt::black);
-
-        painter.setPen(pen);
-
-        painter.drawText(QRectF(QPointF(-xShift-Space, y-0.6*yShift), QSizeF(xShift, yShift)),
-                         QString::number(j), textOption);
+            painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight,
+                                    xWidth, radicalsReviewsHeight),
+                             mRadicalsColor);
+            painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight,
+                                    xWidth, kanjiReviewsHeight),
+                             mKanjiColor);
+            painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight,
+                                    xWidth, vocabularyReviewsHeight),
+                             mVocabularyColor);
+        }
     }
 
     // Accept the event
