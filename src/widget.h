@@ -60,6 +60,10 @@ public:
 
     void update(const int &pRange);
 
+    void setRadicalsColor(const QColor &pRadicalsColor);
+    void setKanjiColor(const QColor &pKanjiColor);
+    void setVocabularyColor(const QColor &pVocabularyColor);
+
 protected:
     virtual void paintEvent(QPaintEvent *pEvent);
 
@@ -67,6 +71,10 @@ private:
     Widget *mWidget;
 
     int mRange;
+
+    QColor mRadicalsColor;
+    QColor mKanjiColor;
+    QColor mVocabularyColor;
 };
 
 //==============================================================================

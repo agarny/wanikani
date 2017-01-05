@@ -65,7 +65,10 @@ limitations under the License.
 ReviewsTimeLineWidget::ReviewsTimeLineWidget(Widget *pWidget) :
     QWidget(pWidget),
     mWidget(pWidget),
-    mRange(6)
+    mRange(6),
+    mRadicalsColor(QColor()),
+    mKanjiColor(QColor()),
+    mVocabularyColor(QColor())
 {
     // Minimum and maximum sizes for our progress bar
 
@@ -80,6 +83,39 @@ void ReviewsTimeLineWidget::update(const int &pRange)
     // Set our new range and update ourselves
 
     mRange = pRange;
+
+    QWidget::update();
+}
+
+//==============================================================================
+
+void ReviewsTimeLineWidget::setRadicalsColor(const QColor &pRadicalsColor)
+{
+    // Set the colour for our radicals
+
+    mRadicalsColor = pRadicalsColor;
+
+    QWidget::update();
+}
+
+//==============================================================================
+
+void ReviewsTimeLineWidget::setKanjiColor(const QColor &pKanjiColor)
+{
+    // Set the colour for our Kanji
+
+    mKanjiColor = pKanjiColor;
+
+    QWidget::update();
+}
+
+//==============================================================================
+
+void ReviewsTimeLineWidget::setVocabularyColor(const QColor &pVocabularyColor)
+{
+    // Set the colour for our vocabulary
+
+    mVocabularyColor = pVocabularyColor;
 
     QWidget::update();
 }
@@ -1740,10 +1776,23 @@ void Widget::setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor)
                                               .arg(qBlue(pColor))
                                               .arg(qAlpha(pColor)));
 
-    if (pPushButton == mGui->enlightenedBackgroundPushButton)
-        mCurrentRadicalsProgress->setColor(pColor);
-    else if (pPushButton == mGui->apprenticeBackgroundPushButton)
-        mCurrentKanjiProgress->setColor(pColor);
+    QColor color;
+
+    color.setRgba(pColor);
+
+    if (pPushButton == mGui->enlightenedBackgroundPushButton) {
+        mCurrentRadicalsProgress->setColor(color);
+
+        mReviewsTimeLine->setRadicalsColor(color);
+    } else if (pPushButton == mGui->apprenticeBackgroundPushButton) {
+        mCurrentKanjiProgress->setColor(color);
+
+        mReviewsTimeLine->setKanjiColor(color);
+    } else if (pPushButton == mGui->guruBackgroundPushButton) {
+        mCurrentKanjiProgress->setColor(color);
+
+        mReviewsTimeLine->setVocabularyColor(color);
+    }
 }
 
 //==============================================================================
