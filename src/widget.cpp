@@ -133,7 +133,9 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     std::sort(dateTimes.begin(), dateTimes.end());
     dateTimes.erase(std::unique(dateTimes.begin(), dateTimes.end()), dateTimes.end());
 
-    QList<int> reviews = QList<int>();
+    QMap<QDateTime, int> radicalsReviews = QMap<QDateTime, int>();
+    QMap<QDateTime, int> kanjiReviews = QMap<QDateTime, int>();
+    QMap<QDateTime, int> vocabularyReviews = QMap<QDateTime, int>();
     QDateTime startTime = QDateTime(mWidget->now().date(), QTime(mWidget->now().time().hour(),
                                                                  (mWidget->now().time().minute() < 15)?
                                                                      0:
@@ -143,16 +145,40 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                                                              30:
                                                                              45));
     QDateTime endTime = startTime.addSecs(3600*mRange);
+    int radicalsReviewsBeforeStartTime = 0;
+    int kanjiReviewsBeforeStartTime = 0;
+    int vocabularyReviewsBeforeStartTime = 0;
 
     foreach (const QDateTime &dateTime, dateTimes) {
-        if ((dateTime >= startTime) && (dateTime < endTime)) {
-            reviews <<  mWidget->allRadicalsReviews().value(dateTime)
-                       +mWidget->allKanjiReviews().value(dateTime)
-                       +mWidget->allVocabularyReviews().value(dateTime);
+        if (dateTime < startTime) {
+            radicalsReviewsBeforeStartTime += mWidget->allRadicalsReviews().value(dateTime);
+            kanjiReviewsBeforeStartTime += mWidget->allKanjiReviews().value(dateTime);
+            vocabularyReviewsBeforeStartTime += mWidget->allVocabularyReviews().value(dateTime);
+        } else if (dateTime < endTime) {
+            radicalsReviews.insert(dateTime, mWidget->allRadicalsReviews().value(dateTime));
+            kanjiReviews.insert(dateTime, mWidget->allKanjiReviews().value(dateTime));
+            vocabularyReviews.insert(dateTime, mWidget->allVocabularyReviews().value(dateTime));
         }
     }
 
-    int reviewsRange = 10*(int(0.1*(*std::max_element(reviews.begin(), reviews.end())))+1);
+    if (   radicalsReviewsBeforeStartTime
+        || kanjiReviewsBeforeStartTime
+        || vocabularyReviewsBeforeStartTime) {
+        radicalsReviews.insert(startTime, radicalsReviewsBeforeStartTime+radicalsReviews.value(startTime));
+        kanjiReviews.insert(startTime, kanjiReviewsBeforeStartTime+kanjiReviews.value(startTime));
+        vocabularyReviews.insert(startTime, vocabularyReviewsBeforeStartTime+vocabularyReviews.value(startTime));
+    }
+
+    int maxReviews = 0;
+
+    foreach (const QDateTime &dateTime, radicalsReviews.keys()) {
+        int crtReviews = radicalsReviews.value(dateTime)+kanjiReviews.value(dateTime)+vocabularyReviews.value(dateTime);
+
+        if (crtReviews > maxReviews)
+            maxReviews = crtReviews;
+    }
+
+    int reviewsRange = 10*(int(0.1*maxReviews)+1);
     int reviewsStep = (reviewsRange > 10)?10:2;
 
     // Determine where to start painting things, as well as the time and reviews
@@ -276,24 +302,22 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     double timeMultiplier = canvasWidthOverRange*mRange/(endTime.toTime_t()-startTime.toTime_t());
 
-    foreach (const QDateTime &dateTime, dateTimes) {
-        if ((dateTime >= startTime) && (dateTime < endTime)) {
-            double x = (dateTime.toTime_t()-startTime.toTime_t())*timeMultiplier;
-            double xWidth = 900.0*timeMultiplier;
-            double radicalsReviewsHeight = mWidget->allRadicalsReviews().value(dateTime)*canvasHeightOverRange;
-            double kanjiReviewsHeight = mWidget->allKanjiReviews().value(dateTime)*canvasHeightOverRange;
-            double vocabularyReviewsHeight = mWidget->allVocabularyReviews().value(dateTime)*canvasHeightOverRange;
+    foreach (const QDateTime &dateTime, radicalsReviews.keys()) {
+        double x = (dateTime.toTime_t()-startTime.toTime_t())*timeMultiplier;
+        double xWidth = 900.0*timeMultiplier;
+        double radicalsReviewsHeight = radicalsReviews.value(dateTime)*canvasHeightOverRange;
+        double kanjiReviewsHeight = kanjiReviews.value(dateTime)*canvasHeightOverRange;
+        double vocabularyReviewsHeight = vocabularyReviews.value(dateTime)*canvasHeightOverRange;
 
-            painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight,
-                                    xWidth, radicalsReviewsHeight),
-                             mRadicalsColor);
-            painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight,
-                                    xWidth, kanjiReviewsHeight),
-                             mKanjiColor);
-            painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight,
-                                    xWidth, vocabularyReviewsHeight),
-                             mVocabularyColor);
-        }
+        painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight,
+                                xWidth, radicalsReviewsHeight),
+                         mRadicalsColor);
+        painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight,
+                                xWidth, kanjiReviewsHeight),
+                         mKanjiColor);
+        painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight,
+                                xWidth, vocabularyReviewsHeight),
+                         mVocabularyColor);
     }
 
     // Accept the event
@@ -1727,9 +1751,7 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
 
     int nbOfReviews = 0;
     int nbOfCurrentReviews = 0;
-    uint from = nowTime;
-    uint to = from+3600*nbOfHours;
-
+    QDateTime endTime = mNow.addSecs(3600*nbOfHours);
     QList<QDateTime> dateTimes = QList<QDateTime>() << mAllRadicalsReviews.keys()
                                                     << mAllKanjiReviews.keys()
                                                     << mAllVocabularyReviews.keys();
@@ -1738,9 +1760,7 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
     dateTimes.erase(std::unique(dateTimes.begin(), dateTimes.end()), dateTimes.end());
 
     foreach (const QDateTime &dateTime, dateTimes) {
-        uint t = dateTime.toTime_t();
-
-        if ((t >= from) && (t <= to)) {
+        if (dateTime < endTime) {
             nbOfCurrentReviews +=  mCurrentRadicalsReviews.value(dateTime)
                                   +mCurrentKanjiReviews.value(dateTime)
                                   +mCurrentVocabularyReviews.value(dateTime);
