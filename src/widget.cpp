@@ -1010,12 +1010,13 @@ void Widget::updateWallpaper(const bool &pForceUpdate)
 
         // Delete any old wallpaper and save our new one before setting it
 
-        QDir picturesDir = QDir(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
+        QString picturesPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator();
+        QDir picturesDir = QDir(picturesPath);
 
         foreach (const QString &fileName, picturesDir.entryList(QStringList() << "WaniKani*.jpg", QDir::Files|QDir::NoSymLinks))
-            QFile(picturesDir.canonicalPath()+QDir::separator()+fileName).remove();
+            QFile(picturesPath+fileName).remove();
 
-        mFileName = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator()+QString("WaniKani%1.jpg").arg(QDateTime::currentMSecsSinceEpoch()));
+        mFileName = QDir::toNativeSeparators(picturesPath+QString("WaniKani%1.jpg").arg(QDateTime::currentMSecsSinceEpoch()));
 
         pixmap.save(mFileName);
 
