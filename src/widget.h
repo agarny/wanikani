@@ -145,9 +145,6 @@ private:
 
     bool mNeedToCheckWallpaper;
 
-    ProgressBarWidget *mCurrentRadicalsProgress;
-    ProgressBarWidget *mCurrentKanjiProgress;
-
     Reviews mCurrentRadicalsReviews;
     Reviews mAllRadicalsReviews;
 

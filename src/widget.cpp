@@ -432,15 +432,6 @@ Widget::Widget() :
 
     mGui->setupUi(this);
 
-    mCurrentRadicalsProgress = new ProgressBarWidget(this);
-    mCurrentKanjiProgress = new ProgressBarWidget(this);
-
-    mGui->userInformationGroupBox->layout()->addWidget(mCurrentRadicalsProgress);
-    mGui->userInformationGroupBox->layout()->addWidget(mCurrentKanjiProgress);
-
-    mGui->userInformationGroupBox->layout()->removeWidget(mGui->levelStatisticsValue);
-    mGui->userInformationGroupBox->layout()->addWidget(mGui->levelStatisticsValue);
-
     setMinimumSize(1440, 900);
 
 #ifdef Q_OS_MAC
@@ -1306,8 +1297,8 @@ void Widget::resetInternals(const bool &pVisible)
     mGui->masterValue->setVisible(pVisible);
     mGui->enlightenedValue->setVisible(pVisible);
     mGui->burnedValue->setVisible(pVisible);
-    mCurrentRadicalsProgress->setVisible(pVisible);
-    mCurrentKanjiProgress->setVisible(pVisible);
+    mGui->currentRadicalsProgress->setVisible(pVisible);
+    mGui->currentKanjiProgress->setVisible(pVisible);
     mGui->levelStatisticsValue->setVisible(pVisible);
 
     mGui->topSeparator->setVisible(pVisible);
@@ -1494,17 +1485,17 @@ void Widget::waniKaniUpdated()
     double currentRadicalsValue = double(radicalsProgress)/radicalsTotal;
     double currentKanjiValue = double(kanjiProgress)/kanjiTotal;
 
-    mCurrentRadicalsProgress->setValue(currentRadicalsValue);
-    mCurrentRadicalsProgress->setToolTip(ProgressToolTip.arg("Radicals Progress")
-                                                        .arg(radicalsProgress)
-                                                        .arg(radicalsTotal)
-                                                        .arg(int(100*currentRadicalsValue)));
+    mGui->currentRadicalsProgress->setValue(currentRadicalsValue);
+    mGui->currentRadicalsProgress->setToolTip(ProgressToolTip.arg("Radicals Progress")
+                                                             .arg(radicalsProgress)
+                                                             .arg(radicalsTotal)
+                                                             .arg(int(100*currentRadicalsValue)));
 
-    mCurrentKanjiProgress->setValue(currentKanjiValue);
-    mCurrentKanjiProgress->setToolTip(ProgressToolTip.arg("Kanji Progression")
-                                                     .arg(kanjiProgress)
-                                                     .arg(kanjiTotal)
-                                                     .arg(int(100*currentKanjiValue)));
+    mGui->currentKanjiProgress->setValue(currentKanjiValue);
+    mGui->currentKanjiProgress->setToolTip(ProgressToolTip.arg("Kanji Progression")
+                                                          .arg(kanjiProgress)
+                                                          .arg(kanjiTotal)
+                                                          .arg(int(100*currentKanjiValue)));
 
     // Determine the next, next hour and next day reviews
 
@@ -1825,15 +1816,15 @@ void Widget::setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor)
     color.setRgba(pColor);
 
     if (pPushButton == mGui->enlightenedBackgroundPushButton) {
-        mCurrentRadicalsProgress->setColor(color);
+        mGui->currentRadicalsProgress->setColor(color);
 
         mGui->reviewsTimeLine->setRadicalsColor(color);
     } else if (pPushButton == mGui->apprenticeBackgroundPushButton) {
-        mCurrentKanjiProgress->setColor(color);
+        mGui->currentKanjiProgress->setColor(color);
 
         mGui->reviewsTimeLine->setKanjiColor(color);
     } else if (pPushButton == mGui->guruBackgroundPushButton) {
-        mCurrentKanjiProgress->setColor(color);
+        mGui->currentKanjiProgress->setColor(color);
 
         mGui->reviewsTimeLine->setVocabularyColor(color);
     }
