@@ -56,7 +56,7 @@ class ReviewsTimeLineWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ReviewsTimeLineWidget(QWidget *pWidget);
+    explicit ReviewsTimeLineWidget(QWidget *pParent);
 
     void update(const int &pRange);
 

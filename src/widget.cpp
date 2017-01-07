@@ -62,9 +62,9 @@ limitations under the License.
 
 //==============================================================================
 
-ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pWidget) :
-    QWidget(pWidget),
-    mWidget(qobject_cast<Widget *>(pWidget)),
+ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pParent) :
+    QWidget(pParent),
+    mWidget(qobject_cast<Widget *>(pParent)),
     mRange(6),
     mRadicalsColor(QColor()),
     mKanjiColor(QColor()),
