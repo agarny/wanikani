@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>WaniKani</string>
   </property>
-  <layout class="QVBoxLayout" name="layout" stretch="1,0,0,0">
+  <layout class="QVBoxLayout" name="layout" stretch="1,0,0,0,0">
    <property name="spacing">
     <number>4</number>
    </property>
@@ -512,6 +512,9 @@
     </widget>
    </item>
    <item>
+    <widget class="ReviewsTimeLineWidget" name="reviewsTimeLine" native="true"/>
+   </item>
+   <item>
     <widget class="Line" name="bottomSeparator">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -588,6 +591,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ReviewsTimeLineWidget</class>
+   <extends>QWidget</extends>
+   <header>widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../res/resources.qrc"/>
  </resources>

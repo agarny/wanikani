@@ -62,9 +62,9 @@ limitations under the License.
 
 //==============================================================================
 
-ReviewsTimeLineWidget::ReviewsTimeLineWidget(Widget *pWidget) :
+ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pWidget) :
     QWidget(pWidget),
-    mWidget(pWidget),
+    mWidget(qobject_cast<Widget *>(pWidget)),
     mRange(6),
     mRadicalsColor(QColor()),
     mKanjiColor(QColor()),
@@ -440,10 +440,6 @@ Widget::Widget() :
 
     mGui->userInformationGroupBox->layout()->removeWidget(mGui->levelStatisticsValue);
     mGui->userInformationGroupBox->layout()->addWidget(mGui->levelStatisticsValue);
-
-    mReviewsTimeLine = new ReviewsTimeLineWidget(this);
-
-    mGui->layout->insertWidget(mGui->layout->indexOf(mGui->bottomSeparator), mReviewsTimeLine);
 
     setMinimumSize(1440, 900);
 
@@ -1319,7 +1315,7 @@ void Widget::resetInternals(const bool &pVisible)
     mGui->nextReviewsValue->setVisible(pVisible);
     mGui->nextHourReviewsValue->setVisible(pVisible);
     mGui->nextDayReviewsValue->setVisible(pVisible);
-    mReviewsTimeLine->setVisible(pVisible);
+    mGui->reviewsTimeLine->setVisible(pVisible);
 
     mNow = QDateTime::currentDateTime();
 
@@ -1746,7 +1742,7 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
 
     int nbOfHours = 6*((pRange == -1)?mGui->reviewsTimeLineSlider->value():pRange);
 
-    mReviewsTimeLine->update(nbOfHours);
+    mGui->reviewsTimeLine->update(nbOfHours);
 
     static const QString ReviewsTimeLineText = "<center>\n"
                                                "    <span style=\"font-size: 11px;\"><strong>%1</strong><br/>within the next %2</span>\n"
@@ -1831,15 +1827,15 @@ void Widget::setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor)
     if (pPushButton == mGui->enlightenedBackgroundPushButton) {
         mCurrentRadicalsProgress->setColor(color);
 
-        mReviewsTimeLine->setRadicalsColor(color);
+        mGui->reviewsTimeLine->setRadicalsColor(color);
     } else if (pPushButton == mGui->apprenticeBackgroundPushButton) {
         mCurrentKanjiProgress->setColor(color);
 
-        mReviewsTimeLine->setKanjiColor(color);
+        mGui->reviewsTimeLine->setKanjiColor(color);
     } else if (pPushButton == mGui->guruBackgroundPushButton) {
         mCurrentKanjiProgress->setColor(color);
 
-        mReviewsTimeLine->setVocabularyColor(color);
+        mGui->reviewsTimeLine->setVocabularyColor(color);
     }
 }
 

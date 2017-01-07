@@ -56,7 +56,7 @@ class ReviewsTimeLineWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ReviewsTimeLineWidget(Widget *pWidget);
+    explicit ReviewsTimeLineWidget(QWidget *pWidget);
 
     void update(const int &pRange);
 
@@ -156,8 +156,6 @@ private:
 
     Reviews mCurrentVocabularyReviews;
     Reviews mAllVocabularyReviews;
-
-    ReviewsTimeLineWidget *mReviewsTimeLine;
 
     QDateTime mNow;
     uint mLevelStartTime;
