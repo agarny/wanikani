@@ -601,13 +601,13 @@
   <customwidget>
    <class>ReviewsTimeLineWidget</class>
    <extends>QWidget</extends>
-   <header>widget.h</header>
+   <header>src/widget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ProgressBarWidget</class>
    <extends>QWidget</extends>
-   <header>widget.h</header>
+   <header>src/widget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
