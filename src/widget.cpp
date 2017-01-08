@@ -909,10 +909,12 @@ void Widget::updateSrsDistributionInformation(QLabel *pLabel,
     // Update the given SRS distribution information
 
     pLabel->setText("<img src=\""+iconDataUri(pIcon, 32, 32)+"\"><br/>"+pInformation.total());
-    pLabel->setToolTip("<center>\n"
-                       "    <strong>"+pInformation.name()+"</strong>\n"
-                       "</center>\n"
-                       "<table>\n"
+    pLabel->setToolTip("<table>\n"
+                       "    <thead>\n"
+                       "        <tr>\n"
+                       "            <td colspan=\"3\" align=center style=\"font-weight: bold;\">"+pInformation.name()+"</td>\n"
+                       "        </tr>\n"
+                       "    </thead>\n"
                        "    <tbody>\n"
                        "        <tr>\n"
                        "            <td>Radicals:</td>\n"
@@ -1622,7 +1624,7 @@ void Widget::waniKaniUpdated()
     static const QString ProgressToolTip = "<table>\n"
                                            "    <thead>\n"
                                            "        <tr>\n"
-                                           "            <td align=center><strong>%1</strong></td>\n"
+                                           "            <td align=center style=\"font-weight: bold;\">%1</td>\n"
                                            "        </tr>\n"
                                            "    </thead>\n"
                                            "    <tbody>\n"
