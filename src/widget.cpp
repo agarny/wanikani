@@ -448,6 +448,10 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     mData = QList<ReviewsTimeLineData>();
 
+    canvasHeightOverRange = double(canvasHeight)/reviewsRange;
+    // Note: slightly different value from the one above since this time we are
+    //       using it with QPainter::fillRect()...
+
     foreach (const QDateTime &dateTime, allRadicalsReviews.keys()) {
         uint timeDiff = dateTime.toTime_t()-startTime.toTime_t();
         double x = timeDiff*timeMultiplier;
