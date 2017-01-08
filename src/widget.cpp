@@ -1511,7 +1511,7 @@ void Widget::waniKaniUpdated()
     updateSrsDistributionPalettes();
 
     mGui->userInformationValue->setText("<center>\n"
-                                        "    <span style=\"font-weight: bold; font-size: 15px;\"><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></strong> of Sect <strong>"+mWaniKani.title()+"</span><br/>\n"
+                                        "    <span style=\"font-size: 15px;\"><span style=\"font-weight: bold;\"><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></span> of Sect <span style=\"font-weight: bold;\">"+mWaniKani.title()+"</span></span><br/>\n"
                                         "    <span style=\"font-weight: bold; font-size: 11px;\">Level "+QString::number(mWaniKani.level())+"</span>\n"
                                         "</center>\n");
 
