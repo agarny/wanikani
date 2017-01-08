@@ -43,6 +43,7 @@ limitations under the License.
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTextStream>
+#include <QToolTip>
 
 //==============================================================================
 
@@ -68,12 +69,17 @@ ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pParent) :
     mRange(6),
     mRadicalsColor(QColor()),
     mKanjiColor(QColor()),
-    mVocabularyColor(QColor())
+    mVocabularyColor(QColor()),
+    mData(QList<ReviewsTimeLineData>())
 {
     // Minimum and maximum sizes for our progress bar
 
     setMinimumSize(QSize(0, 150));
     setMaximumSize(QSize(16777215, 150));
+
+    // Make sure that mouse tracking is enabled
+
+    setMouseTracking(true);
 }
 
 //==============================================================================
@@ -122,6 +128,80 @@ void ReviewsTimeLineWidget::setVocabularyColor(const QColor &pVocabularyColor)
 
 //==============================================================================
 
+void ReviewsTimeLineWidget::mouseMoveEvent(QMouseEvent *pEvent)
+{
+    // Default handling of the event
+
+    QWidget::mouseMoveEvent(pEvent);
+
+    // Show our tool tip based on where our mouse pointer is
+    // Note: the leading spaces are just a trick to ensure that the tool tip
+    //       gets moved as the user moves the mouse...
+
+    static const QString ReviewsToolTip = "%1\n"
+                                          "<table>\n"
+                                          "    <tbody>\n"
+                                          "        <tr style=\"font-weight: bold;\">\n"
+                                          "            <td>Reviews:</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>%2</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>(%3)</td>\n"
+                                          "        </tr>\n"
+                                          "        <tr>\n"
+                                          "            <td>Radicals:</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>%4</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>(%5)</td>\n"
+                                          "        </tr>\n"
+                                          "        <tr>\n"
+                                          "            <td>Kanji:</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>%6</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>(%7)</td>\n"
+                                          "        </tr>\n"
+                                          "        <tr>\n"
+                                          "            <td>Vocabulary:</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>%8</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>(%9)</td>\n"
+                                          "        </tr>\n"
+                                          "    </tbody>\n"
+                                          "</table>\n";
+
+    bool toolTipSet = false;
+    int x = pEvent->pos().x();
+    int y = pEvent->pos().y();
+
+    foreach (const ReviewsTimeLineData &data, mData) {
+        if (   (x >= data.xStart) && (x <= data.xEnd)
+            && (y >= data.yStart) && (y <= data.yEnd)) {
+            QToolTip::showText(pEvent->globalPos(),
+                               ReviewsToolTip.arg(QString().fill(' ', x*y))
+                                             .arg(data.allRadicals+data.allKanji+data.allVocabulary)
+                                             .arg(data.currentRadicals+data.currentKanji+data.currentVocabulary)
+                                             .arg(data.allRadicals)
+                                             .arg(data.currentRadicals)
+                                             .arg(data.allKanji)
+                                             .arg(data.currentKanji)
+                                             .arg(data.allVocabulary)
+                                             .arg(data.currentVocabulary));
+
+            toolTipSet = true;
+
+            break;
+        }
+    }
+
+    if (!toolTipSet)
+        QToolTip::showText(pEvent->globalPos(), QString());
+}
+
+//==============================================================================
+
 void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 {
     // Determine the number of reviews for a given time slot
@@ -133,9 +213,12 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     std::sort(dateTimes.begin(), dateTimes.end());
     dateTimes.erase(std::unique(dateTimes.begin(), dateTimes.end()), dateTimes.end());
 
-    QMap<QDateTime, int> radicalsReviews = QMap<QDateTime, int>();
-    QMap<QDateTime, int> kanjiReviews = QMap<QDateTime, int>();
-    QMap<QDateTime, int> vocabularyReviews = QMap<QDateTime, int>();
+    QMap<QDateTime, int> currentRadicalsReviews = QMap<QDateTime, int>();
+    QMap<QDateTime, int> allRadicalsReviews = QMap<QDateTime, int>();
+    QMap<QDateTime, int> currentKanjiReviews = QMap<QDateTime, int>();
+    QMap<QDateTime, int> allKanjiReviews = QMap<QDateTime, int>();
+    QMap<QDateTime, int> currentVocabularyReviews = QMap<QDateTime, int>();
+    QMap<QDateTime, int> allVocabularyReviews = QMap<QDateTime, int>();
     QDateTime startTime = QDateTime(mWidget->now().date(), QTime(mWidget->now().time().hour(),
                                                                  (mWidget->now().time().minute() < 15)?
                                                                      0:
@@ -145,34 +228,52 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                                                              30:
                                                                              45));
     QDateTime endTime = startTime.addSecs(3600*mRange);
-    int radicalsReviewsBeforeStartTime = 0;
-    int kanjiReviewsBeforeStartTime = 0;
-    int vocabularyReviewsBeforeStartTime = 0;
+    int currentRadicalsReviewsBeforeStartTime = 0;
+    int allRadicalsReviewsBeforeStartTime = 0;
+    int currentKanjiReviewsBeforeStartTime = 0;
+    int allKanjiReviewsBeforeStartTime = 0;
+    int currentVocabularyReviewsBeforeStartTime = 0;
+    int allVocabularyReviewsBeforeStartTime = 0;
 
     foreach (const QDateTime &dateTime, dateTimes) {
         if (dateTime < startTime) {
-            radicalsReviewsBeforeStartTime += mWidget->allRadicalsReviews().value(dateTime);
-            kanjiReviewsBeforeStartTime += mWidget->allKanjiReviews().value(dateTime);
-            vocabularyReviewsBeforeStartTime += mWidget->allVocabularyReviews().value(dateTime);
+            currentRadicalsReviewsBeforeStartTime += mWidget->currentRadicalsReviews().value(dateTime);
+            allRadicalsReviewsBeforeStartTime += mWidget->allRadicalsReviews().value(dateTime);
+
+            currentKanjiReviewsBeforeStartTime += mWidget->currentKanjiReviews().value(dateTime);
+            allKanjiReviewsBeforeStartTime += mWidget->allKanjiReviews().value(dateTime);
+
+            currentVocabularyReviewsBeforeStartTime += mWidget->currentVocabularyReviews().value(dateTime);
+            allVocabularyReviewsBeforeStartTime += mWidget->allVocabularyReviews().value(dateTime);
         } else if (dateTime < endTime) {
-            radicalsReviews.insert(dateTime, mWidget->allRadicalsReviews().value(dateTime));
-            kanjiReviews.insert(dateTime, mWidget->allKanjiReviews().value(dateTime));
-            vocabularyReviews.insert(dateTime, mWidget->allVocabularyReviews().value(dateTime));
+            currentRadicalsReviews.insert(dateTime, mWidget->currentRadicalsReviews().value(dateTime));
+            allRadicalsReviews.insert(dateTime, mWidget->allRadicalsReviews().value(dateTime));
+
+            currentKanjiReviews.insert(dateTime, mWidget->currentKanjiReviews().value(dateTime));
+            allKanjiReviews.insert(dateTime, mWidget->allKanjiReviews().value(dateTime));
+
+            currentVocabularyReviews.insert(dateTime, mWidget->currentVocabularyReviews().value(dateTime));
+            allVocabularyReviews.insert(dateTime, mWidget->allVocabularyReviews().value(dateTime));
         }
     }
 
-    if (   radicalsReviewsBeforeStartTime
-        || kanjiReviewsBeforeStartTime
-        || vocabularyReviewsBeforeStartTime) {
-        radicalsReviews.insert(startTime, radicalsReviewsBeforeStartTime+radicalsReviews.value(startTime));
-        kanjiReviews.insert(startTime, kanjiReviewsBeforeStartTime+kanjiReviews.value(startTime));
-        vocabularyReviews.insert(startTime, vocabularyReviewsBeforeStartTime+vocabularyReviews.value(startTime));
+    if (   allRadicalsReviewsBeforeStartTime
+        || allKanjiReviewsBeforeStartTime
+        || allVocabularyReviewsBeforeStartTime) {
+        currentRadicalsReviews.insert(startTime, allRadicalsReviewsBeforeStartTime+currentRadicalsReviews.value(startTime));
+        allRadicalsReviews.insert(startTime, allRadicalsReviewsBeforeStartTime+allRadicalsReviews.value(startTime));
+
+        currentKanjiReviews.insert(startTime, allKanjiReviewsBeforeStartTime+currentKanjiReviews.value(startTime));
+        allKanjiReviews.insert(startTime, allKanjiReviewsBeforeStartTime+allKanjiReviews.value(startTime));
+
+        currentVocabularyReviews.insert(startTime, allVocabularyReviewsBeforeStartTime+currentVocabularyReviews.value(startTime));
+        allVocabularyReviews.insert(startTime, allVocabularyReviewsBeforeStartTime+allVocabularyReviews.value(startTime));
     }
 
     int maxReviews = 0;
 
-    foreach (const QDateTime &dateTime, radicalsReviews.keys()) {
-        int crtReviews = radicalsReviews.value(dateTime)+kanjiReviews.value(dateTime)+vocabularyReviews.value(dateTime);
+    foreach (const QDateTime &dateTime, allRadicalsReviews.keys()) {
+        int crtReviews = allRadicalsReviews.value(dateTime)+allKanjiReviews.value(dateTime)+allVocabularyReviews.value(dateTime);
 
         if (crtReviews > maxReviews)
             maxReviews = crtReviews;
@@ -302,12 +403,34 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     double timeMultiplier = canvasWidthOverRange*mRange/(endTime.toTime_t()-startTime.toTime_t());
 
-    foreach (const QDateTime &dateTime, radicalsReviews.keys()) {
+    mData = QList<ReviewsTimeLineData>();
+
+    foreach (const QDateTime &dateTime, allRadicalsReviews.keys()) {
         double x = (dateTime.toTime_t()-startTime.toTime_t())*timeMultiplier;
         double xWidth = 900.0*timeMultiplier;
-        double radicalsReviewsHeight = radicalsReviews.value(dateTime)*canvasHeightOverRange;
-        double kanjiReviewsHeight = kanjiReviews.value(dateTime)*canvasHeightOverRange;
-        double vocabularyReviewsHeight = vocabularyReviews.value(dateTime)*canvasHeightOverRange;
+
+        ReviewsTimeLineData data;
+
+        data.xStart = x+xShift;
+        data.xEnd = data.xStart+xWidth;
+
+        data.yStart = height()-canvasHeight-Space;
+        data.yEnd = data.yStart+canvasHeight;
+
+        data.currentRadicals = currentRadicalsReviews.value(dateTime);
+        data.allRadicals = allRadicalsReviews.value(dateTime);
+
+        data.currentKanji = currentKanjiReviews.value(dateTime);
+        data.allKanji = allKanjiReviews.value(dateTime);
+
+        data.currentVocabulary = currentVocabularyReviews.value(dateTime);
+        data.allVocabulary = allVocabularyReviews.value(dateTime);
+
+        mData << data;
+
+        double radicalsReviewsHeight = data.allRadicals*canvasHeightOverRange;
+        double kanjiReviewsHeight = data.allKanji*canvasHeightOverRange;
+        double vocabularyReviewsHeight = data.allVocabulary*canvasHeightOverRange;
 
         painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight,
                                 xWidth, radicalsReviewsHeight),
@@ -564,6 +687,15 @@ QDateTime Widget::now() const
 
 //==============================================================================
 
+Reviews Widget::currentRadicalsReviews() const
+{
+    // Return our current radicals reviews
+
+    return mCurrentRadicalsReviews;
+}
+
+//==============================================================================
+
 Reviews Widget::allRadicalsReviews() const
 {
     // Return all our radicals reviews
@@ -573,11 +705,29 @@ Reviews Widget::allRadicalsReviews() const
 
 //==============================================================================
 
+Reviews Widget::currentKanjiReviews() const
+{
+    // Return our current Kanji reviews
+
+    return mCurrentKanjiReviews;
+}
+
+//==============================================================================
+
 Reviews Widget::allKanjiReviews() const
 {
     // Return all our Kanji reviews
 
     return mAllKanjiReviews;
+}
+
+//==============================================================================
+
+Reviews Widget::currentVocabularyReviews() const
+{
+    // Return our current vocabulary reviews
+
+    return mCurrentVocabularyReviews;
 }
 
 //==============================================================================

@@ -51,6 +51,26 @@ class Widget;
 
 //==============================================================================
 
+struct ReviewsTimeLineData
+{
+    double xStart;
+    double xEnd;
+
+    double yStart;
+    double yEnd;
+
+    int currentRadicals;
+    int allRadicals;
+
+    int currentKanji;
+    int allKanji;
+
+    int currentVocabulary;
+    int allVocabulary;
+};
+
+//==============================================================================
+
 class ReviewsTimeLineWidget : public QWidget
 {
     Q_OBJECT
@@ -65,6 +85,7 @@ public:
     void setVocabularyColor(const QColor &pVocabularyColor);
 
 protected:
+    virtual void mouseMoveEvent(QMouseEvent *pEvent);
     virtual void paintEvent(QPaintEvent *pEvent);
 
 private:
@@ -75,6 +96,8 @@ private:
     QColor mRadicalsColor;
     QColor mKanjiColor;
     QColor mVocabularyColor;
+
+    QList<ReviewsTimeLineData> mData;
 };
 
 //==============================================================================
@@ -113,8 +136,13 @@ public:
 
     QDateTime now() const;
 
+    Reviews currentRadicalsReviews() const;
     Reviews allRadicalsReviews() const;
+
+    Reviews currentKanjiReviews() const;
     Reviews allKanjiReviews() const;
+
+    Reviews currentVocabularyReviews() const;
     Reviews allVocabularyReviews() const;
 
 #ifdef Q_OS_MAC
