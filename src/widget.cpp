@@ -358,21 +358,17 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                    3.0:
                                    1.0;
 
-    // Paint the minor time lines
+    // Paint our background
 
     painter.fillRect(0, 0, width(), height(), QPalette().button());
+
+    // Paint the minor time lines
 
     painter.translate(xShift, yShift);
 
     QPen pen = painter.pen();
 
     pen.setColor(Qt::lightGray);
-    pen.setStyle(Qt::SolidLine);
-
-    painter.setPen(pen);
-
-    painter.drawRect(0, 0, canvasWidth-1, canvasHeight-1);
-
     pen.setStyle(Qt::DotLine);
 
     painter.setPen(pen);
@@ -482,6 +478,16 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
         double kanjiReviewsHeight = data.allKanji*canvasHeightOverRange;
         double vocabularyReviewsHeight = data.allVocabulary*canvasHeightOverRange;
 
+        if (data.currentRadicals || data.currentKanji || data.currentVocabulary) {
+            painter.fillRect(QRectF(x, 0,
+                                    xWidth, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight),
+                             Qt::white);
+        }
+
+        painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight,
+                                xWidth, radicalsReviewsHeight+kanjiReviewsHeight+vocabularyReviewsHeight),
+                         QPalette().button());
+
         painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight,
                                 xWidth, radicalsReviewsHeight),
                          mRadicalsColor);
@@ -492,6 +498,14 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                 xWidth, vocabularyReviewsHeight),
                          mVocabularyColor);
     }
+
+    // Paint our border
+
+    pen.setColor(Qt::lightGray);
+
+    painter.setPen(pen);
+
+    painter.drawRect(0, 0, canvasWidth-1, canvasHeight-1);
 
     // Accept the event
 
