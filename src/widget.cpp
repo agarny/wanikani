@@ -585,7 +585,7 @@ Widget::Widget() :
 
     // Some about information
 
-    static const QString About = "<span style=\"font-size: 19px;\"><strong><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> %1</strong></span><br/>"
+    static const QString About = "<span style=\"font-weight: bold; font-size: 19px;\"><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> %1</span><br/>"
                                  "© 2016-%2 <a href=\"https://github.com/agarny\""+QString(LinkStyle)+">Alan Garny</a>";
 
     QFile versionFile(":/version");
@@ -1509,8 +1509,8 @@ void Widget::waniKaniUpdated()
     updateSrsDistributionPalettes();
 
     mGui->userInformationValue->setText("<center>\n"
-                                        "    <span style=\"font-size: 15px;\"><strong><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></strong> of Sect <strong>"+mWaniKani.title()+"</strong></span><br/>\n"
-                                        "    <span style=\"font-size: 11px;\"><strong>Level "+QString::number(mWaniKani.level())+"</strong></span>\n"
+                                        "    <span style=\"font-weight: bold; font-size: 15px;\"><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></strong> of Sect <strong>"+mWaniKani.title()+"</span><br/>\n"
+                                        "    <span style=\"font-weight: bold; font-size: 11px;\">Level "+QString::number(mWaniKani.level())+"</span>\n"
                                         "</center>\n");
 
     updateSrsDistributionInformation(mGui->apprenticeValue, ":/apprentice", mWaniKani.srsDistribution().apprentice());
@@ -1674,10 +1674,10 @@ void Widget::waniKaniUpdated()
     }
 
     static const QString LessonsText = "<center>\n"
-                                       "    <span style=\"font-size: 15px;\"><strong>%1</strong></span><br/>\n"
+                                       "    <span style=\"font-weight: bold; font-size: 15px;\">%1</span><br/>\n"
                                        "</center>\n";
     static const QString ReviewsText = "<center>\n"
-                                       "    <span style=\"font-size: 15px;\"><strong>%1</strong></span><br/>\n"
+                                       "    <span style=\"font-weight: bold; font-size: 15px;\">%1</span><br/>\n"
                                        "    <span style=\"font-size: 11px;\">%2</span>\n"
                                        "</center>\n";
     static const QString ReviewsToolTip = "<table>\n"
@@ -1852,17 +1852,17 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
                                                    "    <table style=\"font-size: 11px;\">\n"
                                                    "        <tbody>\n"
                                                    "            <tr>\n"
-                                                   "                <td align=right><strong>Start:</strong></td>\n"
+                                                   "                <td align=right style=\"font-weight: bold;\">Start:</td>\n"
                                                    "                <td style=\"width: 4px;\"></td>\n"
                                                    "                <td>%1</td>\n"
                                                    "            </tr>\n"
                                                    "            <tr>\n"
-                                                   "                <td align=right><strong>Finish:</strong></td>\n"
+                                                   "                <td align=right style=\"font-weight: bold;\">Finish:</td>\n"
                                                    "                <td style=\"width: 4px;\"></td>\n"
                                                    "                <td>%2</td>\n"
                                                    "            </tr>\n"
                                                    "            <tr>\n"
-                                                   "                <td align=right><strong>Total:</strong></td>\n"
+                                                   "                <td align=right style=\"font-weight: bold;\">Total:</td>\n"
                                                    "                <td style=\"width: 4px;\"></td>\n"
                                                    "                <td>%3</td>\n"
                                                    "            </tr>\n"
@@ -1886,7 +1886,8 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
     mGui->reviewsTimeLine->update(nbOfHours);
 
     static const QString ReviewsTimeLineText = "<center>\n"
-                                               "    <span style=\"font-size: 11px;\"><strong>%1</strong><br/>within the next %2</span>\n"
+                                               "    <span style=\"font-weight: bold; font-size: 11px;\">%1</span><br/>\n"
+                                               "    <span style=\"font-size: 11px;\">within the next %2</span>\n"
                                                "</center>";
 
     int nbOfReviews = 0;
