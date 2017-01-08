@@ -53,6 +53,8 @@ class Widget;
 
 struct ReviewsTimeLineData
 {
+    QString date;
+
     double xStart;
     double xEnd;
 
@@ -210,8 +212,6 @@ private:
     void updateWallpaper(const bool &pForceUpdate = false);
 
     void setWallpaper();
-
-    QString timeToString(const int &pSeconds);
 
     void determineReviews(const Reviews &pCurrentReviews,
                           const Reviews &pAllReviews, QDateTime &pNextDateTime,

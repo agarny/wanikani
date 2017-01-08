@@ -63,6 +63,50 @@ limitations under the License.
 
 //==============================================================================
 
+QString timeToString(const int &pSeconds)
+{
+    // Return the given number of seconds as a formatted string
+
+    if (pSeconds < 60) {
+        return "less than 1 minute";
+    } else {
+        QString res = QString();
+        int days = pSeconds/86400;
+        int hours = (pSeconds/3600)%24;
+        int minutes = (pSeconds/60)%60;
+
+        if (days) {
+            if (!res.isEmpty())
+                res += ", ";
+
+            res += (days == 1)?"1 day":QString("%1 days").arg(days);
+        }
+
+        if (hours) {
+            if (!res.isEmpty())
+                res += ", ";
+
+            res += (hours == 1)?"1 hour":QString("%1 hours").arg(hours);
+        }
+
+        if (minutes) {
+            if (!res.isEmpty())
+                res += ", ";
+
+            res += (minutes == 1)?"1 minute":QString("%1 minutes").arg(minutes);
+        }
+
+        int lastCommaPosition = res.lastIndexOf(',');
+
+        if (lastCommaPosition == -1)
+            return res;
+        else
+            return res.left(lastCommaPosition)+" and"+res.right(res.length()-lastCommaPosition-1);
+    }
+}
+
+//==============================================================================
+
 ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pParent) :
     QWidget(pParent),
     mWidget(qobject_cast<Widget *>(pParent)),
@@ -140,34 +184,32 @@ void ReviewsTimeLineWidget::mouseMoveEvent(QMouseEvent *pEvent)
 
     static const QString ReviewsToolTip = "%1\n"
                                           "<table>\n"
-                                          "    <tbody>\n"
-                                          "        <tr style=\"font-weight: bold;\">\n"
-                                          "            <td>Reviews:</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>%2</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>(%3)</td>\n"
+                                          "    <thead>\n"
+                                          "        <tr>\n"
+                                          "            <td colspan=\"5\" align=center><span style=\"font-weight: bold;\">%2 (%3) reviews</span><br/>%4</td>\n"
                                           "        </tr>\n"
+                                          "    </thead>\n"
+                                          "    <tbody>\n"
                                           "        <tr>\n"
                                           "            <td>Radicals:</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>%4</td>\n"
+                                          "            <td align=center>%5</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>(%5)</td>\n"
+                                          "            <td align=center>(%6)</td>\n"
                                           "        </tr>\n"
                                           "        <tr>\n"
                                           "            <td>Kanji:</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>%6</td>\n"
+                                          "            <td align=center>%7</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>(%7)</td>\n"
+                                          "            <td align=center>(%8)</td>\n"
                                           "        </tr>\n"
                                           "        <tr>\n"
                                           "            <td>Vocabulary:</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>%8</td>\n"
+                                          "            <td align=center>%9</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>(%9)</td>\n"
+                                          "            <td align=center>(%10)</td>\n"
                                           "        </tr>\n"
                                           "    </tbody>\n"
                                           "</table>\n";
@@ -183,6 +225,7 @@ void ReviewsTimeLineWidget::mouseMoveEvent(QMouseEvent *pEvent)
                                ReviewsToolTip.arg(QString().fill(' ', x*y))
                                              .arg(data.allRadicals+data.allKanji+data.allVocabulary)
                                              .arg(data.currentRadicals+data.currentKanji+data.currentVocabulary)
+                                             .arg(data.date)
                                              .arg(data.allRadicals)
                                              .arg(data.currentRadicals)
                                              .arg(data.allKanji)
@@ -406,10 +449,13 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     mData = QList<ReviewsTimeLineData>();
 
     foreach (const QDateTime &dateTime, allRadicalsReviews.keys()) {
-        double x = (dateTime.toTime_t()-startTime.toTime_t())*timeMultiplier;
+        uint timeDiff = dateTime.toTime_t()-startTime.toTime_t();
+        double x = timeDiff*timeMultiplier;
         double xWidth = 900.0*timeMultiplier;
 
         ReviewsTimeLineData data;
+
+        data.date = (timeDiff <= 0)?"now":"in "+timeToString(timeDiff);
 
         data.xStart = x+xShift;
         data.xEnd = data.xStart+xWidth;
@@ -1328,50 +1374,6 @@ void Widget::on_closeToolButton_clicked()
     // Close ourselves
 
     qApp->quit();
-}
-
-//==============================================================================
-
-QString Widget::timeToString(const int &pSeconds)
-{
-    // Return the given number of seconds as a formatted string
-
-    if (pSeconds < 60) {
-        return "less than 1 minute";
-    } else {
-        QString res = QString();
-        int days = pSeconds/86400;
-        int hours = (pSeconds/3600)%24;
-        int minutes = (pSeconds/60)%60;
-
-        if (days) {
-            if (!res.isEmpty())
-                res += ", ";
-
-            res += (days == 1)?"1 day":QString("%1 days").arg(days);
-        }
-
-        if (hours) {
-            if (!res.isEmpty())
-                res += ", ";
-
-            res += (hours == 1)?"1 hour":QString("%1 hours").arg(hours);
-        }
-
-        if (minutes) {
-            if (!res.isEmpty())
-                res += ", ";
-
-            res += (minutes == 1)?"1 minute":QString("%1 minutes").arg(minutes);
-        }
-
-        int lastCommaPosition = res.lastIndexOf(',');
-
-        if (lastCommaPosition == -1)
-            return res;
-        else
-            return res.left(lastCommaPosition)+" and"+res.right(res.length()-lastCommaPosition-1);
-    }
 }
 
 //==============================================================================
