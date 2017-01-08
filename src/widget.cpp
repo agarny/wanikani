@@ -322,7 +322,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
             maxReviews = crtReviews;
     }
 
-    int reviewsRange = 10*(int(0.1*maxReviews)+1);
+    int reviewsRange = 10*(ceil(0.1*maxReviews));
     int reviewsStep = (reviewsRange > 10)?10:2;
 
     // Determine where to start painting things, as well as the time and reviews
