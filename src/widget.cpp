@@ -303,13 +303,13 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     if (   allRadicalsReviewsBeforeStartTime
         || allKanjiReviewsBeforeStartTime
         || allVocabularyReviewsBeforeStartTime) {
-        currentRadicalsReviews.insert(startTime, allRadicalsReviewsBeforeStartTime+currentRadicalsReviews.value(startTime));
+        currentRadicalsReviews.insert(startTime, currentRadicalsReviewsBeforeStartTime+currentRadicalsReviews.value(startTime));
         allRadicalsReviews.insert(startTime, allRadicalsReviewsBeforeStartTime+allRadicalsReviews.value(startTime));
 
-        currentKanjiReviews.insert(startTime, allKanjiReviewsBeforeStartTime+currentKanjiReviews.value(startTime));
+        currentKanjiReviews.insert(startTime, currentKanjiReviewsBeforeStartTime+currentKanjiReviews.value(startTime));
         allKanjiReviews.insert(startTime, allKanjiReviewsBeforeStartTime+allKanjiReviews.value(startTime));
 
-        currentVocabularyReviews.insert(startTime, allVocabularyReviewsBeforeStartTime+currentVocabularyReviews.value(startTime));
+        currentVocabularyReviews.insert(startTime, currentVocabularyReviewsBeforeStartTime+currentVocabularyReviews.value(startTime));
         allVocabularyReviews.insert(startTime, allVocabularyReviewsBeforeStartTime+allVocabularyReviews.value(startTime));
     }
 
