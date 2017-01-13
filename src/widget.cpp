@@ -1434,11 +1434,6 @@ void Widget::determineReviews(const Reviews &pCurrentReviews,
 
 //==============================================================================
 
-static const int SrsIntervals[2][4] = { { 2, 4, 8, 23 },
-                                        { 4, 8, 23, 47 } };
-
-//==============================================================================
-
 int Widget::guruTime(const int &pSrsLevel, const int &pNextReview)
 {
     // Make sure that we are not yet at the Guru level
@@ -1448,6 +1443,9 @@ int Widget::guruTime(const int &pSrsLevel, const int &pNextReview)
 
     // Compute and return the Guru time for the item which SRS level and next
     // review time are given
+
+    static const int SrsIntervals[2][4] = { { 2, 4, 8, 23 },
+                                            { 4, 8, 23, 47 } };
 
     int res = pSrsLevel?pNextReview:0;
 
