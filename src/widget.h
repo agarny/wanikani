@@ -185,7 +185,7 @@ private:
     Reviews mAllVocabularyReviews;
 
     QDateTime mNow;
-    uint mLevelStartTime;
+    int mLevelStartTime;
 
     QList<int> mRadicalGuruTimes;
     QList<int> mKanjiGuruTimes;
