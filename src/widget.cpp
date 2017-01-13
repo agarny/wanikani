@@ -1451,10 +1451,8 @@ int Widget::guruTime(const int &pSrsLevel, const int &pNextReview)
 
     int res = pSrsLevel?pNextReview:0;
 
-    if (pSrsLevel != 4) {
-        for (int i = 0; i < 4; ++i)
-            res += (pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i]*3600;
-    }
+    for (int i = pSrsLevel; i < 4; ++i)
+        res += (pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i]*3600;
 
     return res;
 }
