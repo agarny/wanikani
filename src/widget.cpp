@@ -1570,7 +1570,8 @@ void Widget::waniKaniUpdated()
             // Retrieve, if needed, when we started our current level
 
             if (   !mLevelStartTime
-                ||  (radical.userSpecific().unlockedDate() < mLevelStartTime)) {
+                ||  (   radical.userSpecific().unlockedDate()
+                     && (radical.userSpecific().unlockedDate() < mLevelStartTime))) {
                 mLevelStartTime = radical.userSpecific().unlockedDate();
             }
         }
