@@ -217,7 +217,7 @@ private:
                           const Reviews &pAllReviews, QDateTime &pNextDateTime,
                           int &pDiff, int *pNbOfReviews);
 
-    int guruTime(const int &pSrsLevel, const int &pNextReview);
+    int guruTime(const int &pSrsLevel = 0, const int &pNextReview = 0);
 
     void resetInternals(const bool &pVisible = true);
 

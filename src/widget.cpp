@@ -1434,6 +1434,11 @@ void Widget::determineReviews(const Reviews &pCurrentReviews,
 
 //==============================================================================
 
+static const int SrsIntervals[2][4] = { { 2, 4, 8, 23 },
+                                        { 4, 8, 23, 47 } };
+
+//==============================================================================
+
 int Widget::guruTime(const int &pSrsLevel, const int &pNextReview)
 {
     // Make sure that we are not yet at the Guru level
@@ -1443,9 +1448,6 @@ int Widget::guruTime(const int &pSrsLevel, const int &pNextReview)
 
     // Compute and return the Guru time for the item which SRS level and next
     // review time are given
-
-    static const int SrsIntervals[2][4] = { { 2, 4, 8, 23 },
-                                            { 4, 8, 23, 47 } };
 
     int res = pSrsLevel?pNextReview:0;
 
@@ -1571,8 +1573,10 @@ void Widget::waniKaniUpdated()
 
             // Retrieve, if needed, when we started our current level
 
-            if (!mLevelStartTime)
+            if (   !mLevelStartTime
+                ||  (radical.userSpecific().unlockedDate() < mLevelStartTime)) {
                 mLevelStartTime = radical.userSpecific().unlockedDate();
+            }
         }
 
         if (radical.userSpecific().availableDate()) {
@@ -1869,37 +1873,39 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
 
     uint nowTime = mNow.toTime_t();
 
-    if (!mRadicalGuruTimes.isEmpty() && !mKanjiGuruTimes.isEmpty()) {
-        static const QString LevelStatisticsText = "<center>\n"
-                                                   "    <table style=\"font-size: 11px;\">\n"
-                                                   "        <tbody>\n"
-                                                   "            <tr>\n"
-                                                   "                <td align=right style=\"font-weight: bold;\">Start:</td>\n"
-                                                   "                <td style=\"width: 4px;\"></td>\n"
-                                                   "                <td>%1</td>\n"
-                                                   "            </tr>\n"
-                                                   "            <tr>\n"
-                                                   "                <td align=right style=\"font-weight: bold;\">Finish:</td>\n"
-                                                   "                <td style=\"width: 4px;\"></td>\n"
-                                                   "                <td>%2</td>\n"
-                                                   "            </tr>\n"
-                                                   "            <tr>\n"
-                                                   "                <td align=right style=\"font-weight: bold;\">Total:</td>\n"
-                                                   "                <td style=\"width: 4px;\"></td>\n"
-                                                   "                <td>%3</td>\n"
-                                                   "            </tr>\n"
-                                                   "        </tbody>\n"
-                                                   "    </table>\n"
-                                                   "</center>";
+    static const QString LevelStatisticsText = "<center>\n"
+                                               "    <table style=\"font-size: 11px;\">\n"
+                                               "        <tbody>\n"
+                                               "            <tr>\n"
+                                               "                <td align=right style=\"font-weight: bold;\">Start:</td>\n"
+                                               "                <td style=\"width: 4px;\"></td>\n"
+                                               "                <td>%1</td>\n"
+                                               "            </tr>\n"
+                                               "            <tr>\n"
+                                               "                <td align=right style=\"font-weight: bold;\">Finish:</td>\n"
+                                               "                <td style=\"width: 4px;\"></td>\n"
+                                               "                <td>%2</td>\n"
+                                               "            </tr>\n"
+                                               "            <tr>\n"
+                                               "                <td align=right style=\"font-weight: bold;\">Total:</td>\n"
+                                               "                <td style=\"width: 4px;\"></td>\n"
+                                               "                <td>%3</td>\n"
+                                               "            </tr>\n"
+                                               "        </tbody>\n"
+                                               "    </table>\n"
+                                               "</center>";
 
-        int start = nowTime-mLevelStartTime;
-        int finish =  mRadicalGuruTimes[0.9*mRadicalGuruTimes.count()-1]
-                     +mKanjiGuruTimes[0.9*mKanjiGuruTimes.count()-1];
+    int start = nowTime-mLevelStartTime;
+    int finish =  (mRadicalGuruTimes.isEmpty()?
+                       guruTime():
+                       mRadicalGuruTimes[0.9*mRadicalGuruTimes.count()-1])
+                 +(mKanjiGuruTimes.isEmpty()?
+                       guruTime():
+                       mKanjiGuruTimes[0.9*mKanjiGuruTimes.count()-1]);
 
-        mGui->levelStatisticsValue->setText(LevelStatisticsText.arg(mLevelStartTime?timeToString(start):"now",
-                                                                    timeToString(finish),
-                                                                    mLevelStartTime?timeToString(start+finish):timeToString(finish)));
-    }
+    mGui->levelStatisticsValue->setText(LevelStatisticsText.arg(mLevelStartTime?timeToString(start):"now",
+                                                                timeToString(finish),
+                                                                mLevelStartTime?timeToString(start+finish):timeToString(finish)));
 
     // Update our reviews time line
 
