@@ -622,7 +622,7 @@ Widget::Widget() :
 
     setMinimumSize(1440, 900);
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
     setWindowFlags(Qt::FramelessWindowHint);
 #else
     setWindowFlags(Qt::Popup);
