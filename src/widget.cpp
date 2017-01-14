@@ -748,7 +748,7 @@ void Widget::closeEvent(QCloseEvent *pEvent)
 
 //==============================================================================
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 void Widget::keyPressEvent(QKeyEvent *pEvent)
 {
     // Hide ourselves if the user presses the escape key

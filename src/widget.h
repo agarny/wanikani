@@ -151,6 +151,8 @@ protected:
     virtual bool event(QEvent *pEvent);
 #ifdef Q_OS_MAC
     virtual void closeEvent(QCloseEvent *pEvent);
+#endif
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
     virtual void keyPressEvent(QKeyEvent *pEvent);
 #endif
 
