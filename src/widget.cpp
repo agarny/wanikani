@@ -529,7 +529,7 @@ ProgressBarWidget::ProgressBarWidget(QWidget *pParent) :
 
 void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
 {
-    // Paint ourselves
+    // Paint ourselves (incl. our 90% threshold)
 
     QPainter painter(this);
 
@@ -537,6 +537,7 @@ void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
 
     painter.setPen(QPalette().mid().color());
     painter.drawRect(0, 0, width()-1, height()-1);
+    painter.drawLine(0.9*(width()-1), 0, 0.9*(width()-1), height()-1);
 
     if (value)
         painter.fillRect(1, 1, value, height()-2, mColor);
