@@ -75,12 +75,8 @@ QString timeToString(const int &pSeconds)
         int hours = (pSeconds/3600)%24;
         int minutes = (pSeconds/60)%60;
 
-        if (days) {
-            if (!res.isEmpty())
-                res += ", ";
-
+        if (days)
             res += (days == 1)?"1 day":QString("%1 days").arg(days);
-        }
 
         if (hours) {
             if (!res.isEmpty())
