@@ -429,7 +429,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
             painter.drawText(QPointF(x+Space, -Space),
                              dayHour?
-                                 QTime(dayHour, 0).toString("ha"):
+                                 QTime(dayHour, 0).toString("hap"):
                                  startTime.addDays(i?i/24:0).toString("ddd"));
         }
     }
@@ -451,7 +451,19 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
         ReviewsTimeLineData data;
 
-        data.date = (timeDiff <= 0)?"now":"in "+timeToString(timeDiff);
+        if (timeDiff <= 0) {
+            data.date = "now";
+        } else {
+            QString day = dateTime.toString("dddd");
+
+            data.date = QString("%1 at %2<br/>i.e. in %3").arg(mWidget->now().toString("dddd").compare(day)?
+                                                                   day:
+                                                                   (timeDiff < 86400)?
+                                                                       "Today":
+                                                                       QString("Next %1").arg(day))
+                                                          .arg(dateTime.toString("h:mmap"))
+                                                          .arg(timeToString(timeDiff));
+        }
 
         data.xStart = x+xShift;
         data.xEnd = data.xStart+xWidth;
