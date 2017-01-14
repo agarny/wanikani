@@ -718,6 +718,23 @@ Widget::Widget() :
 
 //==============================================================================
 
+bool Widget::event(QEvent *pEvent)
+{
+    if (pEvent->type() == QEvent::WindowDeactivate) {
+        // We are not active anymore, so hide ourselves
+
+        hide();
+
+        return true;
+    }
+
+    // Default handling of the event
+
+    return QWidget::event(pEvent);
+}
+
+//==============================================================================
+
 #ifdef Q_OS_MAC
 void Widget::closeEvent(QCloseEvent *pEvent)
 {

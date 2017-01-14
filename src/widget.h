@@ -147,8 +147,9 @@ public:
     Reviews currentVocabularyReviews() const;
     Reviews allVocabularyReviews() const;
 
-#ifdef Q_OS_MAC
 protected:
+    virtual bool event(QEvent *pEvent);
+#ifdef Q_OS_MAC
     virtual void closeEvent(QCloseEvent *pEvent);
     virtual void keyPressEvent(QKeyEvent *pEvent);
 #endif
