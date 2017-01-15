@@ -629,6 +629,7 @@ Widget::Widget() :
     mGui->setupUi(this);
 
     setMinimumSize(1440, 900);
+    setMouseTracking(true);
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
     setWindowFlags(Qt::FramelessWindowHint);
@@ -767,6 +768,20 @@ void Widget::keyPressEvent(QKeyEvent *pEvent)
         QWidget::keyPressEvent(pEvent);
 }
 #endif
+
+//==============================================================================
+
+void Widget::mouseMoveEvent(QMouseEvent *pEvent)
+{
+    // Default handling of the event
+
+    QWidget::mouseMoveEvent(pEvent);
+
+    // (Immediately) show the tool tip of 'important' widgets
+
+    if (mGui->closeToolButton->underMouse())
+        QToolTip::showText(pEvent->globalPos(), "Quit");
+}
 
 //==============================================================================
 

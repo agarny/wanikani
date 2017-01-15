@@ -155,6 +155,7 @@ protected:
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
     virtual void keyPressEvent(QKeyEvent *pEvent);
 #endif
+    virtual void mouseMoveEvent(QMouseEvent *pEvent);
 
 private:
     Ui::Widget *mGui;

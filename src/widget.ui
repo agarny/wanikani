@@ -578,8 +578,8 @@
      </item>
      <item>
       <widget class="QToolButton" name="closeToolButton">
-       <property name="toolTip">
-        <string>Quit</string>
+       <property name="mouseTracking">
+        <bool>true</bool>
        </property>
        <property name="icon">
         <iconset resource="../res/resources.qrc">
