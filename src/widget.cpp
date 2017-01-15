@@ -118,7 +118,9 @@ void LabelWidget::mouseMoveEvent(QMouseEvent *pEvent)
 
     // (Immediately) show the tool tip of the label
 
-    QToolTip::showText(pEvent->globalPos(), toolTip());
+    QPoint globalPos = pEvent->globalPos();
+
+    QToolTip::showText(globalPos, QString().fill(' ', globalPos.x()*globalPos.y())+toolTip());
 }
 
 //==============================================================================
@@ -144,7 +146,9 @@ void ProgressBarWidget::mouseMoveEvent(QMouseEvent *pEvent)
 
     // (Immediately) show the tool tip of the progress bar
 
-    QToolTip::showText(pEvent->globalPos(), toolTip());
+    QPoint globalPos = pEvent->globalPos();
+
+    QToolTip::showText(globalPos, QString().fill(' ', globalPos.x()*globalPos.y())+toolTip());
 }
 
 //==============================================================================
