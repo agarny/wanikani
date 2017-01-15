@@ -103,6 +103,85 @@ QString timeToString(const int &pSeconds)
 
 //==============================================================================
 
+ProgressBarWidget::ProgressBarWidget(QWidget *pParent) :
+    QWidget(pParent),
+    mValue(0.0),
+    mColor(QPalette().highlight().color())
+{
+    // Minimum and maximum sizes for our progress bar
+
+    setMinimumSize(QSize(0, 6));
+    setMaximumSize(QSize(16777215, 6));
+}
+
+//==============================================================================
+
+void ProgressBarWidget::mouseMoveEvent(QMouseEvent *pEvent)
+{
+    // Default handling of the event
+
+    QWidget::mouseMoveEvent(pEvent);
+
+    // (Immediately) show the tool tip of the progress bar
+
+    QToolTip::showText(pEvent->globalPos(), toolTip());
+}
+
+//==============================================================================
+
+void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
+{
+    // Paint ourselves (incl. our 90% threshold)
+
+    QPainter painter(this);
+
+    int value = mValue*(width()-2);
+
+    painter.setPen(QPalette().mid().color());
+    painter.drawRect(0, 0, width()-1, height()-1);
+    painter.drawLine(0.9*(width()-1), 0, 0.9*(width()-1), height()-1);
+
+    if (value)
+        painter.fillRect(1, 1, value, height()-2, mColor);
+
+    // Accept the event
+
+    pEvent->accept();
+}
+
+//==============================================================================
+
+void ProgressBarWidget::setValue(const double &pValue)
+{
+    // Update both our value and ourselves, if needed
+
+    double value = qMin(1.0, qMax(pValue, 0.0));
+
+    if (value != mValue) {
+        bool needUpdate = int(mValue*width()) != int(value*width());
+
+        mValue = value;
+
+        if (needUpdate)
+            update();
+    }
+}
+
+//==============================================================================
+
+void ProgressBarWidget::setColor(const QColor &pColor)
+{
+    // Update our color, if needed
+
+    if (pColor != mColor) {
+        mColor = pColor;
+
+        update();
+    }
+}
+
+//==============================================================================
+
 ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pParent) :
     QWidget(pParent),
     mWidget(qobject_cast<Widget *>(pParent)),
@@ -116,10 +195,6 @@ ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pParent) :
 
     setMinimumSize(QSize(0, 150));
     setMaximumSize(QSize(16777215, 150));
-
-    // Make sure that mouse tracking is enabled
-
-    setMouseTracking(true);
 }
 
 //==============================================================================
@@ -518,72 +593,6 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     // Accept the event
 
     pEvent->accept();
-}
-
-//==============================================================================
-
-ProgressBarWidget::ProgressBarWidget(QWidget *pParent) :
-    QWidget(pParent),
-    mValue(0.0),
-    mColor(QPalette().highlight().color())
-{
-    // Minimum and maximum sizes for our progress bar
-
-    setMinimumSize(QSize(0, 6));
-    setMaximumSize(QSize(16777215, 6));
-}
-
-//==============================================================================
-
-void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
-{
-    // Paint ourselves (incl. our 90% threshold)
-
-    QPainter painter(this);
-
-    int value = mValue*(width()-2);
-
-    painter.setPen(QPalette().mid().color());
-    painter.drawRect(0, 0, width()-1, height()-1);
-    painter.drawLine(0.9*(width()-1), 0, 0.9*(width()-1), height()-1);
-
-    if (value)
-        painter.fillRect(1, 1, value, height()-2, mColor);
-
-    // Accept the event
-
-    pEvent->accept();
-}
-
-//==============================================================================
-
-void ProgressBarWidget::setValue(const double &pValue)
-{
-    // Update both our value and ourselves, if needed
-
-    double value = qMin(1.0, qMax(pValue, 0.0));
-
-    if (value != mValue) {
-        bool needUpdate = int(mValue*width()) != int(value*width());
-
-        mValue = value;
-
-        if (needUpdate)
-            update();
-    }
-}
-
-//==============================================================================
-
-void ProgressBarWidget::setColor(const QColor &pColor)
-{
-    // Update our color, if needed
-
-    if (pColor != mColor) {
-        mColor = pColor;
-
-        update();
-    }
 }
 
 //==============================================================================

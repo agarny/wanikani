@@ -51,6 +51,27 @@ class Widget;
 
 //==============================================================================
 
+class ProgressBarWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit ProgressBarWidget(QWidget *pParent);
+
+    void setValue(const double &pValue);
+    void setColor(const QColor &pColor);
+
+protected:
+    virtual void paintEvent(QPaintEvent *pEvent);
+
+private:
+    double mValue;
+
+    QColor mColor;
+};
+
+//==============================================================================
+
 struct ReviewsTimeLineData
 {
     QString date;
@@ -100,27 +121,6 @@ private:
     QColor mVocabularyColor;
 
     QList<ReviewsTimeLineData> mData;
-};
-
-//==============================================================================
-
-class ProgressBarWidget : public QWidget
-{
-    Q_OBJECT
-
-public:
-    explicit ProgressBarWidget(QWidget *pParent);
-
-    void setValue(const double &pValue);
-    void setColor(const QColor &pColor);
-
-protected:
-    virtual void paintEvent(QPaintEvent *pEvent);
-
-private:
-    double mValue;
-
-    QColor mColor;
 };
 
 //==============================================================================
