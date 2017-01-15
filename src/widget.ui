@@ -98,7 +98,7 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QLabel" name="apprenticeValue">
+               <widget class="LabelWidget" name="apprenticeValue">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -114,7 +114,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="guruValue">
+               <widget class="LabelWidget" name="guruValue">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -130,7 +130,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="masterValue">
+               <widget class="LabelWidget" name="masterValue">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -146,7 +146,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="enlightenedValue">
+               <widget class="LabelWidget" name="enlightenedValue">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -162,7 +162,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="burnedValue">
+               <widget class="LabelWidget" name="burnedValue">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -183,10 +183,18 @@
              <widget class="QLabel" name="levelStatisticsValue"/>
             </item>
             <item>
-             <widget class="ProgressBarWidget" name="currentRadicalsProgress" native="true"/>
+             <widget class="ProgressBarWidget" name="currentRadicalsProgress" native="true">
+              <property name="mouseTracking">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
             <item>
-             <widget class="ProgressBarWidget" name="currentKanjiProgress" native="true"/>
+             <widget class="ProgressBarWidget" name="currentKanjiProgress" native="true">
+              <property name="mouseTracking">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -518,7 +526,11 @@
     </widget>
    </item>
    <item>
-    <widget class="ReviewsTimeLineWidget" name="reviewsTimeLine" native="true"/>
+    <widget class="ReviewsTimeLineWidget" name="reviewsTimeLine" native="true">
+     <property name="mouseTracking">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="Line" name="bottomSeparator">
@@ -553,7 +565,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="nextReviewsValue">
+      <widget class="LabelWidget" name="nextReviewsValue">
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
@@ -563,14 +575,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="nextHourReviewsValue">
+      <widget class="LabelWidget" name="nextHourReviewsValue">
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="nextDayReviewsValue">
+      <widget class="LabelWidget" name="nextDayReviewsValue">
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
@@ -578,9 +590,6 @@
      </item>
      <item>
       <widget class="QToolButton" name="closeToolButton">
-       <property name="mouseTracking">
-        <bool>true</bool>
-       </property>
        <property name="icon">
         <iconset resource="../res/resources.qrc">
          <normaloff>:/close</normaloff>:/close</iconset>
@@ -602,13 +611,16 @@
    <class>ReviewsTimeLineWidget</class>
    <extends>QWidget</extends>
    <header>src/widget.h</header>
-   <container>1</container>
   </customwidget>
   <customwidget>
    <class>ProgressBarWidget</class>
    <extends>QWidget</extends>
    <header>src/widget.h</header>
-   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LabelWidget</class>
+   <extends>QLabel</extends>
+   <header>src/widget.h</header>
   </customwidget>
  </customwidgets>
  <resources>

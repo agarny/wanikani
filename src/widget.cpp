@@ -103,6 +103,26 @@ QString timeToString(const int &pSeconds)
 
 //==============================================================================
 
+LabelWidget::LabelWidget(QWidget *pParent) :
+    QLabel(pParent)
+{
+}
+
+//==============================================================================
+
+void LabelWidget::mouseMoveEvent(QMouseEvent *pEvent)
+{
+    // Default handling of the event
+
+    QLabel::mouseMoveEvent(pEvent);
+
+    // (Immediately) show the tool tip of the label
+
+    QToolTip::showText(pEvent->globalPos(), toolTip());
+}
+
+//==============================================================================
+
 ProgressBarWidget::ProgressBarWidget(QWidget *pParent) :
     QWidget(pParent),
     mValue(0.0),
@@ -638,7 +658,6 @@ Widget::Widget() :
     mGui->setupUi(this);
 
     setMinimumSize(1440, 900);
-    setMouseTracking(true);
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
     setWindowFlags(Qt::FramelessWindowHint);
@@ -777,20 +796,6 @@ void Widget::keyPressEvent(QKeyEvent *pEvent)
         QWidget::keyPressEvent(pEvent);
 }
 #endif
-
-//==============================================================================
-
-void Widget::mouseMoveEvent(QMouseEvent *pEvent)
-{
-    // Default handling of the event
-
-    QWidget::mouseMoveEvent(pEvent);
-
-    // (Immediately) show the tool tip of 'important' widgets
-
-    if (mGui->closeToolButton->underMouse())
-        QToolTip::showText(pEvent->globalPos(), "Quit");
-}
 
 //==============================================================================
 

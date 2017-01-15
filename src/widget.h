@@ -29,6 +29,7 @@ limitations under the License.
 //==============================================================================
 
 #include <QDateTime>
+#include <QLabel>
 #include <QMap>
 #include <QSystemTrayIcon>
 #include <QTimer>
@@ -42,12 +43,24 @@ namespace Ui {
 
 //==============================================================================
 
-class QLabel;
 class QPushButton;
 
 //==============================================================================
 
 class Widget;
+
+//==============================================================================
+
+class LabelWidget : public QLabel
+{
+    Q_OBJECT
+
+public:
+    explicit LabelWidget(QWidget *pParent);
+
+protected:
+    virtual void mouseMoveEvent(QMouseEvent *pEvent);
+};
 
 //==============================================================================
 
@@ -62,6 +75,7 @@ public:
     void setColor(const QColor &pColor);
 
 protected:
+    virtual void mouseMoveEvent(QMouseEvent *pEvent);
     virtual void paintEvent(QPaintEvent *pEvent);
 
 private:
@@ -155,7 +169,6 @@ protected:
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
     virtual void keyPressEvent(QKeyEvent *pEvent);
 #endif
-    virtual void mouseMoveEvent(QMouseEvent *pEvent);
 
 private:
     Ui::Widget *mGui;
