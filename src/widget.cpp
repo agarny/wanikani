@@ -236,7 +236,7 @@ void ReviewsTimeLineWidget::mouseMoveEvent(QMouseEvent *pEvent)
     }
 
     if (!toolTipSet)
-        QToolTip::showText(pEvent->globalPos(), QString());
+        QToolTip::hideText();
 }
 
 //==============================================================================
