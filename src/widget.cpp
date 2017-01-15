@@ -445,8 +445,8 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     //       using it with QPainter::fillRect()...
 
     foreach (const QDateTime &dateTime, allRadicalsReviews.keys()) {
-        uint timeDiff = dateTime.toTime_t()-startTime.toTime_t();
-        double x = timeDiff*timeMultiplier;
+        uint timeDiff = dateTime.toTime_t()-mWidget->now().toTime_t();
+        double x = (dateTime.toTime_t()-startTime.toTime_t())*timeMultiplier;
         double xWidth = 900.0*timeMultiplier;
 
         ReviewsTimeLineData data;
