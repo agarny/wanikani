@@ -418,7 +418,13 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     }
 
     int reviewsRange = 10*(ceil(0.1*maxReviews));
-    int reviewsStep = (reviewsRange > 10)?10:2;
+    int reviewsStep = (reviewsRange > 10)?
+                          (reviewsRange > 100)?
+                              (reviewsRange > 200)?
+                                  50:
+                                  20:
+                              10:
+                          2;
 
     // Determine where to start painting things, as well as the time and reviews
     // major/minor lines
