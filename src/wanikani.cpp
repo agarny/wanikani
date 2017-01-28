@@ -32,6 +32,10 @@ limitations under the License.
 
 //==============================================================================
 
+#include "zlib.h"
+
+//==============================================================================
+
 StudyQueue::StudyQueue() :
     mLessonsAvailable(0),
     mReviewsAvailable(0),
@@ -570,11 +574,16 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
     if (mApiKey.isEmpty())
         return QJsonDocument();
 
-    // Send a request to WaniKani and convert its response to a JSON document,
-    // if possible
+    // Send a request to WaniKani, asking for its response to be compressed, and
+    // then convert its response to a JSON document, if possible and after
+    // having uncompressed it
 
     QNetworkAccessManager networkAccessManager;
-    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(QString("https://www.wanikani.com/api/v1.4/user/%1/%2").arg(mApiKey, pRequest)));
+    QNetworkRequest networkRequest(QString("https://www.wanikani.com/api/v1.4/user/%1/%2").arg(mApiKey, pRequest));
+
+    networkRequest.setRawHeader("Accept-Encoding", "gzip");
+
+    QNetworkReply *networkReply = networkAccessManager.get(networkRequest);
     QEventLoop eventLoop;
 
     QObject::connect(networkReply, SIGNAL(finished()),
@@ -592,7 +601,43 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
     if (response.isEmpty()) {
         return QJsonDocument();
     } else {
-        QJsonDocument res = QJsonDocument::fromJson(response);
+        // Uncompress the response
+
+        z_stream stream;
+        QByteArray json = QByteArray();
+
+        memset(&stream, 0, sizeof(z_stream));
+
+        if (inflateInit2(&stream, MAX_WBITS+16) == Z_OK) {
+            enum {
+                BufferSize = 32768
+            };
+
+            Bytef buffer[BufferSize];
+
+            stream.next_in = (Bytef *) response.data();
+            stream.avail_in = response.size();
+
+            do {
+                stream.next_out = buffer;
+                stream.avail_out = BufferSize;
+
+                inflate(&stream, Z_NO_FLUSH);
+
+                if (!stream.msg)
+                    json += QByteArray::fromRawData((char *) buffer, BufferSize-stream.avail_out);
+                else
+                    json = QByteArray();
+            } while (!stream.avail_out);
+
+            inflateEnd(&stream);
+        } else {
+            return QJsonDocument();
+        }
+
+        // Convert the response to a JSON document
+
+        QJsonDocument res = QJsonDocument::fromJson(json);
 
         return res.object().toVariantMap()["error"].toMap().count()?QJsonDocument():res;
     }
