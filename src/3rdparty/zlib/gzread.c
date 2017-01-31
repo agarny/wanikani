@@ -2,6 +2,12 @@
  * Copyright (C) 2004, 2005, 2010, 2011, 2012, 2013, 2016 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
+//---WANIKANI--- BEGIN
+#if defined(_WIN32)
+#  pragma warning(disable: 4267)
+#  pragma warning(disable: 4996)
+#endif
+//---WANIKANI--- END
 
 #include "gzguts.h"
 
