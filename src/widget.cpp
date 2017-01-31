@@ -1962,10 +1962,10 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
     int start = nowTime-mLevelStartTime;
     int finish =  (mRadicalGuruTimes.isEmpty()?
                        guruTime():
-                       mRadicalGuruTimes[0.9*mRadicalGuruTimes.count()-1])
+                       mRadicalGuruTimes[ceil(0.9*mRadicalGuruTimes.count())-1])
                  +(mKanjiGuruTimes.isEmpty()?
                        guruTime():
-                       mKanjiGuruTimes[0.9*mKanjiGuruTimes.count()-1]);
+                       mKanjiGuruTimes[ceil(0.9*mKanjiGuruTimes.count())-1]);
 
     mGui->levelStatisticsValue->setText(LevelStatisticsText.arg(mLevelStartTime?timeToString(start):"now",
                                                                 timeToString(finish),
