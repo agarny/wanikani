@@ -5,7 +5,7 @@
 //---WANIKANI--- BEGIN
 #if defined(_WIN32)
 #  pragma warning(disable: 4996)
-#elif defined(__APPLE__)
+#elif defined(__linux__) || defined(__APPLE__)
 #  pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 #endif
 //---WANIKANI--- END
