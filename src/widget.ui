@@ -608,8 +608,8 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ReviewsTimeLineWidget</class>
-   <extends>QWidget</extends>
+   <class>LabelWidget</class>
+   <extends>QLabel</extends>
    <header>src/widget.h</header>
   </customwidget>
   <customwidget>
@@ -618,8 +618,8 @@
    <header>src/widget.h</header>
   </customwidget>
   <customwidget>
-   <class>LabelWidget</class>
-   <extends>QLabel</extends>
+   <class>ReviewsTimeLineWidget</class>
+   <extends>QWidget</extends>
    <header>src/widget.h</header>
   </customwidget>
  </customwidgets>
