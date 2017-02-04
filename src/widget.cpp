@@ -601,15 +601,15 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                 xWidth, radicalsReviewsHeight+kanjiReviewsHeight+vocabularyReviewsHeight),
                          QPalette().button());
 
-        painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight,
-                                xWidth, radicalsReviewsHeight),
-                         mRadicalsColor);
-        painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight,
-                                xWidth, kanjiReviewsHeight),
-                         mKanjiColor);
-        painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight,
+        painter.fillRect(QRectF(x, canvasHeight-vocabularyReviewsHeight,
                                 xWidth, vocabularyReviewsHeight),
                          mVocabularyColor);
+        painter.fillRect(QRectF(x, canvasHeight-vocabularyReviewsHeight-kanjiReviewsHeight,
+                                xWidth, kanjiReviewsHeight),
+                         mKanjiColor);
+        painter.fillRect(QRectF(x, canvasHeight-vocabularyReviewsHeight-kanjiReviewsHeight-radicalsReviewsHeight,
+                                xWidth, radicalsReviewsHeight),
+                         mRadicalsColor);
     }
 
     // Paint our border
