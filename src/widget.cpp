@@ -1629,7 +1629,7 @@ void Widget::waniKaniUpdated()
 
             // Keep track of our radical progress
 
-            if (radical.userSpecific().srsNumeric() == 5)
+            if (radical.userSpecific().srsNumeric() >= 5)
                 ++radicalsProgress;
 
             ++radicalsTotal;
@@ -1670,7 +1670,7 @@ void Widget::waniKaniUpdated()
 
             // Keep track of our Kanji progress
 
-            if (kanji.userSpecific().srsNumeric() == 5)
+            if (kanji.userSpecific().srsNumeric() >= 5)
                 ++kanjiProgress;
 
             ++kanjiTotal;
