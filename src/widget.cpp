@@ -421,7 +421,9 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     int reviewsStep = (reviewsRange > 10)?
                           (reviewsRange > 100)?
                               (reviewsRange > 200)?
-                                  50:
+                                  (reviewsRange > 500)?
+                                      100:
+                                      50:
                                   20:
                               10:
                           2;
