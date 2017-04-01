@@ -591,11 +591,11 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
         double kanjiReviewsHeight = data.allKanji*canvasHeightOverRange;
         double vocabularyReviewsHeight = data.allVocabulary*canvasHeightOverRange;
 
-        if (data.currentRadicals || data.currentKanji || data.currentVocabulary) {
-            painter.fillRect(QRectF(x, 0,
-                                    xWidth, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight),
-                             Qt::white);
-        }
+        painter.fillRect(QRectF(x, 0,
+                                xWidth, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight),
+                         (data.currentRadicals || data.currentKanji || data.currentVocabulary)?
+                             Qt::white:
+                             qRgb(224, 224, 224));
 
         painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight,
                                 xWidth, radicalsReviewsHeight+kanjiReviewsHeight+vocabularyReviewsHeight),
