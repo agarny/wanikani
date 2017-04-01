@@ -417,17 +417,6 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
             maxReviews = crtReviews;
     }
 
-    int reviewsRange = 10*(ceil(0.1*maxReviews));
-    int reviewsStep = (reviewsRange > 10)?
-                          (reviewsRange > 100)?
-                              (reviewsRange > 200)?
-                                  (reviewsRange > 500)?
-                                      100:
-                                      50:
-                                  20:
-                              10:
-                          2;
-
     // Determine where to start painting things, as well as the time and reviews
     // major/minor lines
 
@@ -441,12 +430,29 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     painter.setFont(font);
 
     QFontMetrics fontMetrics = painter.fontMetrics();
+    int reviewsRange = 10*(ceil(0.1*maxReviews));
     int xShift = fontMetrics.width(QString::number(reviewsRange))+Space;
     int yShift = fontMetrics.height();
     int canvasWidth = width()-xShift;
     int canvasHeight = height()-yShift-Space;
     double canvasWidthOverRange = double(canvasWidth-1)/mRange;
+    int reviewsStepA = 1;
+    int reviewsStepB = 1;
+    int reviewsStep = reviewsStepA*reviewsStepB;
     int timeMajorStep = 1;
+
+    while (yShift*(reviewsRange/reviewsStep+1) > canvasHeight) {
+        if (reviewsStepA == 1) {
+            reviewsStepA = 2;
+        } else if (reviewsStepA == 2) {
+            reviewsStepA = 5;
+        } else {
+            reviewsStepA = 1;
+            reviewsStepB *= 10;
+        }
+
+        reviewsStep = reviewsStepA*reviewsStepB;
+    }
 
     while (timeMajorStep*canvasWidthOverRange < 72.0) {
         if (timeMajorStep == 1)
