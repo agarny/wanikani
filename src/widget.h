@@ -180,7 +180,7 @@ private:
     QString mFileName;
 
     QTimer mWaniKaniTimer;
-    QTimer mReviewsTimeLineTimer;
+    QTimer mTimeRelatedInformationTimer;
 
     QSystemTrayIcon mTrayIcon;
 

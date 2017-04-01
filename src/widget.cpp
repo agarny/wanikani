@@ -736,10 +736,10 @@ Widget::Widget() :
 
     // User our other timer to update our reviews time line
 
-    connect(&mReviewsTimeLineTimer, SIGNAL(timeout()),
+    connect(&mTimeRelatedInformationTimer, SIGNAL(timeout()),
             this, SLOT(updateTimeRelatedInformation()));
 
-    mReviewsTimeLineTimer.start(1000);
+    mTimeRelatedInformationTimer.start(1000);
 
     // Create and show our system tray icon
     // Note: activation of the tray icon doesn't (currently) work on Linux, so
@@ -1737,111 +1737,6 @@ void Widget::waniKaniUpdated()
                                                           .arg(kanjiTotal)
                                                           .arg(int(100*currentKanjiValue)));
 
-    // Determine the next, next hour and next day reviews
-
-    QDateTime nextDateTime = mNow;
-    int diff = INT_MAX;
-    int nbOfRadicalsReviews[6] = {0, 0, 0, 0, 0, 0};
-    int nbOfKanjiReviews[6] = {0, 0, 0, 0, 0, 0};
-    int nbOfVocabularyReviews[6] = {0, 0, 0, 0, 0, 0};
-
-    determineReviews(mCurrentRadicalsReviews, mAllRadicalsReviews, nextDateTime,
-                     diff, nbOfRadicalsReviews);
-    determineReviews(mCurrentKanjiReviews, mAllKanjiReviews, nextDateTime, diff,
-                     nbOfKanjiReviews);
-    determineReviews(mCurrentVocabularyReviews, mAllVocabularyReviews,
-                     nextDateTime, diff, nbOfVocabularyReviews);
-
-    if (!nbOfRadicalsReviews[1] && !nbOfKanjiReviews[1] && !nbOfVocabularyReviews[1]) {
-        nbOfRadicalsReviews[0] = mCurrentRadicalsReviews.value(nextDateTime);
-        nbOfRadicalsReviews[1] = mAllRadicalsReviews.value(nextDateTime);
-
-        nbOfKanjiReviews[0] = mCurrentKanjiReviews.value(nextDateTime);
-        nbOfKanjiReviews[1] = mAllKanjiReviews.value(nextDateTime);
-
-        nbOfVocabularyReviews[0] = mCurrentVocabularyReviews.value(nextDateTime);
-        nbOfVocabularyReviews[1] = mAllVocabularyReviews.value(nextDateTime);
-    }
-
-    static const QString LessonsText = "<center>\n"
-                                       "    <span style=\"font-weight: bold; font-size: 15px;\">%1</span><br/>\n"
-                                       "</center>\n";
-    static const QString ReviewsText = "<center>\n"
-                                       "    <span style=\"font-weight: bold; font-size: 15px;\">%1</span><br/>\n"
-                                       "    <span style=\"font-size: 11px;\">%2</span>\n"
-                                       "</center>\n";
-    static const QString ReviewsToolTip = "<table>\n"
-                                          "    <tbody>\n"
-                                          "        <tr>\n"
-                                          "            <td>Radicals:</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>%1</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>(%2)</td>\n"
-                                          "        </tr>\n"
-                                          "        <tr>\n"
-                                          "            <td>Kanji:</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>%3</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>(%4)</td>\n"
-                                          "        </tr>\n"
-                                          "        <tr>\n"
-                                          "            <td>Vocabulary:</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>%5</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>(%6)</td>\n"
-                                          "        </tr>\n"
-                                          "    </tbody>\n"
-                                          "</table>\n";
-    static const QString ReviewsLink = "<a href=\"https://www.wanikani.com/review/session\""+QString(LinkStyle)+">%1</a>";
-    static const QString Reviews = "%1 (%2) reviews";
-    static const QString NoReviews = "No reviews";
-
-    mGui->nextLessonsValue->setText(LessonsText.arg(mWaniKani.studyQueue().lessonsAvailable()?
-                                                        QString("<a href=\"https://www.wanikani.com/lesson/session\""+QString(LinkStyle)+">%1 lessons</a>").arg(mWaniKani.studyQueue().lessonsAvailable()):
-                                                        "No lessons"));
-
-    int nbOfReviews = nbOfRadicalsReviews[1]+nbOfKanjiReviews[1]+nbOfVocabularyReviews[1];
-    int nbOfCurrentReviews = nbOfRadicalsReviews[0]+nbOfKanjiReviews[0]+nbOfVocabularyReviews[0];
-
-    mGui->nextReviewsValue->setText(ReviewsText.arg(nbOfReviews?
-                                                        (diff <= 0)?
-                                                            QString(ReviewsLink.arg(Reviews)).arg(nbOfReviews).arg(nbOfCurrentReviews):
-                                                            Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
-                                                        NoReviews)
-                                               .arg(mWaniKani.vacationDate()?
-                                                        QString():
-                                                        (diff <= 0)?
-                                                            ReviewsLink.arg("now"):
-                                                            "in "+timeToString(diff)));
-    mGui->nextReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[1]).arg(nbOfRadicalsReviews[0])
-                                                     .arg(nbOfKanjiReviews[1]).arg(nbOfKanjiReviews[0])
-                                                     .arg(nbOfVocabularyReviews[1]).arg(nbOfVocabularyReviews[0]));
-
-    nbOfReviews = nbOfRadicalsReviews[3]+nbOfKanjiReviews[3]+nbOfVocabularyReviews[3];
-    nbOfCurrentReviews = nbOfRadicalsReviews[2]+nbOfKanjiReviews[2]+nbOfVocabularyReviews[2];
-
-    mGui->nextHourReviewsValue->setText(ReviewsText.arg(nbOfReviews?
-                                                            Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
-                                                            NoReviews)
-                                                   .arg("within the next hour"));
-    mGui->nextHourReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[3]).arg(nbOfRadicalsReviews[2])
-                                                         .arg(nbOfKanjiReviews[3]).arg(nbOfKanjiReviews[2])
-                                                         .arg(nbOfVocabularyReviews[3]).arg(nbOfVocabularyReviews[2]));
-
-    nbOfReviews = nbOfRadicalsReviews[5]+nbOfKanjiReviews[5]+nbOfVocabularyReviews[5];
-    nbOfCurrentReviews = nbOfRadicalsReviews[4]+nbOfKanjiReviews[4]+nbOfVocabularyReviews[4];
-
-    mGui->nextDayReviewsValue->setText(ReviewsText.arg(nbOfReviews?
-                                                           Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
-                                                           NoReviews)
-                                                  .arg("within the next day"));
-    mGui->nextDayReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[5]).arg(nbOfRadicalsReviews[4])
-                                                        .arg(nbOfKanjiReviews[5]).arg(nbOfKanjiReviews[4])
-                                                        .arg(nbOfVocabularyReviews[5]).arg(nbOfVocabularyReviews[4]));
-
     // Update our wallpaper
 
     updateWallpaper();
@@ -2012,6 +1907,111 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
                                                                     (nbOfHours == 24)?
                                                                         "day":
                                                                         QString("%1 days").arg(nbOfHours/24.0)));
+
+    // Update our next, next hour and next day reviews
+
+    QDateTime nextDateTime = mNow;
+    int diff = INT_MAX;
+    int nbOfRadicalsReviews[6] = {0, 0, 0, 0, 0, 0};
+    int nbOfKanjiReviews[6] = {0, 0, 0, 0, 0, 0};
+    int nbOfVocabularyReviews[6] = {0, 0, 0, 0, 0, 0};
+
+    determineReviews(mCurrentRadicalsReviews, mAllRadicalsReviews, nextDateTime,
+                     diff, nbOfRadicalsReviews);
+    determineReviews(mCurrentKanjiReviews, mAllKanjiReviews, nextDateTime, diff,
+                     nbOfKanjiReviews);
+    determineReviews(mCurrentVocabularyReviews, mAllVocabularyReviews,
+                     nextDateTime, diff, nbOfVocabularyReviews);
+
+    if (!nbOfRadicalsReviews[1] && !nbOfKanjiReviews[1] && !nbOfVocabularyReviews[1]) {
+        nbOfRadicalsReviews[0] = mCurrentRadicalsReviews.value(nextDateTime);
+        nbOfRadicalsReviews[1] = mAllRadicalsReviews.value(nextDateTime);
+
+        nbOfKanjiReviews[0] = mCurrentKanjiReviews.value(nextDateTime);
+        nbOfKanjiReviews[1] = mAllKanjiReviews.value(nextDateTime);
+
+        nbOfVocabularyReviews[0] = mCurrentVocabularyReviews.value(nextDateTime);
+        nbOfVocabularyReviews[1] = mAllVocabularyReviews.value(nextDateTime);
+    }
+
+    static const QString LessonsText = "<center>\n"
+                                       "    <span style=\"font-weight: bold; font-size: 15px;\">%1</span><br/>\n"
+                                       "</center>\n";
+    static const QString ReviewsText = "<center>\n"
+                                       "    <span style=\"font-weight: bold; font-size: 15px;\">%1</span><br/>\n"
+                                       "    <span style=\"font-size: 11px;\">%2</span>\n"
+                                       "</center>\n";
+    static const QString ReviewsToolTip = "<table>\n"
+                                          "    <tbody>\n"
+                                          "        <tr>\n"
+                                          "            <td>Radicals:</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>%1</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>(%2)</td>\n"
+                                          "        </tr>\n"
+                                          "        <tr>\n"
+                                          "            <td>Kanji:</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>%3</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>(%4)</td>\n"
+                                          "        </tr>\n"
+                                          "        <tr>\n"
+                                          "            <td>Vocabulary:</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>%5</td>\n"
+                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td align=center>(%6)</td>\n"
+                                          "        </tr>\n"
+                                          "    </tbody>\n"
+                                          "</table>\n";
+    static const QString ReviewsLink = "<a href=\"https://www.wanikani.com/review/session\""+QString(LinkStyle)+">%1</a>";
+    static const QString Reviews = "%1 (%2) reviews";
+    static const QString NoReviews = "No reviews";
+
+    mGui->nextLessonsValue->setText(LessonsText.arg(mWaniKani.studyQueue().lessonsAvailable()?
+                                                        QString("<a href=\"https://www.wanikani.com/lesson/session\""+QString(LinkStyle)+">%1 lessons</a>").arg(mWaniKani.studyQueue().lessonsAvailable()):
+                                                        "No lessons"));
+
+    nbOfReviews = nbOfRadicalsReviews[1]+nbOfKanjiReviews[1]+nbOfVocabularyReviews[1];
+    nbOfCurrentReviews = nbOfRadicalsReviews[0]+nbOfKanjiReviews[0]+nbOfVocabularyReviews[0];
+
+    mGui->nextReviewsValue->setText(ReviewsText.arg(nbOfReviews?
+                                                        (diff <= 0)?
+                                                            QString(ReviewsLink.arg(Reviews)).arg(nbOfReviews).arg(nbOfCurrentReviews):
+                                                            Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
+                                                        NoReviews)
+                                               .arg(mWaniKani.vacationDate()?
+                                                        QString():
+                                                        (diff <= 0)?
+                                                            ReviewsLink.arg("now"):
+                                                            "in "+timeToString(diff)));
+    mGui->nextReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[1]).arg(nbOfRadicalsReviews[0])
+                                                     .arg(nbOfKanjiReviews[1]).arg(nbOfKanjiReviews[0])
+                                                     .arg(nbOfVocabularyReviews[1]).arg(nbOfVocabularyReviews[0]));
+
+    nbOfReviews = nbOfRadicalsReviews[3]+nbOfKanjiReviews[3]+nbOfVocabularyReviews[3];
+    nbOfCurrentReviews = nbOfRadicalsReviews[2]+nbOfKanjiReviews[2]+nbOfVocabularyReviews[2];
+
+    mGui->nextHourReviewsValue->setText(ReviewsText.arg(nbOfReviews?
+                                                            Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
+                                                            NoReviews)
+                                                   .arg("within the next hour"));
+    mGui->nextHourReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[3]).arg(nbOfRadicalsReviews[2])
+                                                         .arg(nbOfKanjiReviews[3]).arg(nbOfKanjiReviews[2])
+                                                         .arg(nbOfVocabularyReviews[3]).arg(nbOfVocabularyReviews[2]));
+
+    nbOfReviews = nbOfRadicalsReviews[5]+nbOfKanjiReviews[5]+nbOfVocabularyReviews[5];
+    nbOfCurrentReviews = nbOfRadicalsReviews[4]+nbOfKanjiReviews[4]+nbOfVocabularyReviews[4];
+
+    mGui->nextDayReviewsValue->setText(ReviewsText.arg(nbOfReviews?
+                                                           Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
+                                                           NoReviews)
+                                                  .arg("within the next day"));
+    mGui->nextDayReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[5]).arg(nbOfRadicalsReviews[4])
+                                                        .arg(nbOfKanjiReviews[5]).arg(nbOfKanjiReviews[4])
+                                                        .arg(nbOfVocabularyReviews[5]).arg(nbOfVocabularyReviews[4]));
 }
 
 //==============================================================================
