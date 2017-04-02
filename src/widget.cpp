@@ -603,7 +603,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                 xWidth, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight),
                          (data.currentRadicals || data.currentKanji || data.currentVocabulary)?
                              Qt::white:
-                             qRgb(224, 224, 224));
+                             QColor(qRgb(224, 224, 224)));
 
         painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight,
                                 xWidth, radicalsReviewsHeight+kanjiReviewsHeight+vocabularyReviewsHeight),
