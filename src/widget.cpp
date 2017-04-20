@@ -281,30 +281,30 @@ void ReviewsTimeLineWidget::mouseMoveEvent(QMouseEvent *pEvent)
                                           "<table>\n"
                                           "    <thead>\n"
                                           "        <tr>\n"
-                                          "            <td colspan=\"5\" align=center><span style=\"font-weight: bold;\">%2 (%3) reviews</span><br/>%4</td>\n"
+                                          "            <td colspan=\"5\" align=center><span style=\"font-weight: bold;\">%2 (%3) %4</span><br/>%5</td>\n"
                                           "        </tr>\n"
                                           "    </thead>\n"
                                           "    <tbody>\n"
                                           "        <tr>\n"
                                           "            <td>Radicals:</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>%5</td>\n"
+                                          "            <td align=center>%6</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>(%6)</td>\n"
+                                          "            <td align=center>(%7)</td>\n"
                                           "        </tr>\n"
                                           "        <tr>\n"
                                           "            <td>Kanji:</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>%7</td>\n"
+                                          "            <td align=center>%8</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>(%8)</td>\n"
+                                          "            <td align=center>(%9)</td>\n"
                                           "        </tr>\n"
                                           "        <tr>\n"
                                           "            <td>Vocabulary:</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>%9</td>\n"
+                                          "            <td align=center>%10</td>\n"
                                           "            <td style=\"width: 4px;\"></td>\n"
-                                          "            <td align=center>(%10)</td>\n"
+                                          "            <td align=center>(%11)</td>\n"
                                           "        </tr>\n"
                                           "    </tbody>\n"
                                           "</table>\n";
@@ -314,12 +314,16 @@ void ReviewsTimeLineWidget::mouseMoveEvent(QMouseEvent *pEvent)
     int y = pEvent->pos().y();
 
     foreach (const ReviewsTimeLineData &data, mData) {
+        int nbOfReviews = data.allRadicals+data.allKanji+data.allVocabulary;
+        int nbOfCurrentReviews = data.currentRadicals+data.currentKanji+data.currentVocabulary;
+
         if (   (x >= data.xStart) && (x <= data.xEnd)
             && (y >= data.yStart) && (y <= data.yEnd)) {
             QToolTip::showText(pEvent->globalPos(),
                                ReviewsToolTip.arg(QString().fill(' ', x*y))
-                                             .arg(data.allRadicals+data.allKanji+data.allVocabulary)
-                                             .arg(data.currentRadicals+data.currentKanji+data.currentVocabulary)
+                                             .arg(nbOfReviews)
+                                             .arg(nbOfCurrentReviews)
+                                             .arg((nbOfReviews == 1)?"review":"reviews")
                                              .arg(data.date)
                                              .arg(data.allRadicals)
                                              .arg(data.currentRadicals)
@@ -1975,7 +1979,7 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
                                           "    </tbody>\n"
                                           "</table>\n";
     static const QString ReviewsLink = "<a href=\"https://www.wanikani.com/review/session\""+QString(LinkStyle)+">%1</a>";
-    static const QString Reviews = "%1 (%2) reviews";
+    static const QString Reviews = (nbOfReviews == 1)?"%1 (%2) review":"%1 (%2) reviews";
     static const QString NoReviews = "No reviews";
 
     mGui->nextLessonsValue->setText(LessonsText.arg(mWaniKani.studyQueue().lessonsAvailable()?
