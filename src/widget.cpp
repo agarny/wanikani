@@ -904,6 +904,7 @@ void Widget::retrieveSettings(const bool &pResetSettings)
         mInitializing = true;
 
         settings.clear();
+        settings.sync();
     }
 
     if (settings.value(SettingsCurrentKanji, true).toBool())
@@ -1467,6 +1468,8 @@ void Widget::on_closeToolButton_clicked()
         for (int j = 1; j <= 2; ++j)
             settings.setValue(SettingsColor.arg(i).arg(j), mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget())));
     }
+
+    settings.sync();
 
     // Close ourselves
 
