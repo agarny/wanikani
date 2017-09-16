@@ -1605,8 +1605,10 @@ void Widget::waniKaniUpdated()
             // A radical from our current level, so determine how soon it can
             // reach Guru level
 
-            mRadicalGuruTimes << guruTime(radical.userSpecific().srsNumeric(),
-                                          radical.userSpecific().availableDate()-nowTime);
+            if (radical.userSpecific().availableDate()) {
+                mRadicalGuruTimes << guruTime(radical.userSpecific().srsNumeric(),
+                                              radical.userSpecific().availableDate()-nowTime);
+            }
 
             // Keep track of our radical progress
 
@@ -1646,8 +1648,10 @@ void Widget::waniKaniUpdated()
             // A Kanji from our current level, so determine how soon it can
             // reach Guru level
 
-            mKanjiGuruTimes << guruTime(kanji.userSpecific().srsNumeric(),
-                                        kanji.userSpecific().availableDate()-nowTime);
+            if (kanji.userSpecific().availableDate()) {
+                mKanjiGuruTimes << guruTime(kanji.userSpecific().srsNumeric(),
+                                            kanji.userSpecific().availableDate()-nowTime);
+            }
 
             // Keep track of our Kanji progress
 

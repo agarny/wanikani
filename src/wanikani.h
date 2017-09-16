@@ -48,7 +48,7 @@ public:
 private:
     int mLessonsAvailable;
     int mReviewsAvailable;
-    int mNextReviewDate;
+    uint mNextReviewDate;
     int mReviewsAvailableNextHour;
     int mReviewsAvailableNextDay;
 };
@@ -147,10 +147,10 @@ public:
 private:
     QString mSrs;
     int mSrsNumeric;
-    int mUnlockedDate;
-    int mAvailableDate;
+    uint mUnlockedDate;
+    uint mAvailableDate;
     bool mBurned;
-    int mBurnedDate;
+    uint mBurnedDate;
     int mMeaningCorrect;
     int mMeaningIncorrect;
     int mMeaningMaxStreak;
@@ -288,8 +288,8 @@ private:
     QString mTwitter;
     int mTopicsCount;
     int mPostsCount;
-    int mCreationDate;
-    int mVacationDate;
+    uint mCreationDate;
+    uint mVacationDate;
 
     StudyQueue mStudyQueue;
     SrsDistribution mSrsDistribution;

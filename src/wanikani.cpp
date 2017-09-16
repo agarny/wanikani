@@ -687,8 +687,8 @@ void WaniKani::update()
         mTwitter = userInformationMap["twitter"].toString();
         mTopicsCount = userInformationMap["topics_count"].toInt();
         mPostsCount = userInformationMap["posts_count"].toInt();
-        mCreationDate = userInformationMap["creation_date"].toInt();
-        mVacationDate = userInformationMap["vacation_date"].toInt();
+        mCreationDate = userInformationMap["creation_date"].toUInt();
+        mVacationDate = userInformationMap["vacation_date"].toUInt();
 
         // Retrieve the user's study queue
 
@@ -696,7 +696,7 @@ void WaniKani::update()
 
         mStudyQueue.mLessonsAvailable = studyQueueMap["lessons_available"].toInt();
         mStudyQueue.mReviewsAvailable = studyQueueMap["reviews_available"].toInt();
-        mStudyQueue.mNextReviewDate = studyQueueMap["next_review_date"].toInt();
+        mStudyQueue.mNextReviewDate = studyQueueMap["next_review_date"].toUInt();
         mStudyQueue.mReviewsAvailableNextHour = studyQueueMap["reviews_available_next_hour"].toInt();
         mStudyQueue.mReviewsAvailableNextDay = studyQueueMap["reviews_available_next_day"].toInt();
 
@@ -728,10 +728,10 @@ void WaniKani::update()
 
             radical.mUserSpecific.mSrs = radicalUserSpecificInformationMap["srs"].toString();
             radical.mUserSpecific.mSrsNumeric = radicalUserSpecificInformationMap["srs_numeric"].toInt();
-            radical.mUserSpecific.mUnlockedDate = radicalUserSpecificInformationMap["unlocked_date"].toInt();
-            radical.mUserSpecific.mAvailableDate = radicalUserSpecificInformationMap["available_date"].toInt();
+            radical.mUserSpecific.mUnlockedDate = radicalUserSpecificInformationMap["unlocked_date"].toUInt();
+            radical.mUserSpecific.mAvailableDate = radicalUserSpecificInformationMap["burned"].toBool()?0:radicalUserSpecificInformationMap["available_date"].toUInt();
             radical.mUserSpecific.mBurned = radicalUserSpecificInformationMap["burned"].toBool();
-            radical.mUserSpecific.mBurnedDate = radicalUserSpecificInformationMap["burned_date"].toInt();
+            radical.mUserSpecific.mBurnedDate = radicalUserSpecificInformationMap["burned_date"].toUInt();
             radical.mUserSpecific.mMeaningCorrect = radicalUserSpecificInformationMap["meaning_correct"].toInt();
             radical.mUserSpecific.mMeaningIncorrect = radicalUserSpecificInformationMap["meaning_incorrect"].toInt();
             radical.mUserSpecific.mMeaningMaxStreak = radicalUserSpecificInformationMap["meaning_max_streak"].toInt();
@@ -767,10 +767,10 @@ void WaniKani::update()
 
             kanji.mUserSpecific.mSrs = kanjiUserSpecificInformationMap["srs"].toString();
             kanji.mUserSpecific.mSrsNumeric = kanjiUserSpecificInformationMap["srs_numeric"].toInt();
-            kanji.mUserSpecific.mUnlockedDate = kanjiUserSpecificInformationMap["unlocked_date"].toInt();
-            kanji.mUserSpecific.mAvailableDate = kanjiUserSpecificInformationMap["available_date"].toInt();
+            kanji.mUserSpecific.mUnlockedDate = kanjiUserSpecificInformationMap["unlocked_date"].toUInt();
+            kanji.mUserSpecific.mAvailableDate = kanjiUserSpecificInformationMap["burned"].toBool()?0:kanjiUserSpecificInformationMap["available_date"].toUInt();
             kanji.mUserSpecific.mBurned = kanjiUserSpecificInformationMap["burned"].toBool();
-            kanji.mUserSpecific.mBurnedDate = kanjiUserSpecificInformationMap["burned_date"].toInt();
+            kanji.mUserSpecific.mBurnedDate = kanjiUserSpecificInformationMap["burned_date"].toUInt();
             kanji.mUserSpecific.mMeaningCorrect = kanjiUserSpecificInformationMap["meaning_correct"].toInt();
             kanji.mUserSpecific.mMeaningIncorrect = kanjiUserSpecificInformationMap["meaning_incorrect"].toInt();
             kanji.mUserSpecific.mMeaningMaxStreak = kanjiUserSpecificInformationMap["meaning_max_streak"].toInt();
@@ -804,10 +804,10 @@ void WaniKani::update()
 
             vocabulary.mUserSpecific.mSrs = vocabularyUserSpecificInformationMap["srs"].toString();
             vocabulary.mUserSpecific.mSrsNumeric = vocabularyUserSpecificInformationMap["srs_numeric"].toInt();
-            vocabulary.mUserSpecific.mUnlockedDate = vocabularyUserSpecificInformationMap["unlocked_date"].toInt();
-            vocabulary.mUserSpecific.mAvailableDate = vocabularyUserSpecificInformationMap["available_date"].toInt();
+            vocabulary.mUserSpecific.mUnlockedDate = vocabularyUserSpecificInformationMap["unlocked_date"].toUInt();
+            vocabulary.mUserSpecific.mAvailableDate = vocabularyUserSpecificInformationMap["burned"].toBool()?0:vocabularyUserSpecificInformationMap["available_date"].toUInt();
             vocabulary.mUserSpecific.mBurned = vocabularyUserSpecificInformationMap["burned"].toBool();
-            vocabulary.mUserSpecific.mBurnedDate = vocabularyUserSpecificInformationMap["burned_date"].toInt();
+            vocabulary.mUserSpecific.mBurnedDate = vocabularyUserSpecificInformationMap["burned_date"].toUInt();
             vocabulary.mUserSpecific.mMeaningCorrect = vocabularyUserSpecificInformationMap["meaning_correct"].toInt();
             vocabulary.mUserSpecific.mMeaningIncorrect = vocabularyUserSpecificInformationMap["meaning_incorrect"].toInt();
             vocabulary.mUserSpecific.mMeaningMaxStreak = vocabularyUserSpecificInformationMap["meaning_max_streak"].toInt();
