@@ -215,8 +215,6 @@ private:
 
     void updateInterval(const int &pInterval);
 
-    QJsonDocument waniKaniRequest(const QString &pRequest);
-
     QString iconDataUri(const QString &pIcon, const int &pWidth = -1,
                         const int &pHeight = -1,
                         const QIcon::Mode &pMode = QIcon::Normal);

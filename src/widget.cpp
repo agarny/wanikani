@@ -1081,40 +1081,6 @@ void Widget::updateSrsDistributionInformation(QLabel *pLabel,
 
 //==============================================================================
 
-QJsonDocument Widget::waniKaniRequest(const QString &pRequest)
-{
-    // Make sure that we have an API key
-
-    if (mGui->apiKeyValue->text().isEmpty())
-        return QJsonDocument();
-
-    // Send a request to WaniKani and convert its response to a JSON document,
-    // if possible
-
-    QNetworkAccessManager networkAccessManager;
-    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(QString("https://www.wanikani.com/api/v1/user/%1/%2").arg(mGui->apiKeyValue->text(), pRequest)));
-    QEventLoop eventLoop;
-
-    QObject::connect(networkReply, SIGNAL(finished()),
-                     &eventLoop, SLOT(quit()));
-
-    eventLoop.exec();
-
-    QByteArray response = QByteArray();
-
-    if (networkReply->error() == QNetworkReply::NoError)
-        response = networkReply->readAll();
-
-    networkReply->deleteLater();
-
-    if (response.isEmpty())
-        return QJsonDocument();
-    else
-        return QJsonDocument::fromJson(response);
-}
-
-//==============================================================================
-
 static const QString KanjiTable =
 "一二三四五六七八九十口日月田目古吾冒朋明唱晶品呂昌早旭世胃旦胆亘凹凸旧自白百中千舌升昇丸寸専博"
 "占上下卓朝只貝貞員見児元頁頑凡負万句肌旬勺的首乙乱直具真工左右有賄貢項刀刃切召昭則副別丁町可頂"
