@@ -65,7 +65,7 @@ int StudyQueue::reviewsAvailable() const
 
 //==============================================================================
 
-int StudyQueue::nextReviewDate() const
+uint StudyQueue::nextReviewDate() const
 {
     // Return our next review date
 
@@ -280,7 +280,7 @@ int UserSpecific::srsNumeric() const
 
 //==============================================================================
 
-int UserSpecific::unlockedDate() const
+uint UserSpecific::unlockedDate() const
 {
     // Return our unlocked date
 
@@ -289,7 +289,7 @@ int UserSpecific::unlockedDate() const
 
 //==============================================================================
 
-int UserSpecific::availableDate() const
+uint UserSpecific::availableDate() const
 {
     // Return our available date
 
@@ -307,7 +307,7 @@ bool UserSpecific::burned() const
 
 //==============================================================================
 
-int UserSpecific::burnedDate() const
+uint UserSpecific::burnedDate() const
 {
     // Return our burned date
 
@@ -931,7 +931,7 @@ int WaniKani::postsCount() const
 
 //==============================================================================
 
-int WaniKani::creationDate() const
+uint WaniKani::creationDate() const
 {
     // Return our creation date
 
@@ -940,7 +940,7 @@ int WaniKani::creationDate() const
 
 //==============================================================================
 
-int WaniKani::vacationDate() const
+uint WaniKani::vacationDate() const
 {
     // Return our vacation date
 

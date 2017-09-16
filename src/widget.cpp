@@ -1482,7 +1482,7 @@ void Widget::determineReviews(const Reviews &pCurrentReviews,
 
 //==============================================================================
 
-int Widget::guruTime(const int &pSrsLevel, const int &pNextReview)
+uint Widget::guruTime(const int &pSrsLevel, const uint &pNextReview)
 {
     // Make sure that we are not yet at the Guru level
 

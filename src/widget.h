@@ -202,7 +202,7 @@ private:
     Reviews mAllVocabularyReviews;
 
     QDateTime mNow;
-    int mLevelStartTime;
+    uint mLevelStartTime;
 
     QList<int> mRadicalGuruTimes;
     QList<int> mKanjiGuruTimes;
@@ -232,7 +232,7 @@ private:
                           const Reviews &pAllReviews, QDateTime &pNextDateTime,
                           int &pDiff, int *pNbOfReviews);
 
-    int guruTime(const int &pSrsLevel = 0, const int &pNextReview = 0);
+    uint guruTime(const int &pSrsLevel = 0, const uint &pNextReview = 0);
 
     void resetInternals(const bool &pVisible = true);
 

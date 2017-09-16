@@ -41,7 +41,7 @@ public:
 
     int lessonsAvailable() const;
     int reviewsAvailable() const;
-    int nextReviewDate() const;
+    uint nextReviewDate() const;
     int reviewsAvailableNextHour() const;
     int reviewsAvailableNextDay() const;
 
@@ -129,10 +129,10 @@ public:
 
     QString srs() const;
     int srsNumeric() const;
-    int unlockedDate() const;
-    int availableDate() const;
+    uint unlockedDate() const;
+    uint availableDate() const;
     bool burned() const;
-    int burnedDate() const;
+    uint burnedDate() const;
     int meaningCorrect() const;
     int meaningIncorrect() const;
     int meaningMaxStreak() const;
@@ -267,8 +267,8 @@ public:
     QString twitter() const;
     int topicsCount() const;
     int postsCount() const;
-    int creationDate() const;
-    int vacationDate() const;
+    uint creationDate() const;
+    uint vacationDate() const;
 
     StudyQueue studyQueue() const;
     SrsDistribution srsDistribution() const;
