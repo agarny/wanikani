@@ -1593,8 +1593,6 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our radicals
 
-    int radicalsProgress = 0;
-    int radicalsTotal = 0;
     uint nowTime = mNow.toTime_t();
 
     mLevelStartTime = 0;
@@ -1607,13 +1605,6 @@ void Widget::waniKaniUpdated()
 
             mRadicalGuruTimes << guruTime(radical.userSpecific().srsNumeric(),
                                           radical.userSpecific().availableDate()-nowTime);
-
-            // Keep track of our radical progress
-
-            if (radical.userSpecific().srsNumeric() >= 5)
-                ++radicalsProgress;
-
-            ++radicalsTotal;
 
             // Retrieve, if needed, when we started our current level
 
@@ -1636,9 +1627,6 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our Kanji
 
-    int kanjiProgress = 0;
-    int kanjiTotal = 0;
-
     mKanjiGuruTimes = QList<int>();
 
     foreach (const Kanji &kanji, mWaniKani.kanjis()) {
@@ -1648,13 +1636,6 @@ void Widget::waniKaniUpdated()
 
             mKanjiGuruTimes << guruTime(kanji.userSpecific().srsNumeric(),
                                         kanji.userSpecific().availableDate()-nowTime);
-
-            // Keep track of our Kanji progress
-
-            if (kanji.userSpecific().srsNumeric() >= 5)
-                ++kanjiProgress;
-
-            ++kanjiTotal;
         }
 
         if (kanji.level() <= mWaniKani.level())
@@ -1703,14 +1684,19 @@ void Widget::waniKaniUpdated()
                                            "    </tbody>\n"
                                            "</table>\n";
 
+    int radicalsProgress = mWaniKani.levelProgression().radicalsProgress();
+    int radicalsTotal = mWaniKani.levelProgression().radicalsTotal();
     double currentRadicalsValue = double(radicalsProgress)/radicalsTotal;
-    double currentKanjiValue = double(kanjiProgress)/kanjiTotal;
 
     mGui->currentRadicalsProgress->setValue(currentRadicalsValue);
     mGui->currentRadicalsProgress->setToolTip(ProgressToolTip.arg("Radicals Progress")
                                                              .arg(radicalsProgress)
                                                              .arg(radicalsTotal)
                                                              .arg(int(100*currentRadicalsValue)));
+
+    int kanjiProgress = mWaniKani.levelProgression().kanjiProgress();
+    int kanjiTotal = mWaniKani.levelProgression().kanjiTotal();
+    double currentKanjiValue = double(kanjiProgress)/kanjiTotal;
 
     mGui->currentKanjiProgress->setValue(currentKanjiValue);
     mGui->currentKanjiProgress->setToolTip(ProgressToolTip.arg("Kanji Progression")
