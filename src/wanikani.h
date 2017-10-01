@@ -55,6 +55,27 @@ private:
 
 //==============================================================================
 
+class LevelProgression
+{
+    friend class WaniKani;
+
+public:
+    explicit LevelProgression();
+
+    int radicalsProgress() const;
+    int radicalsTotal() const;
+    int kanjiProgress() const;
+    int kanjiTotal() const;
+
+private:
+    int mRadicalsProgress;
+    int mRadicalsTotal;
+    int mKanjiProgress;
+    int mKanjiTotal;
+};
+
+//==============================================================================
+
 class SrsDistributionInformation
 {
     friend class WaniKani;
@@ -271,6 +292,7 @@ public:
     uint vacationDate() const;
 
     StudyQueue studyQueue() const;
+    LevelProgression levelProgression() const;
     SrsDistribution srsDistribution() const;
     Radicals radicals() const;
     Kanjis kanjis() const;
@@ -292,6 +314,7 @@ private:
     uint mVacationDate;
 
     StudyQueue mStudyQueue;
+    LevelProgression mLevelProgression;
     SrsDistribution mSrsDistribution;
     Radicals mRadicals;
     Kanjis mKanjis;

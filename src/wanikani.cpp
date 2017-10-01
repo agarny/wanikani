@@ -92,6 +92,52 @@ int StudyQueue::reviewsAvailableNextDay() const
 
 //==============================================================================
 
+LevelProgression::LevelProgression() :
+    mRadicalsProgress(0),
+    mRadicalsTotal(0),
+    mKanjiProgress(0),
+    mKanjiTotal(0)
+{
+}
+
+//==============================================================================
+
+int LevelProgression::radicalsProgress() const
+{
+    // Return our radicals progress
+
+    return mRadicalsProgress;
+}
+
+//==============================================================================
+
+int LevelProgression::radicalsTotal() const
+{
+    // Return our total number of radicals
+
+    return mRadicalsTotal;
+}
+
+//==============================================================================
+
+int LevelProgression::kanjiProgress() const
+{
+    // Return our Kanji progress
+
+    return mKanjiProgress;
+}
+
+//==============================================================================
+
+int LevelProgression::kanjiTotal() const
+{
+    // Return our total number of Kanji
+
+    return mKanjiTotal;
+}
+
+//==============================================================================
+
 SrsDistributionInformation::SrsDistributionInformation() :
     mName(QString()),
     mRadicals(QString()),
@@ -655,8 +701,12 @@ void WaniKani::update()
     //  - the user's list of vocabulary (and their information)
 
     QJsonDocument studyQueueResponse = waniKaniRequest("study-queue");
-    QJsonDocument srsDistributionResponse = (   studyQueueResponse.isNull()
-                                             || studyQueueResponse.object().contains("error"))?
+    QJsonDocument levelProgressionResponse = (   studyQueueResponse.isNull()
+                                              || studyQueueResponse.object().contains("error"))?
+                                                     QJsonDocument():
+                                                     waniKaniRequest("level-progression");
+    QJsonDocument srsDistributionResponse = (   levelProgressionResponse.isNull()
+                                             || levelProgressionResponse.object().contains("error"))?
                                                     QJsonDocument():
                                                     waniKaniRequest("srs-distribution");
     QJsonDocument radicalsResponse = (   srsDistributionResponse.isNull()
@@ -699,6 +749,15 @@ void WaniKani::update()
         mStudyQueue.mNextReviewDate = studyQueueMap["next_review_date"].toUInt();
         mStudyQueue.mReviewsAvailableNextHour = studyQueueMap["reviews_available_next_hour"].toInt();
         mStudyQueue.mReviewsAvailableNextDay = studyQueueMap["reviews_available_next_day"].toInt();
+
+        // Retrieve the user's level progression
+
+        QVariantMap levelProgressionResponseMap = levelProgressionResponse.object().toVariantMap()["requested_information"].toMap();
+
+        mLevelProgression.mRadicalsProgress = levelProgressionResponseMap["radicals_progress"].toInt();
+        mLevelProgression.mRadicalsTotal = levelProgressionResponseMap["radicals_total"].toInt();
+        mLevelProgression.mKanjiProgress = levelProgressionResponseMap["kanji_progress"].toInt();
+        mLevelProgression.mKanjiTotal = levelProgressionResponseMap["kanji_total"].toInt();
 
         // Retrieve the user's SRS distribution
 
@@ -954,6 +1013,15 @@ StudyQueue WaniKani::studyQueue() const
     // Return our study queue
 
     return mStudyQueue;
+}
+
+//==============================================================================
+
+LevelProgression WaniKani::levelProgression() const
+{
+    // Return our level progression
+
+    return mLevelProgression;
 }
 
 //==============================================================================
