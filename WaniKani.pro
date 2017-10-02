@@ -55,4 +55,4 @@ mac: OBJECTIVE_SOURCES = src/macos.mm
 
 RESOURCES = res/resources.qrc
 
-mac: QMAKE_INFO_PLIST = Res/Info.plist
+mac: QMAKE_INFO_PLIST = res/Info.plist
