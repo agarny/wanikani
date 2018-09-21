@@ -33,9 +33,20 @@ limitations under the License.
 
 //==============================================================================
 
+#ifdef Q_OS_WIN
+    #include <Windows.h>
+#endif
+
+//==============================================================================
+
 int main(int pArgC, char *pArgV[])
 {
-    // Create our application
+    // Create our application, after making that on Windows we can handle scaled
+    // HiDPI screens
+
+#ifdef Q_OS_WIN
+    SetProcessDPIAware();
+#endif
 
     QtSingleApplication app(QFileInfo(pArgV[0]).baseName(), pArgC, pArgV);
 
