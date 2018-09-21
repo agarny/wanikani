@@ -25,6 +25,7 @@ limitations under the License.
 //==============================================================================
 
 #include <QFileInfo>
+#include <QLoggingCategory>
 
 //==============================================================================
 
@@ -43,6 +44,10 @@ int main(int pArgC, char *pArgV[])
 
     if (app.isRunning())
         return 0;
+
+    // Filter out OpenSSL warning messages
+
+    QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
 
     // Customise our application
 
