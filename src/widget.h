@@ -204,8 +204,8 @@ private:
     QDateTime mNow;
     uint mLevelStartTime;
 
-    QList<int> mRadicalGuruTimes;
-    QList<int> mKanjiGuruTimes;
+    QList<uint> mRadicalGuruTimes;
+    QList<uint> mKanjiGuruTimes;
 
     void retrieveSettings(const bool &pResetSettings = false);
 
@@ -230,7 +230,7 @@ private:
 
     void determineReviews(const Reviews &pCurrentReviews,
                           const Reviews &pAllReviews, QDateTime &pNextDateTime,
-                          int &pDiff, int *pNbOfReviews);
+                          uint &pDiff, int *pNbOfReviews);
 
     uint guruTime(const int &pSrsLevel = 0, const uint &pNextReview = 0);
 

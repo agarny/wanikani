@@ -654,15 +654,15 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
 
         memset(&stream, 0, sizeof(z_stream));
 
-        if (inflateInit2(&stream, MAX_WBITS+16) == Z_OK) {
+        if (inflateInit2_(&stream, MAX_WBITS+16, ZLIB_VERSION, sizeof(z_stream)) == Z_OK) {
             enum {
                 BufferSize = 32768
             };
 
             Bytef buffer[BufferSize];
 
-            stream.next_in = (Bytef *) response.data();
-            stream.avail_in = response.size();
+            stream.next_in = reinterpret_cast<Bytef *>(response.data());
+            stream.avail_in = uint(response.size());
 
             do {
                 stream.next_out = buffer;
@@ -671,7 +671,7 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
                 inflate(&stream, Z_NO_FLUSH);
 
                 if (!stream.msg)
-                    json += QByteArray::fromRawData((char *) buffer, BufferSize-stream.avail_out);
+                    json += QByteArray::fromRawData(reinterpret_cast<char *>(buffer), BufferSize-int(stream.avail_out));
                 else
                     json = QByteArray();
             } while (!stream.avail_out);

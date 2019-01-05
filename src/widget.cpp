@@ -27,7 +27,6 @@ limitations under the License.
 #include <QBuffer>
 #include <QColorDialog>
 #include <QDate>
-#include <QDesktopWidget>
 #include <QDir>
 #include <QFile>
 #include <QJsonDocument>
@@ -40,6 +39,7 @@ limitations under the License.
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QPainter>
+#include <QScreen>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QTextStream>
@@ -63,7 +63,7 @@ limitations under the License.
 
 //==============================================================================
 
-QString timeToString(const int &pSeconds)
+QString timeToString(const uint &pSeconds)
 {
     // Return the given number of seconds as a formatted string
 
@@ -71,9 +71,9 @@ QString timeToString(const int &pSeconds)
         return "less than 1 minute";
     } else {
         QString res = QString();
-        int days = pSeconds/86400;
-        int hours = (pSeconds/3600)%24;
-        int minutes = (pSeconds/60)%60;
+        uint days = pSeconds/86400;
+        uint hours = (pSeconds/3600)%24;
+        uint minutes = (pSeconds/60)%60;
 
         if (days)
             res += (days == 1)?"1 day":QString("%1 days").arg(days);
@@ -159,11 +159,11 @@ void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
 
     QPainter painter(this);
 
-    int value = mValue*(width()-2);
+    int value = int(mValue*(width()-2));
 
     painter.setPen(QPalette().mid().color());
     painter.drawRect(0, 0, width()-1, height()-1);
-    painter.drawLine(0.9*(width()-1), 0, 0.9*(width()-1), height()-1);
+    painter.drawLine(int(0.9*(width()-1)), 0, int(0.9*(width()-1)), height()-1);
 
     if (value)
         painter.fillRect(1, 1, value, height()-2, mColor);
@@ -181,7 +181,7 @@ void ProgressBarWidget::setValue(const double &pValue)
 
     double value = qMin(1.0, qMax(pValue, 0.0));
 
-    if (value != mValue) {
+    if (!qIsNull(value-mValue)) {
         bool needUpdate = int(mValue*width()) != int(value*width());
 
         mValue = value;
@@ -434,7 +434,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     painter.setFont(font);
 
     QFontMetrics fontMetrics = painter.fontMetrics();
-    int reviewsRange = 10*(ceil(0.1*maxReviews));
+    int reviewsRange = 10*(int(ceil(0.1*maxReviews)));
     int xShift = fontMetrics.width(QString::number(reviewsRange))+Space;
     int yShift = fontMetrics.height();
     int canvasWidth = width()-xShift;
@@ -532,7 +532,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
         double x = xDayShift+i*canvasWidthOverRange;
 
         if (x >= 0) {
-            int dayHour = fmod(i, 24.0);
+            int dayHour = int(fmod(i, 24.0));
 
             pen.setColor(dayHour?Qt::lightGray:Qt::red);
 
@@ -547,7 +547,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
             painter.drawText(QPointF(x+Space, -Space),
                              dayHour?
                                  QTime(dayHour, 0).toString("hap"):
-                                 startTime.addDays(i?i/24:0).toString("ddd"));
+                                 startTime.addDays(qint64(!qIsNull(i)?i/24:0)).toString("ddd"));
         }
     }
 
@@ -672,8 +672,8 @@ Widget::Widget() :
     mAllVocabularyReviews(Reviews()),
     mNow(QDateTime::currentDateTime()),
     mLevelStartTime(0),
-    mRadicalGuruTimes(QList<int>()),
-    mKanjiGuruTimes(QList<int>())
+    mRadicalGuruTimes(QList<uint>()),
+    mKanjiGuruTimes(QList<uint>())
 {
     // Set up our GUI
 
@@ -1154,12 +1154,12 @@ void Widget::updateWallpaper(const bool &pForceUpdate)
         static const int Shift = 32;
         static const int SmallShift = 1;
 
-        QDesktopWidget desktopWidget;
-        QRect availableGeometry = desktopWidget.availableGeometry();
-        QRect geometry = desktopWidget.geometry();
+        QScreen *primaryScreen = QGuiApplication::primaryScreen();
+        QRect availableGeometry = primaryScreen->availableGeometry();
+        QRect geometry = primaryScreen->geometry();
 
         int areaWidth = pixmap.width()-LeftBorder-2*Shift;
-        int areaHeight = double(availableGeometry.height())/geometry.height()*pixmap.height()-2*Shift;
+        int areaHeight = int(double(availableGeometry.height())/geometry.height()*pixmap.height())-2*Shift;
 
         QFont font = QFont(mGui->fontComboBox->currentText());
 
@@ -1180,7 +1180,7 @@ void Widget::updateWallpaper(const bool &pForceUpdate)
             int crtCharWidth = fontMetrics.width(KanjiTable.at(0));
             int crtCharHeight = fontMetrics.height();
             int crtNbOfCols = areaWidth/(crtCharWidth+SmallShift);
-            int crtNbOfRows =  floor(kanjiState.size()/crtNbOfCols)
+            int crtNbOfRows =  int(floor(kanjiState.size()/crtNbOfCols))
                               +((kanjiState.size() % crtNbOfCols)?1:0);
 
             if (crtNbOfRows*crtCharHeight+(crtNbOfRows-1)*SmallShift+fontMetrics.descent() <= areaHeight) {
@@ -1206,9 +1206,9 @@ void Widget::updateWallpaper(const bool &pForceUpdate)
 
         int xStart = LeftBorder+Shift+((areaWidth-nbOfCols*charWidth-(nbOfCols-1)*SmallShift) >> 1);
         int x = 0;
-        int y =  double(availableGeometry.top())/geometry.height()*pixmap.height()
+        int y =  int(double(availableGeometry.top())/geometry.height()*pixmap.height())
                 +Shift+((areaHeight-nbOfRows*charHeight-(nbOfRows-1)*SmallShift) >> 1)-descent;
-        int radius = ceil(0.75*(qMax(charWidth, charHeight) >> 3));
+        int radius = int(ceil(0.75*(qMax(charWidth, charHeight) >> 3)));
 
         for (int i = 0, j = 0, iMax = KanjiTable.size(); i < iMax; ++i) {
             if (kanjiState.keys().contains(KanjiTable.at(i))) {
@@ -1446,13 +1446,13 @@ void Widget::on_closeToolButton_clicked()
 
 void Widget::determineReviews(const Reviews &pCurrentReviews,
                               const Reviews &pAllReviews,
-                              QDateTime &pNextDateTime, int &pDiff,
+                              QDateTime &pNextDateTime, uint &pDiff,
                               int *pNbOfReviews)
 {
     // Determine all the given reviews
 
     foreach (const QDateTime &dateTime, pAllReviews.keys()) {
-        int localDiff = mNow.secsTo(dateTime);
+        uint localDiff = uint(mNow.secsTo(dateTime));
 
         if (localDiff < pDiff) {
             pDiff = localDiff;
@@ -1495,10 +1495,10 @@ uint Widget::guruTime(const int &pSrsLevel, const uint &pNextReview)
     static const int SrsIntervals[2][4] = { { 2, 4, 8, 23 },
                                             { 4, 8, 23, 47 } };
 
-    int res = pSrsLevel?pNextReview:0;
+    uint res = pSrsLevel?pNextReview:0;
 
     for (int i = pSrsLevel; i < 4; ++i)
-        res += (pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i]*3600;
+        res += uint((pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i])*3600;
 
     return res;
 }
@@ -1596,7 +1596,7 @@ void Widget::waniKaniUpdated()
     uint nowTime = mNow.toTime_t();
 
     mLevelStartTime = 0;
-    mRadicalGuruTimes = QList<int>();
+    mRadicalGuruTimes.clear();
 
     foreach (const Radical &radical, mWaniKani.radicals()) {
         if (radical.level() == mWaniKani.level()) {
@@ -1627,7 +1627,7 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our Kanji
 
-    mKanjiGuruTimes = QList<int>();
+    mKanjiGuruTimes.clear();
 
     foreach (const Kanji &kanji, mWaniKani.kanjis()) {
         if (kanji.level() == mWaniKani.level()) {
@@ -1726,8 +1726,7 @@ void Widget::trayIconActivated()
 {
     // Make sure that we are in the centre of the screen
 
-    QDesktopWidget desktopWidget;
-    QRect availableGeometry = desktopWidget.availableGeometry();
+    QRect availableGeometry = QGuiApplication::primaryScreen()->availableGeometry();
 
     move(availableGeometry.center()-QPoint(width() >> 1, height() >> 1));
 
@@ -1748,8 +1747,8 @@ void Widget::trayIconActivated()
 
     // Bring us to the foreground
 
-    DWORD foregroundThreadProcId = GetWindowThreadProcessId(GetForegroundWindow(), 0);
-    DWORD mainThreadProcId = GetWindowThreadProcessId(mainWinId, 0);
+    DWORD foregroundThreadProcId = GetWindowThreadProcessId(GetForegroundWindow(), nullptr);
+    DWORD mainThreadProcId = GetWindowThreadProcessId(mainWinId, nullptr);
 
     if (foregroundThreadProcId != mainThreadProcId) {
         // Our thread process Id is not that of the foreground window, so attach
@@ -1821,13 +1820,13 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
                                                "    </table>\n"
                                                "</center>";
 
-    int start = nowTime-mLevelStartTime;
-    int finish =  (mRadicalGuruTimes.isEmpty()?
-                       guruTime():
-                       mRadicalGuruTimes[ceil(0.9*mRadicalGuruTimes.count())-1])
-                 +(mKanjiGuruTimes.isEmpty()?
-                       guruTime():
-                       mKanjiGuruTimes[ceil(0.9*mKanjiGuruTimes.count())-1]);
+    uint start = nowTime-mLevelStartTime;
+    uint finish =  (mRadicalGuruTimes.isEmpty()?
+                        guruTime():
+                        mRadicalGuruTimes[int(ceil(0.9*mRadicalGuruTimes.count()))-1])
+                  +(mKanjiGuruTimes.isEmpty()?
+                        guruTime():
+                        mKanjiGuruTimes[int(ceil(0.9*mKanjiGuruTimes.count()))-1]);
 
     mGui->levelStatisticsValue->setText(LevelStatisticsText.arg(mLevelStartTime?timeToString(start):"now",
                                                                 timeToString(finish),
@@ -1878,7 +1877,7 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
     // Update our next, next hour and next day reviews
 
     QDateTime nextDateTime = mNow;
-    int diff = INT_MAX;
+    uint diff = UINT_MAX;
     int nbOfRadicalsReviews[6] = {0, 0, 0, 0, 0, 0};
     int nbOfKanjiReviews[6] = {0, 0, 0, 0, 0, 0};
     int nbOfVocabularyReviews[6] = {0, 0, 0, 0, 0, 0};
