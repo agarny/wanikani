@@ -746,13 +746,6 @@ Widget::Widget() :
 
     updateInterval(mGui->intervalSpinBox->value());
 
-    // User our other timer to update our reviews time line
-
-    connect(&mTimeRelatedInformationTimer, SIGNAL(timeout()),
-            this, SLOT(updateTimeRelatedInformation()));
-
-    mTimeRelatedInformationTimer.start(1000);
-
     // Create and show our system tray icon
     // Note: activation of the tray icon doesn't (currently) work on Linux, so
     //       we achieve the same result through a 'fake' context menu...
