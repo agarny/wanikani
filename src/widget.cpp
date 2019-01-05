@@ -687,20 +687,20 @@ Widget::Widget() :
     setWindowFlags(Qt::Popup);
 #endif
 
-    connect(mGui->currentKanjiRadioButton, SIGNAL(clicked()),
-            this, SLOT(updateLevels()));
-    connect(mGui->allKanjiRadioButton, SIGNAL(clicked()),
-            this, SLOT(updateLevels()));
+    connect(mGui->currentKanjiRadioButton, &QRadioButton::clicked,
+            this, &Widget::updateLevels);
+    connect(mGui->allKanjiRadioButton, &QRadioButton::clicked,
+            this, &Widget::updateLevels);
 
     for (int i = 1; i <= 6; ++i) {
         for (int j = 1; j <= 2; ++j) {
-            connect(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget()), SIGNAL(clicked()),
-                    this, SLOT(updatePushButtonColor()));
+            connect(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget()), &QPushButton::clicked,
+                    this, &Widget::updatePushButtonColor);
         }
     }
 
-    connect(mGui->reviewsTimeLineSlider, SIGNAL(valueChanged(int)),
-            this, SLOT(updateTimeRelatedInformation(const int &)));
+    connect(mGui->reviewsTimeLineSlider, &QSlider::valueChanged,
+            this, QOverload<>::of(&Widget::updateTimeRelatedInformation));
 
 #ifdef Q_OS_MAC
     mGui->apiKeyValue->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -725,15 +725,15 @@ Widget::Widget() :
 
     // Handle signals from our WaniKani object
 
-    connect(&mWaniKani, SIGNAL(updated()),
-            this, SLOT(waniKaniUpdated()));
-    connect(&mWaniKani, SIGNAL(updated()),
-            this, SLOT(updateTimeRelatedInformation()));
+    connect(&mWaniKani, &WaniKani::updated,
+            this, &Widget::waniKaniUpdated);
+    connect(&mWaniKani, &WaniKani::updated,
+            this, QOverload<>::of(&Widget::updateTimeRelatedInformation));
 
-    connect(&mWaniKani, SIGNAL(error()),
-            this, SLOT(waniKaniError()));
-    connect(&mWaniKani, SIGNAL(error()),
-            this, SLOT(updateTimeRelatedInformation()));
+    connect(&mWaniKani, &WaniKani::error,
+            this, &Widget::waniKaniError);
+    connect(&mWaniKani, &WaniKani::error,
+            this, QOverload<>::of(&Widget::updateTimeRelatedInformation));
 
     // Retrieve our settings
 
@@ -741,8 +741,8 @@ Widget::Widget() :
 
     // Use our timer to update our WaniKani object
 
-    connect(&mWaniKaniTimer, SIGNAL(timeout()),
-            &mWaniKani, SLOT(update()));
+    connect(&mWaniKaniTimer, &QTimer::timeout,
+            &mWaniKani, &WaniKani::update);
 
     updateInterval(mGui->intervalSpinBox->value());
 
@@ -756,11 +756,11 @@ Widget::Widget() :
 #ifdef Q_OS_LINUX
     mTrayIcon.setContextMenu(new QMenu());
 
-    connect(mTrayIcon.contextMenu(), SIGNAL(aboutToShow()),
-            this, SLOT(trayIconActivated()));
+    connect(mTrayIcon.contextMenu(), &QMenu::aboutToShow,
+            this, &Widget::trayIconActivated);
 #else
-    connect(&mTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-            this, SLOT(trayIconActivated()));
+    connect(&mTrayIcon, &QSystemTrayIcon::activated,
+            this, &Widget::trayIconActivated);
 #endif
 
     mTrayIcon.show();
@@ -1270,7 +1270,7 @@ void Widget::updateWallpaper(const bool &pForceUpdate)
     if (mNeedToCheckWallpaper) {
         mNeedToCheckWallpaper = false;
 
-        QTimer::singleShot(1000, this, SLOT(checkWallpaper()));
+        QTimer::singleShot(1000, this, &Widget::checkWallpaper);
     }
 }
 
@@ -1545,8 +1545,8 @@ void Widget::waniKaniUpdated()
                                                                                                                                    .arg(GravatarSize)));
     QEventLoop eventLoop;
 
-    QObject::connect(networkReply, SIGNAL(finished()),
-                     &eventLoop, SLOT(quit()));
+    QObject::connect(networkReply, &QNetworkReply::finished,
+                     &eventLoop, &QEventLoop::quit);
 
     eventLoop.exec();
 
@@ -1975,6 +1975,15 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
 
 //==============================================================================
 
+void Widget::updateTimeRelatedInformation()
+{
+    // Update our time-related information using our current range
+
+    updateTimeRelatedInformation(-1);
+}
+
+//==============================================================================
+
 void Widget::updatePushButtonColor()
 {
     // Update the background colour of the given push button
@@ -2069,7 +2078,7 @@ void Widget::checkWallpaper()
 
     // Check again in about one second
 
-    QTimer::singleShot(1000, this, SLOT(checkWallpaper()));
+    QTimer::singleShot(1000, this, &Widget::checkWallpaper);
 }
 
 //==============================================================================
