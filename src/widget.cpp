@@ -700,7 +700,7 @@ Widget::Widget() :
     }
 
     connect(mGui->reviewsTimeLineSlider, &QSlider::valueChanged,
-            this, QOverload<>::of(&Widget::updateTimeRelatedInformation));
+            this, QOverload<const int &>::of(&Widget::updateTimeRelatedInformation));
 
 #ifdef Q_OS_MAC
     mGui->apiKeyValue->setAttribute(Qt::WA_MacShowFocusRect, false);
