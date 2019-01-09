@@ -700,7 +700,7 @@ Widget::Widget() :
     }
 
     connect(mGui->reviewsTimeLineSlider, &QSlider::valueChanged,
-            this, QOverload<const int &>::of(&Widget::updateTimeRelatedInformation));
+            this, &Widget::updateTimeRelatedInformation);
 
 #ifdef Q_OS_MAC
     mGui->apiKeyValue->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -728,12 +728,12 @@ Widget::Widget() :
     connect(&mWaniKani, &WaniKani::updated,
             this, &Widget::waniKaniUpdated);
     connect(&mWaniKani, &WaniKani::updated,
-            this, QOverload<>::of(&Widget::updateTimeRelatedInformation));
+            this, &Widget::updateTimeRelatedInformation);
 
     connect(&mWaniKani, &WaniKani::error,
             this, &Widget::waniKaniError);
     connect(&mWaniKani, &WaniKani::error,
-            this, QOverload<>::of(&Widget::updateTimeRelatedInformation));
+            this, &Widget::updateTimeRelatedInformation);
 
     // Retrieve our settings
 
@@ -1783,7 +1783,7 @@ void Widget::updateLevels()
 
 //==============================================================================
 
-void Widget::updateTimeRelatedInformation(const int &pRange)
+void Widget::updateTimeRelatedInformation()
 {
     // Update our level statistics
 
@@ -1827,7 +1827,7 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
 
     // Update our reviews time line
 
-    int nbOfHours = 6*((pRange == -1)?mGui->reviewsTimeLineSlider->value():pRange);
+    int nbOfHours = 6*mGui->reviewsTimeLineSlider->value();
 
     mGui->reviewsTimeLine->update(nbOfHours);
 
@@ -1971,15 +1971,6 @@ void Widget::updateTimeRelatedInformation(const int &pRange)
     mGui->nextDayReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[5]).arg(nbOfRadicalsReviews[4])
                                                         .arg(nbOfKanjiReviews[5]).arg(nbOfKanjiReviews[4])
                                                         .arg(nbOfVocabularyReviews[5]).arg(nbOfVocabularyReviews[4]));
-}
-
-//==============================================================================
-
-void Widget::updateTimeRelatedInformation()
-{
-    // Update our time-related information using our current range
-
-    updateTimeRelatedInformation(-1);
 }
 
 //==============================================================================

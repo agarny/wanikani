@@ -257,7 +257,6 @@ private slots:
 
     void updateLevels();
 
-    void updateTimeRelatedInformation(const int &pRange);
     void updateTimeRelatedInformation();
 
     void updatePushButtonColor();
