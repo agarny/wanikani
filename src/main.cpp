@@ -41,8 +41,8 @@ limitations under the License.
 
 int main(int pArgC, char *pArgV[])
 {
-    // Create our application, after making that on Windows we can handle scaled
-    // HiDPI screens
+    // Create our application, after making sure that on Windows we can handle
+    // scaled HiDPI screens
 
 #ifdef Q_OS_WIN
     SetProcessDPIAware();
