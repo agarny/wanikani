@@ -773,7 +773,8 @@ Widget::Widget() :
 bool Widget::event(QEvent *pEvent)
 {
     if (pEvent->type() == QEvent::WindowDeactivate) {
-        // We are not active anymore, so handle the even and then hide ourselves
+        // We are not active anymore, so handle the event and then hide
+        // ourselves
 
         QWidget::event(pEvent);
 
