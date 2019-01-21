@@ -1663,7 +1663,7 @@ void Widget::waniKaniUpdated()
         }
     }
 
-    // Determine our radicals and Kanji progressions
+    // Determine our radicals and Kanji progress
 
     static const QString ProgressToolTip = "<table>\n"
                                            "    <thead>\n"
@@ -1693,7 +1693,7 @@ void Widget::waniKaniUpdated()
     double currentKanjiValue = double(kanjiProgress)/kanjiTotal;
 
     mGui->currentKanjiProgress->setValue(currentKanjiValue);
-    mGui->currentKanjiProgress->setToolTip(ProgressToolTip.arg("Kanji Progression")
+    mGui->currentKanjiProgress->setToolTip(ProgressToolTip.arg("Kanji Progress")
                                                           .arg(kanjiProgress)
                                                           .arg(kanjiTotal)
                                                           .arg(int(100*currentKanjiValue)));
