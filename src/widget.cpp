@@ -547,7 +547,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
             painter.drawText(QPointF(x+Space, -Space),
                              dayHour?
                                  QTime(dayHour, 0).toString("hap"):
-                                 startTime.addDays(qint64(!qIsNull(i)?i/24:0)).toString("ddd"));
+                                 startTime.addDays(qint64(qFuzzyIsNull(i)?0:i/24)).toString("ddd"));
         }
     }
 
@@ -1492,7 +1492,7 @@ qint64 Widget::guruTime(int pSrsLevel, qint64 pNextReview)
     qint64 res = pSrsLevel?pNextReview:0;
 
     for (int i = pSrsLevel; i < 4; ++i)
-        res += qint64((pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i])*3600;
+        res += (pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i]*3600;
 
     return res;
 }
