@@ -201,10 +201,10 @@ private:
     Reviews mAllVocabularyReviews;
 
     QDateTime mNow;
-    uint mLevelStartTime;
+    qint64 mLevelStartTime;
 
-    QList<uint> mRadicalGuruTimes;
-    QList<uint> mKanjiGuruTimes;
+    QList<qint64> mRadicalGuruTimes;
+    QList<qint64> mKanjiGuruTimes;
 
     void retrieveSettings(const bool &pResetSettings = false);
 
@@ -229,9 +229,9 @@ private:
 
     void determineReviews(const Reviews &pCurrentReviews,
                           const Reviews &pAllReviews, QDateTime &pNextDateTime,
-                          uint &pDiff, int *pNbOfReviews);
+                          qint64 &pDiff, int *pNbOfReviews);
 
-    uint guruTime(const int &pSrsLevel = 0, const uint &pNextReview = 0);
+    qint64 guruTime(const int &pSrsLevel = 0, const qint64 &pNextReview = 0);
 
     void resetInternals(const bool &pVisible = true);
 

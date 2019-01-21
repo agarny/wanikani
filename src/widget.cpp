@@ -63,7 +63,7 @@ limitations under the License.
 
 //==============================================================================
 
-QString timeToString(const uint &pSeconds)
+QString timeToString(const qint64 &pSeconds)
 {
     // Return the given number of seconds as a formatted string
 
@@ -71,9 +71,9 @@ QString timeToString(const uint &pSeconds)
         return "less than 1 minute";
     } else {
         QString res = QString();
-        uint days = pSeconds/86400;
-        uint hours = (pSeconds/3600)%24;
-        uint minutes = (pSeconds/60)%60;
+        qint64 days = pSeconds/86400;
+        qint64 hours = (pSeconds/3600)%24;
+        qint64 minutes = (pSeconds/60)%60;
 
         if (days)
             res += (days == 1)?"1 day":QString("%1 days").arg(days);
@@ -562,7 +562,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     //       using it with QPainter::fillRect()...
 
     foreach (const QDateTime &dateTime, allRadicalsReviews.keys()) {
-        uint timeDiff = dateTime.toTime_t()-mWidget->now().toTime_t();
+        qint64 timeDiff = dateTime.toTime_t()-mWidget->now().toTime_t();
         double x = (dateTime.toTime_t()-startTime.toTime_t())*timeMultiplier;
         double xWidth = 900.0*timeMultiplier;
 
@@ -672,8 +672,8 @@ Widget::Widget() :
     mAllVocabularyReviews(Reviews()),
     mNow(QDateTime::currentDateTime()),
     mLevelStartTime(0),
-    mRadicalGuruTimes(QList<uint>()),
-    mKanjiGuruTimes(QList<uint>())
+    mRadicalGuruTimes(QList<qint64>()),
+    mKanjiGuruTimes(QList<qint64>())
 {
     // Set up our GUI
 
@@ -1440,13 +1440,13 @@ void Widget::on_closeToolButton_clicked()
 
 void Widget::determineReviews(const Reviews &pCurrentReviews,
                               const Reviews &pAllReviews,
-                              QDateTime &pNextDateTime, uint &pDiff,
+                              QDateTime &pNextDateTime, qint64 &pDiff,
                               int *pNbOfReviews)
 {
     // Determine all the given reviews
 
     foreach (const QDateTime &dateTime, pAllReviews.keys()) {
-        uint localDiff = uint(mNow.secsTo(dateTime));
+        qint64 localDiff = mNow.secsTo(dateTime);
 
         if (localDiff < pDiff) {
             pDiff = localDiff;
@@ -1476,7 +1476,7 @@ void Widget::determineReviews(const Reviews &pCurrentReviews,
 
 //==============================================================================
 
-uint Widget::guruTime(const int &pSrsLevel, const uint &pNextReview)
+qint64 Widget::guruTime(const int &pSrsLevel, const qint64 &pNextReview)
 {
     // Make sure that we are not yet at the Guru level
 
@@ -1489,10 +1489,10 @@ uint Widget::guruTime(const int &pSrsLevel, const uint &pNextReview)
     static const int SrsIntervals[2][4] = { { 2, 4, 8, 23 },
                                             { 4, 8, 23, 47 } };
 
-    uint res = pSrsLevel?pNextReview:0;
+    qint64 res = pSrsLevel?pNextReview:0;
 
     for (int i = pSrsLevel; i < 4; ++i)
-        res += uint((pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i])*3600;
+        res += qint64((pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i])*3600;
 
     return res;
 }
@@ -1587,7 +1587,7 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our radicals
 
-    uint nowTime = mNow.toTime_t();
+    qint64 nowTime = mNow.toTime_t();
 
     mLevelStartTime = 0;
     mRadicalGuruTimes.clear();
@@ -1790,7 +1790,7 @@ void Widget::updateTimeRelatedInformation()
 
     mNow = QDateTime::currentDateTime();
 
-    uint nowTime = mNow.toTime_t();
+    qint64 nowTime = mNow.toTime_t();
 
     static const QString LevelStatisticsText = "<center>\n"
                                                "    <table style=\"font-size: 11px;\">\n"
@@ -1814,13 +1814,13 @@ void Widget::updateTimeRelatedInformation()
                                                "    </table>\n"
                                                "</center>";
 
-    uint start = nowTime-mLevelStartTime;
-    uint finish =  (mRadicalGuruTimes.isEmpty()?
-                        guruTime():
-                        mRadicalGuruTimes[int(ceil(0.9*mRadicalGuruTimes.count()))-1])
-                  +(mKanjiGuruTimes.isEmpty()?
-                        guruTime():
-                        mKanjiGuruTimes[int(ceil(0.9*mKanjiGuruTimes.count()))-1]);
+    qint64 start = nowTime-mLevelStartTime;
+    qint64 finish =  (mRadicalGuruTimes.isEmpty()?
+                          guruTime():
+                          mRadicalGuruTimes[int(ceil(0.9*mRadicalGuruTimes.count()))-1])
+                    +(mKanjiGuruTimes.isEmpty()?
+                          guruTime():
+                          mKanjiGuruTimes[int(ceil(0.9*mKanjiGuruTimes.count()))-1]);
 
     mGui->levelStatisticsValue->setText(LevelStatisticsText.arg(mLevelStartTime?timeToString(start):"now",
                                                                 timeToString(finish),
@@ -1871,7 +1871,7 @@ void Widget::updateTimeRelatedInformation()
     // Update our next, next hour and next day reviews
 
     QDateTime nextDateTime = mNow;
-    uint diff = UINT_MAX;
+    qint64 diff = LLONG_MAX;
     int nbOfRadicalsReviews[6] = {0, 0, 0, 0, 0, 0};
     int nbOfKanjiReviews[6] = {0, 0, 0, 0, 0, 0};
     int nbOfVocabularyReviews[6] = {0, 0, 0, 0, 0, 0};
