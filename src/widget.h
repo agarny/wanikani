@@ -71,7 +71,7 @@ class ProgressBarWidget : public QWidget
 public:
     explicit ProgressBarWidget(QWidget *pParent);
 
-    void setValue(const double &pValue);
+    void setValue(double pValue);
     void setColor(const QColor &pColor);
 
 protected:
@@ -115,7 +115,7 @@ class ReviewsTimeLineWidget : public QWidget
 public:
     explicit ReviewsTimeLineWidget(QWidget *pParent);
 
-    void update(const int &pRange);
+    void update(int pRange);
 
     void setRadicalsColor(const QColor &pRadicalsColor);
     void setKanjiColor(const QColor &pKanjiColor);
@@ -206,24 +206,23 @@ private:
     QList<qint64> mRadicalGuruTimes;
     QList<qint64> mKanjiGuruTimes;
 
-    void retrieveSettings(const bool &pResetSettings = false);
+    void retrieveSettings(bool pResetSettings = false);
 
-    void setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor);
+    void setPushButtonColor(QPushButton *pPushButton, QRgb pColor);
 
-    QColor color(const int &pRow, const int &pColumn) const;
+    QColor color(int pRow, int pColumn) const;
 
-    void updateInterval(const int &pInterval);
+    void updateInterval(int pInterval);
 
-    QString iconDataUri(const QString &pIcon, const int &pWidth = -1,
-                        const int &pHeight = -1,
-                        const QIcon::Mode &pMode = QIcon::Normal);
+    QString iconDataUri(const QString &pIcon, int pWidth = -1, int pHeight = -1,
+                        QIcon::Mode pMode = QIcon::Normal);
 
     void updateGravatar(const QPixmap &pGravatar);
     void updateSrsDistributionPalettes();
     void updateSrsDistributionInformation(QLabel *pLabel, const QString &pIcon,
                                           const SrsDistributionInformation &pInformation);
 
-    void updateWallpaper(const bool &pForceUpdate = false);
+    void updateWallpaper(bool pForceUpdate = false);
 
     void setWallpaper();
 
@@ -231,9 +230,9 @@ private:
                           const Reviews &pAllReviews, QDateTime &pNextDateTime,
                           qint64 &pDiff, int *pNbOfReviews);
 
-    qint64 guruTime(const int &pSrsLevel = 0, const qint64 &pNextReview = 0);
+    qint64 guruTime(int pSrsLevel = 0, qint64 pNextReview = 0);
 
-    void resetInternals(const bool &pVisible = true);
+    void resetInternals(bool pVisible = true);
 
 private slots:
     void on_apiKeyValue_returnPressed();

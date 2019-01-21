@@ -63,7 +63,7 @@ limitations under the License.
 
 //==============================================================================
 
-QString timeToString(const qint64 &pSeconds)
+QString timeToString(qint64 pSeconds)
 {
     // Return the given number of seconds as a formatted string
 
@@ -175,13 +175,13 @@ void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
 
 //==============================================================================
 
-void ProgressBarWidget::setValue(const double &pValue)
+void ProgressBarWidget::setValue(double pValue)
 {
     // Update both our value and ourselves, if needed
 
     double value = qMin(1.0, qMax(pValue, 0.0));
 
-    if (!qIsNull(value-mValue)) {
+    if (qFuzzyCompare(value, mValue)) {
         bool needUpdate = int(mValue*width()) != int(value*width());
 
         mValue = value;
@@ -223,7 +223,7 @@ ReviewsTimeLineWidget::ReviewsTimeLineWidget(QWidget *pParent) :
 
 //==============================================================================
 
-void ReviewsTimeLineWidget::update(const int &pRange)
+void ReviewsTimeLineWidget::update(int pRange)
 {
     // Set our new range and update ourselves
 
@@ -878,7 +878,7 @@ Reviews Widget::allVocabularyReviews() const
 
 //==============================================================================
 
-void Widget::retrieveSettings(const bool &pResetSettings)
+void Widget::retrieveSettings(bool pResetSettings)
 {
     // Retrieve all of our settings after having reset some of them, if
     // requested
@@ -957,7 +957,7 @@ void Widget::retrieveSettings(const bool &pResetSettings)
 
 //==============================================================================
 
-void Widget::updateInterval(const int &pInterval)
+void Widget::updateInterval(int pInterval)
 {
     // Update our timer's interval
 
@@ -966,8 +966,8 @@ void Widget::updateInterval(const int &pInterval)
 
 //==============================================================================
 
-QString Widget::iconDataUri(const QString &pIcon, const int &pWidth,
-                            const int &pHeight, const QIcon::Mode &pMode)
+QString Widget::iconDataUri(const QString &pIcon, int pWidth, int pHeight,
+                            QIcon::Mode pMode)
 {
     // Convert an icon, which resource name is given, to a data URI, after
     // having resized it, if requested
@@ -1124,7 +1124,7 @@ static const QString KanjiTable =
 
 //==============================================================================
 
-void Widget::updateWallpaper(const bool &pForceUpdate)
+void Widget::updateWallpaper(bool pForceUpdate)
 {
     // Generate and set the wallpaper, if needed
 
@@ -1307,7 +1307,7 @@ void Widget::setWallpaper()
 
 //==============================================================================
 
-QColor Widget::color(const int &pRow, const int &pColumn) const
+QColor Widget::color(int pRow, int pColumn) const
 {
     // Return whether our font is to be in italics
 
@@ -1476,7 +1476,7 @@ void Widget::determineReviews(const Reviews &pCurrentReviews,
 
 //==============================================================================
 
-qint64 Widget::guruTime(const int &pSrsLevel, const qint64 &pNextReview)
+qint64 Widget::guruTime(int pSrsLevel, qint64 pNextReview)
 {
     // Make sure that we are not yet at the Guru level
 
@@ -1499,7 +1499,7 @@ qint64 Widget::guruTime(const int &pSrsLevel, const qint64 &pNextReview)
 
 //==============================================================================
 
-void Widget::resetInternals(const bool &pVisible)
+void Widget::resetInternals(bool pVisible)
 {
     // Reset some of our internals
 
@@ -1997,7 +1997,7 @@ void Widget::updatePushButtonColor()
 
 //==============================================================================
 
-void Widget::setPushButtonColor(QPushButton *pPushButton, const QRgb &pColor)
+void Widget::setPushButtonColor(QPushButton *pPushButton, QRgb pColor)
 {
     // Set the background of the given push button to the given colour
 
