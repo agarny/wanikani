@@ -313,7 +313,7 @@ void ReviewsTimeLineWidget::mouseMoveEvent(QMouseEvent *pEvent)
     int x = pEvent->pos().x();
     int y = pEvent->pos().y();
 
-    foreach (const ReviewsTimeLineData &data, mData) {
+    for (const auto &data : mData) {
         int nbOfReviews = data.allRadicals+data.allKanji+data.allVocabulary;
         int nbOfCurrentReviews = data.currentRadicals+data.currentKanji+data.currentVocabulary;
 
@@ -377,7 +377,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     int currentVocabularyReviewsBeforeStartTime = 0;
     int allVocabularyReviewsBeforeStartTime = 0;
 
-    foreach (const QDateTime &dateTime, dateTimes) {
+    for (const auto &dateTime : dateTimes) {
         if (dateTime < startTime) {
             currentRadicalsReviewsBeforeStartTime += mWidget->currentRadicalsReviews().value(dateTime);
             allRadicalsReviewsBeforeStartTime += mWidget->allRadicalsReviews().value(dateTime);
@@ -414,7 +414,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     int maxReviews = 0;
 
-    foreach (const QDateTime &dateTime, allRadicalsReviews.keys()) {
+    for (const auto &dateTime : allRadicalsReviews.keys()) {
         int crtReviews = allRadicalsReviews.value(dateTime)+allKanjiReviews.value(dateTime)+allVocabularyReviews.value(dateTime);
 
         if (crtReviews > maxReviews)
@@ -561,7 +561,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     // Note: slightly different value from the one above since this time we are
     //       using it with QPainter::fillRect()...
 
-    foreach (const QDateTime &dateTime, allRadicalsReviews.keys()) {
+    for (const auto &dateTime : allRadicalsReviews.keys()) {
         qint64 timeDiff = dateTime.toTime_t()-mWidget->now().toTime_t();
         double x = (dateTime.toTime_t()-startTime.toTime_t())*timeMultiplier;
         double xWidth = 900.0*timeMultiplier;
@@ -1256,7 +1256,7 @@ void Widget::updateWallpaper(bool pForceUpdate)
         QString picturesPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator();
         QDir picturesDir = QDir(picturesPath);
 
-        foreach (const QString &fileName, picturesDir.entryList(QStringList() << "WaniKani*.jpg", QDir::Files|QDir::NoSymLinks))
+        for (const auto &fileName : picturesDir.entryList(QStringList() << "WaniKani*.jpg", QDir::Files|QDir::NoSymLinks))
             QFile(picturesPath+fileName).remove();
 
         mFileName = QDir::toNativeSeparators(picturesPath+QString("WaniKani%1.jpg").arg(QDateTime::currentMSecsSinceEpoch()));
@@ -1445,7 +1445,7 @@ void Widget::determineReviews(const Reviews &pCurrentReviews,
 {
     // Determine all the given reviews
 
-    foreach (const QDateTime &dateTime, pAllReviews.keys()) {
+    for (const auto &dateTime : pAllReviews.keys()) {
         qint64 localDiff = mNow.secsTo(dateTime);
 
         if (localDiff < pDiff) {
@@ -1592,7 +1592,7 @@ void Widget::waniKaniUpdated()
     mLevelStartTime = 0;
     mRadicalGuruTimes.clear();
 
-    foreach (const Radical &radical, mWaniKani.radicals()) {
+    for (const auto &radical : mWaniKani.radicals()) {
         if (radical.level() == mWaniKani.level()) {
             // A radical from our current level, so determine how soon it can
             // reach Guru level
@@ -1623,7 +1623,7 @@ void Widget::waniKaniUpdated()
 
     mKanjiGuruTimes.clear();
 
-    foreach (const Kanji &kanji, mWaniKani.kanjis()) {
+    for (const auto &kanji : mWaniKani.kanjis()) {
         if (kanji.level() == mWaniKani.level()) {
             // A Kanji from our current level, so determine how soon it can
             // reach Guru level
@@ -1652,7 +1652,7 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our vocabulary
 
-    foreach (const Vocabulary &vocabulary, mWaniKani.vocabularies()) {
+    for (const auto &vocabulary : mWaniKani.vocabularies()) {
         if (vocabulary.userSpecific().availableDate()) {
             QDateTime dateTime = QDateTime::fromTime_t(vocabulary.userSpecific().availableDate());
 
@@ -1847,7 +1847,7 @@ void Widget::updateTimeRelatedInformation()
     std::sort(dateTimes.begin(), dateTimes.end());
     dateTimes.erase(std::unique(dateTimes.begin(), dateTimes.end()), dateTimes.end());
 
-    foreach (const QDateTime &dateTime, dateTimes) {
+    for (const auto &dateTime : dateTimes) {
         if (dateTime < endTime) {
             nbOfCurrentReviews +=  mCurrentRadicalsReviews.value(dateTime)
                                   +mCurrentKanjiReviews.value(dateTime)

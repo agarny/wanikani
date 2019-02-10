@@ -773,8 +773,7 @@ void WaniKani::update()
 
         mRadicals = Radicals();
 
-        foreach (const QVariant &radicalInformation,
-                 radicalsResponse.object().toVariantMap()["requested_information"].toList()) {
+        for (const auto &radicalInformation : radicalsResponse.object().toVariantMap()["requested_information"].toList()) {
             QVariantMap radicalInformationMap = radicalInformation.toMap();
             Radical radical;
 
@@ -809,8 +808,7 @@ void WaniKani::update()
 
         mKanjis = Kanjis();
 
-        foreach (const QVariant &kanjiInformation,
-                 kanjiResponse.object().toVariantMap()["requested_information"].toList()) {
+        for (const auto &kanjiInformation : kanjiResponse.object().toVariantMap()["requested_information"].toList()) {
             QVariantMap kanjiInformationMap = kanjiInformation.toMap();
             Kanji kanji;
 
@@ -849,8 +847,7 @@ void WaniKani::update()
 
         mVocabularies = Vocabularies();
 
-        foreach (const QVariant &vocabularyInformation,
-                 vocabularyResponse.object().toVariantMap()["requested_information"].toList()) {
+        for (const auto &vocabularyInformation : vocabularyResponse.object().toVariantMap()["requested_information"].toList()) {
             QVariantMap vocabularyInformationMap = vocabularyInformation.toMap();
             Vocabulary vocabulary;
 
