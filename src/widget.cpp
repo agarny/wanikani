@@ -1929,6 +1929,7 @@ void Widget::updateTimeRelatedInformation()
     static const QString ReviewsLink = "<a href=\"https://www.wanikani.com/review/session\""+QString(LinkStyle)+">%1</a>";
     static const QString Reviews = (nbOfReviews == 1)?"%1 (%2) review":"%1 (%2) reviews";
     static const QString NoReviews = "No reviews";
+    static const QString InSomeTime = "in %1";
 
     mGui->nextLessonsValue->setText(LessonsText.arg(mWaniKani.studyQueue().lessonsAvailable()?
                                                         QString("<a href=\"https://www.wanikani.com/lesson/session\""+QString(LinkStyle)+">%1 lessons</a>").arg(mWaniKani.studyQueue().lessonsAvailable()):
@@ -1946,7 +1947,9 @@ void Widget::updateTimeRelatedInformation()
                                                         QString():
                                                         (diff <= 0)?
                                                             ReviewsLink.arg("now"):
-                                                            "in "+timeToString(diff)));
+                                                            (diff != std::numeric_limits<qint64>::max())?
+                                                                InSomeTime.arg(timeToString(diff)):
+                                                                ""));
     mGui->nextReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[1]).arg(nbOfRadicalsReviews[0])
                                                      .arg(nbOfKanjiReviews[1]).arg(nbOfKanjiReviews[0])
                                                      .arg(nbOfVocabularyReviews[1]).arg(nbOfVocabularyReviews[0]));
