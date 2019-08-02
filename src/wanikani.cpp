@@ -639,8 +639,9 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
 
     QByteArray response = QByteArray();
 
-    if (networkReply->error() == QNetworkReply::NoError)
+    if (networkReply->error() == QNetworkReply::NoError) {
         response = networkReply->readAll();
+    }
 
     networkReply->deleteLater();
 
@@ -670,10 +671,11 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
 
                 inflate(&stream, Z_NO_FLUSH);
 
-                if (!stream.msg)
+                if (!stream.msg) {
                     json += QByteArray::fromRawData(reinterpret_cast<char *>(buffer), BufferSize-int(stream.avail_out));
-                else
+                } else {
                     json = QByteArray();
+                }
             } while (!stream.avail_out);
 
             inflateEnd(&stream);
