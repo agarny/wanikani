@@ -322,6 +322,8 @@ private:
 
     bool validJsonDocument(const QJsonDocument &pJsonDocument);
 
+    void checkNbOfReplies();
+
     void updateSrsDistribution(const QString &pName,
                                const QVariantMap &pVariantMap,
                                SrsDistributionInformation &pSrsDistributionInformation);
@@ -340,8 +342,6 @@ private slots:
     void radicalsReply();
     void kanjiReply();
     void vocabularyReply();
-
-    void checkNbOfReplies();
 };
 
 //==============================================================================

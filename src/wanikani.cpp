@@ -606,6 +606,8 @@ void WaniKani::studyQueueReply()
         mStudyQueue.mReviewsAvailableNextHour = studyQueueMap["reviews_available_next_hour"].toInt();
         mStudyQueue.mReviewsAvailableNextDay = studyQueueMap["reviews_available_next_day"].toInt();
     }
+
+    checkNbOfReplies();
 }
 
 //==============================================================================
@@ -624,6 +626,8 @@ void WaniKani::levelProgressionReply()
         mLevelProgression.mKanjiProgress = levelProgressionResponseMap["kanji_progress"].toInt();
         mLevelProgression.mKanjiTotal = levelProgressionResponseMap["kanji_total"].toInt();
     }
+
+    checkNbOfReplies();
 }
 
 //==============================================================================
@@ -643,6 +647,8 @@ void WaniKani::srsDistributionReply()
         updateSrsDistribution("Enlightened", srsDistributionMap["enlighten"].toMap(), mSrsDistribution.mEnlightened);
         updateSrsDistribution("Burned", srsDistributionMap["burned"].toMap(), mSrsDistribution.mBurned);
     }
+
+    checkNbOfReplies();
 }
 
 //==============================================================================
@@ -687,6 +693,8 @@ void WaniKani::radicalsReply()
             mRadicals << radical;
         }
     }
+
+    checkNbOfReplies();
 }
 
 //==============================================================================
@@ -735,6 +743,8 @@ void WaniKani::kanjiReply()
             mKanjis << kanji;
         }
     }
+
+    checkNbOfReplies();
 }
 
 //==============================================================================
@@ -780,6 +790,8 @@ void WaniKani::vocabularyReply()
             mVocabularies << vocabulary;
         }
     }
+
+    checkNbOfReplies();
 }
 
 //==============================================================================
@@ -826,44 +838,20 @@ void WaniKani::update()
     //  - the user's list of Kanji (and their information)
     //  - the user's list of vocabulary (and their information)
 
-    QNetworkReply *studyQueueNetworkReply = waniKaniNetworkReply("study-queue");
-    QNetworkReply *levelProgressionNetworkReply = waniKaniNetworkReply("level-progression");
-    QNetworkReply *srsDistributionNetworkReply = waniKaniNetworkReply("srs-distribution");
-    QNetworkReply *radicalsNetworkReply = waniKaniNetworkReply("radicals/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
-    QNetworkReply *kanjiNetworkReply = waniKaniNetworkReply("kanji/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
-    QNetworkReply *vocabularyNetworkReply = waniKaniNetworkReply("vocabulary/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
-
     mNbOfReplies = 0;
 
-    QObject::connect(studyQueueNetworkReply, &QNetworkReply::finished,
+    QObject::connect(waniKaniNetworkReply("study-queue"), &QNetworkReply::finished,
                      this, &WaniKani::studyQueueReply);
-    QObject::connect(studyQueueNetworkReply, &QNetworkReply::finished,
-                     this, &WaniKani::checkNbOfReplies);
-
-    QObject::connect(levelProgressionNetworkReply, &QNetworkReply::finished,
+    QObject::connect(waniKaniNetworkReply("level-progression"), &QNetworkReply::finished,
                      this, &WaniKani::levelProgressionReply);
-    QObject::connect(levelProgressionNetworkReply, &QNetworkReply::finished,
-                     this, &WaniKani::checkNbOfReplies);
-
-    QObject::connect(srsDistributionNetworkReply, &QNetworkReply::finished,
+    QObject::connect(waniKaniNetworkReply("srs-distribution"), &QNetworkReply::finished,
                      this, &WaniKani::srsDistributionReply);
-    QObject::connect(srsDistributionNetworkReply, &QNetworkReply::finished,
-                     this, &WaniKani::checkNbOfReplies);
-
-    QObject::connect(radicalsNetworkReply, &QNetworkReply::finished,
+    QObject::connect(waniKaniNetworkReply("radicals/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60"), &QNetworkReply::finished,
                      this, &WaniKani::radicalsReply);
-    QObject::connect(radicalsNetworkReply, &QNetworkReply::finished,
-                     this, &WaniKani::checkNbOfReplies);
-
-    QObject::connect(kanjiNetworkReply, &QNetworkReply::finished,
+    QObject::connect(waniKaniNetworkReply("kanji/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60"), &QNetworkReply::finished,
                      this, &WaniKani::kanjiReply);
-    QObject::connect(kanjiNetworkReply, &QNetworkReply::finished,
-                     this, &WaniKani::checkNbOfReplies);
-
-    QObject::connect(vocabularyNetworkReply, &QNetworkReply::finished,
+    QObject::connect(waniKaniNetworkReply("vocabulary/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60"), &QNetworkReply::finished,
                      this, &WaniKani::vocabularyReply);
-    QObject::connect(vocabularyNetworkReply, &QNetworkReply::finished,
-                     this, &WaniKani::checkNbOfReplies);
 }
 
 //==============================================================================
