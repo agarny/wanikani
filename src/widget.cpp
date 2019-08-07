@@ -1004,10 +1004,6 @@ QString Widget::iconDataUri(const QString &pIcon, int pWidth, int pHeight,
 
 //==============================================================================
 
-static const int GravatarSize = 80;
-
-//==============================================================================
-
 void Widget::updateGravatar(const QPixmap &pGravatar)
 {
     // Update our gravatar
@@ -1560,37 +1556,9 @@ void Widget::resetInternals(bool pVisible)
 
 void Widget::waniKaniUpdated()
 {
-    // Retrieve the user's gravatar
-
-    QNetworkAccessManager networkAccessManager;
-    QNetworkReply *networkReply = networkAccessManager.get(QNetworkRequest(QString("https://www.gravatar.com/avatar/%1?s=%2&d=404").arg(mWaniKani.gravatar())
-                                                                                                                                   .arg(GravatarSize)));
-    QEventLoop eventLoop;
-
-    QObject::connect(networkReply, &QNetworkReply::finished,
-                     &eventLoop, &QEventLoop::quit);
-
-    eventLoop.exec();
-
-    QByteArray gravatarData = QByteArray();
-
-    if (networkReply->error() == QNetworkReply::NoError) {
-        gravatarData = networkReply->readAll();
-    }
-
-    networkReply->deleteLater();
-
-    QPixmap gravatar;
-
-    if (gravatarData.isEmpty()) {
-        gravatar = QPixmap(":/face");
-    } else {
-        gravatar.loadFromData(gravatarData);
-    }
-
     // Update the GUI based on our WaniKani information
 
-    updateGravatar(gravatar);
+    updateGravatar(mWaniKani.gravatar());
     updateSrsDistributionPalettes();
 
     mGui->userInformationValue->setText("<center>\n"

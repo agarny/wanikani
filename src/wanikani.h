@@ -255,6 +255,10 @@ class QNetworkReply;
 
 //==============================================================================
 
+static const int GravatarSize = 80;
+
+//==============================================================================
+
 class WaniKani : public QObject
 {
     Q_OBJECT
@@ -266,7 +270,7 @@ public:
     void setApiKey(const QString &pApiKey);
 
     QString userName() const;
-    QString gravatar() const;
+    QPixmap gravatar() const;
     int level() const;
     QString title() const;
     QString about() const;
@@ -288,7 +292,7 @@ private:
     QString mApiKey;
 
     QString mUserName;
-    QString mGravatar;
+    QPixmap mGravatar;
     int mLevel = 0;
     QString mTitle;
     QString mAbout;
@@ -316,6 +320,7 @@ private:
     QJsonDocument mVocabularyResponse;
 
     int mNbOfReplies = 0;
+    int mNbOfNeededReplies = 6;
 
     QNetworkReply * waniKaniNetworkReply(const QString &pRequest);
     QJsonDocument waniKaniJsonResponse(QNetworkReply *pNetworkReply);
@@ -342,6 +347,8 @@ private slots:
     void radicalsReply();
     void kanjiReply();
     void vocabularyReply();
+
+    void gravatarReply();
 };
 
 //==============================================================================

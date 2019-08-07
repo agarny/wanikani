@@ -587,7 +587,6 @@ void WaniKani::studyQueueReply()
         QVariantMap userInformationMap = mStudyQueueResponse.object().toVariantMap()["user_information"].toMap();
 
         mUserName = userInformationMap["username"].toString();
-        mGravatar = userInformationMap["gravatar"].toString();
         mLevel = userInformationMap["level"].toInt();
         mTitle = userInformationMap["title"].toString();
         mAbout = userInformationMap["about"].toString();
@@ -605,6 +604,12 @@ void WaniKani::studyQueueReply()
         mStudyQueue.mNextReviewDate = studyQueueMap["next_review_date"].toUInt();
         mStudyQueue.mReviewsAvailableNextHour = studyQueueMap["reviews_available_next_hour"].toInt();
         mStudyQueue.mReviewsAvailableNextDay = studyQueueMap["reviews_available_next_day"].toInt();
+
+        ++mNbOfNeededReplies;
+
+        QObject::connect(mNetworkAccessManager->get(QNetworkRequest(QString("https://www.gravatar.com/avatar/%1?s=%2&d=404").arg(userInformationMap["gravatar"].toString())
+                                                                                                                            .arg(GravatarSize))), &QNetworkReply::finished,
+                         this, &WaniKani::gravatarReply);
     }
 
     checkNbOfReplies();
@@ -796,6 +801,30 @@ void WaniKani::vocabularyReply()
 
 //==============================================================================
 
+void WaniKani::gravatarReply()
+{
+    // Retrieve, if available, a pixmap version of the gravatar
+
+    QByteArray gravatarData = QByteArray();
+    QNetworkReply *networkReply = qobject_cast<QNetworkReply *>(sender());
+
+    if (networkReply->error() == QNetworkReply::NoError) {
+        gravatarData = networkReply->readAll();
+    }
+
+    networkReply->deleteLater();
+
+    if (gravatarData.isEmpty()) {
+        mGravatar = QPixmap(":/face");
+    } else {
+        mGravatar.loadFromData(gravatarData);
+    }
+
+    checkNbOfReplies();
+}
+
+//==============================================================================
+
 void WaniKani::checkNbOfReplies()
 {
     // Increase our number of replies and, if we have got the number we are
@@ -803,7 +832,7 @@ void WaniKani::checkNbOfReplies()
 
     ++mNbOfReplies;
 
-    if (mNbOfReplies == 6) {
+    if (mNbOfReplies == mNbOfNeededReplies) {
         if (   validJsonDocument(mStudyQueueResponse)
             || validJsonDocument(mLevelProgressionResponse)
             || validJsonDocument(mSrsDistributionResponse)
@@ -839,6 +868,7 @@ void WaniKani::update()
     //  - the user's list of vocabulary (and their information)
 
     mNbOfReplies = 0;
+    mNbOfNeededReplies = 6;
 
     QObject::connect(waniKaniNetworkReply("study-queue"), &QNetworkReply::finished,
                      this, &WaniKani::studyQueueReply);
@@ -880,7 +910,7 @@ QString WaniKani::userName() const
 
 //==============================================================================
 
-QString WaniKani::gravatar() const
+QPixmap WaniKani::gravatar() const
 {
     // Return our gravatar
 
