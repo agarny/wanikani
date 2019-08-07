@@ -483,8 +483,9 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
 {
     // Make sure that we have an API key
 
-    if (mApiKey.isEmpty())
+    if (mApiKey.isEmpty()) {
         return QJsonDocument();
+    }
 
     // Send a request to WaniKani, asking for its response to be compressed, and
     // then convert its response to a JSON document, if possible and after

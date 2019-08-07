@@ -53,8 +53,9 @@ int main(int pArgC, char *pArgV[])
     // Check whether another instance of our application is already running and
     // leave if that's the case
 
-    if (app.isRunning())
+    if (app.isRunning()) {
         return 0;
+    }
 
     // Filter out OpenSSL warning messages
 

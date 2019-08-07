@@ -79,25 +79,28 @@ QString timeToString(qint64 pSeconds)
             res += (days == 1)?"1 day":QString("%1 days").arg(days);
 
         if (hours) {
-            if (!res.isEmpty())
+            if (!res.isEmpty()) {
                 res += ", ";
+            }
 
             res += (hours == 1)?"1 hour":QString("%1 hours").arg(hours);
         }
 
         if (minutes) {
-            if (!res.isEmpty())
+            if (!res.isEmpty()) {
                 res += ", ";
+            }
 
             res += (minutes == 1)?"1 minute":QString("%1 minutes").arg(minutes);
         }
 
         int lastCommaPosition = res.lastIndexOf(',');
 
-        if (lastCommaPosition == -1)
+        if (lastCommaPosition == -1) {
             return res;
-        else
+        } else {
             return res.left(lastCommaPosition)+" and"+res.right(res.length()-lastCommaPosition-1);
+        }
     }
 }
 
@@ -165,8 +168,9 @@ void ProgressBarWidget::paintEvent(QPaintEvent *pEvent)
     painter.drawRect(0, 0, width()-1, height()-1);
     painter.drawLine(int(0.9*(width()-1)), 0, int(0.9*(width()-1)), height()-1);
 
-    if (value)
+    if (value) {
         painter.fillRect(1, 1, value, height()-2, mColor);
+    }
 
     // Accept the event
 
@@ -186,8 +190,9 @@ void ProgressBarWidget::setValue(double pValue)
 
         mValue = value;
 
-        if (needUpdate)
+        if (needUpdate) {
             update();
+        }
     }
 }
 
@@ -338,8 +343,9 @@ void ReviewsTimeLineWidget::mouseMoveEvent(QMouseEvent *pEvent)
         }
     }
 
-    if (!toolTipSet)
+    if (!toolTipSet) {
         QToolTip::hideText();
+    }
 }
 
 //==============================================================================
@@ -417,8 +423,9 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     for (const auto &dateTime : allRadicalsReviews.keys()) {
         int crtReviews = allRadicalsReviews.value(dateTime)+allKanjiReviews.value(dateTime)+allVocabularyReviews.value(dateTime);
 
-        if (crtReviews > maxReviews)
+        if (crtReviews > maxReviews) {
             maxReviews = crtReviews;
+        }
     }
 
     // Determine where to start painting things, as well as the time and reviews
@@ -459,10 +466,11 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     }
 
     while (timeMajorStep*canvasWidthOverRange < 72.0) {
-        if (timeMajorStep == 1)
+        if (timeMajorStep == 1) {
             timeMajorStep = 3;
-        else
+        } else {
             timeMajorStep *= 2;
+        }
     }
 
     double timeMinorStep = (timeMajorStep == 1)?
@@ -493,8 +501,9 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     for (double i = 0.0, iMax = mRange+startTimeHourAndMinutes; i <= iMax; i += timeMinorStep) {
         double x = xDayShift+i*canvasWidthOverRange;
 
-        if (x >= 0)
+        if (x >= 0) {
             painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1.0));
+        }
     }
 
     // Paint the reviews lines
@@ -806,10 +815,11 @@ void Widget::keyPressEvent(QKeyEvent *pEvent)
 {
     // Hide ourselves if the user presses the escape key
 
-    if (pEvent->key() == Qt::Key_Escape)
+    if (pEvent->key() == Qt::Key_Escape) {
         hide();
-    else
+    } else {
         QWidget::keyPressEvent(pEvent);
+    }
 }
 #endif
 
@@ -901,10 +911,11 @@ void Widget::retrieveSettings(bool pResetSettings)
         settings.sync();
     }
 
-    if (settings.value(SettingsCurrentKanji, true).toBool())
+    if (settings.value(SettingsCurrentKanji, true).toBool()) {
         mGui->currentKanjiRadioButton->setChecked(true);
-    else
+    } else {
         mGui->allKanjiRadioButton->setChecked(true);
+    }
 
     mGui->intervalSpinBox->setValue(settings.value(SettingsInterval).toInt());
 
@@ -943,8 +954,9 @@ void Widget::retrieveSettings(bool pResetSettings)
 #endif
     }
 
-    if (setWaniKaniApiKey)
+    if (setWaniKaniApiKey) {
         mWaniKani.setApiKey(mGui->apiKeyValue->text());
+    }
 
     if (pResetSettings) {
         mInitializing = false;
@@ -974,8 +986,9 @@ QString Widget::iconDataUri(const QString &pIcon, int pWidth, int pHeight,
 
     QIcon icon(pIcon);
 
-    if (icon.isNull())
+    if (icon.isNull()) {
         return QString();
+    }
 
     QByteArray data;
     QBuffer buffer(&data);
@@ -1256,8 +1269,9 @@ void Widget::updateWallpaper(bool pForceUpdate)
         QString picturesPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+QDir::separator();
         QDir picturesDir = QDir(picturesPath);
 
-        for (const auto &fileName : picturesDir.entryList(QStringList() << "WaniKani*.jpg", QDir::Files|QDir::NoSymLinks))
+        for (const auto &fileName : picturesDir.entryList(QStringList() << "WaniKani*.jpg", QDir::Files|QDir::NoSymLinks)) {
             QFile(picturesPath+fileName).remove();
+        }
 
         mFileName = QDir::toNativeSeparators(picturesPath+QString("WaniKani%1.jpg").arg(QDateTime::currentMSecsSinceEpoch()));
 
@@ -1331,8 +1345,9 @@ void Widget::on_intervalSpinBox_valueChanged(int pInterval)
 {
     // Update our timer's interval
 
-    if (!mInitializing)
+    if (!mInitializing) {
         updateInterval(pInterval);
+    }
 }
 
 //==============================================================================
@@ -1352,8 +1367,9 @@ void Widget::on_fontComboBox_currentTextChanged(const QString &pFontName)
 
     // Force the update of our wallpaper
 
-    if (!mInitializing)
+    if (!mInitializing) {
         updateWallpaper(true);
+    }
 }
 
 //==============================================================================
@@ -1362,8 +1378,9 @@ void Widget::on_boldFontCheckBox_clicked()
 {
     // Force the update of our wallpaper
 
-    if (!mInitializing)
+    if (!mInitializing) {
         updateWallpaper(true);
+    }
 }
 
 //==============================================================================
@@ -1372,8 +1389,9 @@ void Widget::on_italicsFontCheckBox_clicked()
 {
     // Force the update of our wallpaper
 
-    if (!mInitializing)
+    if (!mInitializing) {
         updateWallpaper(true);
+    }
 }
 
 //==============================================================================
@@ -1425,8 +1443,9 @@ void Widget::on_closeToolButton_clicked()
     settings.setValue(SettingsReviewsTimeLine, mGui->reviewsTimeLineSlider->value());
 
     for (int i = 1; i <= 6; ++i) {
-        for (int j = 1; j <= 2; ++j)
+        for (int j = 1; j <= 2; ++j) {
             settings.setValue(SettingsColor.arg(i).arg(j), mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(i, j)->widget())));
+        }
     }
 
     settings.sync();
@@ -1480,8 +1499,9 @@ qint64 Widget::guruTime(int pSrsLevel, qint64 pNextReview)
 {
     // Make sure that we are not yet at the Guru level
 
-    if (pSrsLevel >= 5)
+    if (pSrsLevel >= 5) {
         return 0;
+    }
 
     // Compute and return the Guru time for the item which SRS level and next
     // review time are given
@@ -1491,8 +1511,9 @@ qint64 Widget::guruTime(int pSrsLevel, qint64 pNextReview)
 
     qint64 res = pSrsLevel?pNextReview:0;
 
-    for (int i = pSrsLevel; i < 4; ++i)
+    for (int i = pSrsLevel; i < 4; ++i) {
         res += (pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i]*3600;
+    }
 
     return res;
 }
@@ -1553,17 +1574,19 @@ void Widget::waniKaniUpdated()
 
     QByteArray gravatarData = QByteArray();
 
-    if (networkReply->error() == QNetworkReply::NoError)
+    if (networkReply->error() == QNetworkReply::NoError) {
         gravatarData = networkReply->readAll();
+    }
 
     networkReply->deleteLater();
 
     QPixmap gravatar;
 
-    if (gravatarData.isEmpty())
+    if (gravatarData.isEmpty()) {
         gravatar = QPixmap(":/face");
-    else
+    } else {
         gravatar.loadFromData(gravatarData);
+    }
 
     // Update the GUI based on our WaniKani information
 
@@ -1612,8 +1635,9 @@ void Widget::waniKaniUpdated()
         if (radical.userSpecific().availableDate()) {
             QDateTime dateTime = QDateTime::fromTime_t(radical.userSpecific().availableDate());
 
-            if (radical.level() == mWaniKani.level())
+            if (radical.level() == mWaniKani.level()) {
                 mCurrentRadicalsReviews.insert(dateTime, mCurrentRadicalsReviews.value(dateTime)+1);
+            }
 
             mAllRadicalsReviews.insert(dateTime, mAllRadicalsReviews.value(dateTime)+1);
         }
@@ -1640,8 +1664,9 @@ void Widget::waniKaniUpdated()
         if (kanji.userSpecific().availableDate()) {
             QDateTime dateTime = QDateTime::fromTime_t(kanji.userSpecific().availableDate());
 
-            if (kanji.level() == mWaniKani.level())
+            if (kanji.level() == mWaniKani.level()) {
                 mCurrentKanjiReviews.insert(dateTime, mCurrentKanjiReviews.value(dateTime)+1);
+            }
 
             mAllKanjiReviews.insert(dateTime, mAllKanjiReviews.value(dateTime)+1);
         }
@@ -1656,8 +1681,9 @@ void Widget::waniKaniUpdated()
         if (vocabulary.userSpecific().availableDate()) {
             QDateTime dateTime = QDateTime::fromTime_t(vocabulary.userSpecific().availableDate());
 
-            if (vocabulary.level() == mWaniKani.level())
+            if (vocabulary.level() == mWaniKani.level()) {
                 mCurrentVocabularyReviews.insert(dateTime, mCurrentVocabularyReviews.value(dateTime)+1);
+            }
 
             mAllVocabularyReviews.insert(dateTime, mAllVocabularyReviews.value(dateTime)+1);
         }
@@ -1778,8 +1804,9 @@ void Widget::updateLevels()
 {
     // Update the levels to display
 
-    if (!mInitializing)
+    if (!mInitializing) {
         updateWallpaper(true);
+    }
 }
 
 //==============================================================================
@@ -2068,8 +2095,9 @@ void Widget::checkWallpaper()
     // as the one in our settings (which might happen if we switch virtual
     // desktops, for example)
 
-    if (wallpaperFileName.compare(mFileName))
+    if (wallpaperFileName.compare(mFileName)) {
         setWallpaper();
+    }
 
     // Check again in about one second
 
