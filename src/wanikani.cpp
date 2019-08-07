@@ -468,6 +468,20 @@ ExtraUserSpecific Vocabulary::userSpecific() const
 
 //==============================================================================
 
+WaniKani::WaniKani()
+{
+    mNetworkAccessManager = new QNetworkAccessManager();
+}
+
+//==============================================================================
+
+WaniKani::~WaniKani()
+{
+    delete mNetworkAccessManager;
+}
+
+//==============================================================================
+
 void WaniKani::setApiKey(const QString &pApiKey)
 {
     // Set our API key and update our information
@@ -479,38 +493,30 @@ void WaniKani::setApiKey(const QString &pApiKey)
 
 //==============================================================================
 
-QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
+QNetworkReply * WaniKani::waniKaniNetworkReply(const QString &pRequest)
 {
-    // Make sure that we have an API key
-
-    if (mApiKey.isEmpty()) {
-        return QJsonDocument();
-    }
-
     // Send a request to WaniKani, asking for its response to be compressed, and
     // then convert its response to a JSON document, if possible and after
     // having uncompressed it
 
-    QNetworkAccessManager networkAccessManager;
     QNetworkRequest networkRequest(QString("https://www.wanikani.com/api/v1.4/user/%1/%2").arg(mApiKey, pRequest));
 
     networkRequest.setRawHeader("Accept-Encoding", "gzip");
 
-    QNetworkReply *networkReply = networkAccessManager.get(networkRequest);
-    QEventLoop eventLoop;
+    return mNetworkAccessManager->get(networkRequest);;
+}
 
-    QObject::connect(networkReply, &QNetworkReply::finished,
-                     &eventLoop, &QEventLoop::quit);
+//==============================================================================
 
-    eventLoop.exec();
-
+QJsonDocument WaniKani::waniKaniJsonResponse(QNetworkReply *pNetworkReply)
+{
     QByteArray response = QByteArray();
 
-    if (networkReply->error() == QNetworkReply::NoError) {
-        response = networkReply->readAll();
+    if (pNetworkReply->error() == QNetworkReply::NoError) {
+        response = pNetworkReply->readAll();
     }
 
-    networkReply->deleteLater();
+    pNetworkReply->deleteLater();
 
     if (response.isEmpty()) {
         return QJsonDocument();
@@ -560,42 +566,23 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
 
 //==============================================================================
 
-void WaniKani::update()
+bool WaniKani::validJsonDocument(const QJsonDocument &pJsonDocument)
 {
-    // Retrieve
-    //  - the user's information and study queue
-    //  - the user's SRS distribution
-    //  - the user's list of radicals (and their information)
-    //  - the user's list of Kanji (and their information)
-    //  - the user's list of vocabulary (and their information)
+    // Return whether the given JSON document is valid
 
-    QJsonDocument studyQueueResponse = waniKaniRequest("study-queue");
-    QJsonDocument levelProgressionResponse = (   studyQueueResponse.isNull()
-                                              || studyQueueResponse.object().contains("error"))?
-                                                     QJsonDocument():
-                                                     waniKaniRequest("level-progression");
-    QJsonDocument srsDistributionResponse = (   levelProgressionResponse.isNull()
-                                             || levelProgressionResponse.object().contains("error"))?
-                                                    QJsonDocument():
-                                                    waniKaniRequest("srs-distribution");
-    QJsonDocument radicalsResponse = (   srsDistributionResponse.isNull()
-                                      || srsDistributionResponse.object().contains("error"))?
-                                             QJsonDocument():
-                                             waniKaniRequest("radicals/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
-    QJsonDocument kanjiResponse = (   radicalsResponse.isNull()
-                                   || radicalsResponse.object().contains("error"))?
-                                          QJsonDocument():
-                                          waniKaniRequest("kanji/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
-    QJsonDocument vocabularyResponse = (   kanjiResponse.isNull()
-                                        || kanjiResponse.object().contains("error"))?
-                                               QJsonDocument():
-                                               waniKaniRequest("vocabulary/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
+    return !pJsonDocument.isNull() && !pJsonDocument.object().contains("error");
+}
 
-    if (   !vocabularyResponse.isNull()
-        && !vocabularyResponse.object().contains("error")) {
+//==============================================================================
+
+void WaniKani::studyQueueReply()
+{
+    mStudyQueueResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
+
+    if (validJsonDocument(mStudyQueueResponse)) {
         // Retrieve some of the user's information
 
-        QVariantMap userInformationMap = studyQueueResponse.object().toVariantMap()["user_information"].toMap();
+        QVariantMap userInformationMap = mStudyQueueResponse.object().toVariantMap()["user_information"].toMap();
 
         mUserName = userInformationMap["username"].toString();
         mGravatar = userInformationMap["gravatar"].toString();
@@ -611,38 +598,65 @@ void WaniKani::update()
 
         // Retrieve the user's study queue
 
-        QVariantMap studyQueueMap = studyQueueResponse.object().toVariantMap()["requested_information"].toMap();
+        QVariantMap studyQueueMap = mStudyQueueResponse.object().toVariantMap()["requested_information"].toMap();
 
         mStudyQueue.mLessonsAvailable = studyQueueMap["lessons_available"].toInt();
         mStudyQueue.mReviewsAvailable = studyQueueMap["reviews_available"].toInt();
         mStudyQueue.mNextReviewDate = studyQueueMap["next_review_date"].toUInt();
         mStudyQueue.mReviewsAvailableNextHour = studyQueueMap["reviews_available_next_hour"].toInt();
         mStudyQueue.mReviewsAvailableNextDay = studyQueueMap["reviews_available_next_day"].toInt();
+    }
+}
 
+//==============================================================================
+
+void WaniKani::levelProgressionReply()
+{
+    mLevelProgressionResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
+
+    if (validJsonDocument(mLevelProgressionResponse)) {
         // Retrieve the user's level progression
 
-        QVariantMap levelProgressionResponseMap = levelProgressionResponse.object().toVariantMap()["requested_information"].toMap();
+        QVariantMap levelProgressionResponseMap = mLevelProgressionResponse.object().toVariantMap()["requested_information"].toMap();
 
         mLevelProgression.mRadicalsProgress = levelProgressionResponseMap["radicals_progress"].toInt();
         mLevelProgression.mRadicalsTotal = levelProgressionResponseMap["radicals_total"].toInt();
         mLevelProgression.mKanjiProgress = levelProgressionResponseMap["kanji_progress"].toInt();
         mLevelProgression.mKanjiTotal = levelProgressionResponseMap["kanji_total"].toInt();
+    }
+}
 
+//==============================================================================
+
+void WaniKani::srsDistributionReply()
+{
+    mSrsDistributionResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
+
+    if (validJsonDocument(mSrsDistributionResponse)) {
         // Retrieve the user's SRS distribution
 
-        QVariantMap srsDistributionMap = srsDistributionResponse.object().toVariantMap()["requested_information"].toMap();
+        QVariantMap srsDistributionMap = mSrsDistributionResponse.object().toVariantMap()["requested_information"].toMap();
 
         updateSrsDistribution("Apprentice", srsDistributionMap["apprentice"].toMap(), mSrsDistribution.mApprentice);
         updateSrsDistribution("Guru", srsDistributionMap["guru"].toMap(), mSrsDistribution.mGuru);
         updateSrsDistribution("Master", srsDistributionMap["master"].toMap(), mSrsDistribution.mMaster);
         updateSrsDistribution("Enlightened", srsDistributionMap["enlighten"].toMap(), mSrsDistribution.mEnlightened);
         updateSrsDistribution("Burned", srsDistributionMap["burned"].toMap(), mSrsDistribution.mBurned);
+    }
+}
 
+//==============================================================================
+
+void WaniKani::radicalsReply()
+{
+    mRadicalsResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
+
+    if (validJsonDocument(mRadicalsResponse)) {
         // Retrieve the radicals and their information
 
         mRadicals = Radicals();
 
-        for (const auto &radicalInformation : radicalsResponse.object().toVariantMap()["requested_information"].toList()) {
+        for (const auto &radicalInformation : mRadicalsResponse.object().toVariantMap()["requested_information"].toList()) {
             QVariantMap radicalInformationMap = radicalInformation.toMap();
             Radical radical;
 
@@ -672,12 +686,21 @@ void WaniKani::update()
 
             mRadicals << radical;
         }
+    }
+}
 
+//==============================================================================
+
+void WaniKani::kanjiReply()
+{
+    mKanjiResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
+
+    if (validJsonDocument(mKanjiResponse)) {
         // Retrieve the Kanji and their information
 
         mKanjis = Kanjis();
 
-        for (const auto &kanjiInformation : kanjiResponse.object().toVariantMap()["requested_information"].toList()) {
+        for (const auto &kanjiInformation : mKanjiResponse.object().toVariantMap()["requested_information"].toList()) {
             QVariantMap kanjiInformationMap = kanjiInformation.toMap();
             Kanji kanji;
 
@@ -711,12 +734,21 @@ void WaniKani::update()
 
             mKanjis << kanji;
         }
+    }
+}
 
+//==============================================================================
+
+void WaniKani::vocabularyReply()
+{
+    mVocabularyResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
+
+    if (validJsonDocument(mVocabularyResponse)) {
         // Retrieve the vocabularies and their information
 
         mVocabularies = Vocabularies();
 
-        for (const auto &vocabularyInformation : vocabularyResponse.object().toVariantMap()["requested_information"].toList()) {
+        for (const auto &vocabularyInformation : mVocabularyResponse.object().toVariantMap()["requested_information"].toList()) {
             QVariantMap vocabularyInformationMap = vocabularyInformation.toMap();
             Vocabulary vocabulary;
 
@@ -747,15 +779,91 @@ void WaniKani::update()
 
             mVocabularies << vocabulary;
         }
-
-        // Let people know that we have been updated
-
-        emit updated();
-    } else {
-        // Let people know that something went wrong
-
-        emit error();
     }
+}
+
+//==============================================================================
+
+void WaniKani::checkNbOfReplies()
+{
+    // Increase our number of replies and, if we have got the number we are
+    // after, let people know whether things are valid or not
+
+    ++mNbOfReplies;
+
+    if (mNbOfReplies == 6) {
+        if (   validJsonDocument(mStudyQueueResponse)
+            || validJsonDocument(mLevelProgressionResponse)
+            || validJsonDocument(mSrsDistributionResponse)
+            || validJsonDocument(mRadicalsResponse)
+            || validJsonDocument(mKanjiResponse)
+            || validJsonDocument(mVocabularyResponse)) {
+            // Let people know that we have been updated
+
+            emit updated();
+        } else {
+            // Let people know that something went wrong
+
+            emit error();
+        }
+    }
+}
+
+//==============================================================================
+
+void WaniKani::update()
+{
+    // Make sure that we have an API key
+
+    if (mApiKey.isEmpty()) {
+        return;
+    }
+
+    // Retrieve
+    //  - the user's information and study queue
+    //  - the user's SRS distribution
+    //  - the user's list of radicals (and their information)
+    //  - the user's list of Kanji (and their information)
+    //  - the user's list of vocabulary (and their information)
+
+    QNetworkReply *studyQueueNetworkReply = waniKaniNetworkReply("study-queue");
+    QNetworkReply *levelProgressionNetworkReply = waniKaniNetworkReply("level-progression");
+    QNetworkReply *srsDistributionNetworkReply = waniKaniNetworkReply("srs-distribution");
+    QNetworkReply *radicalsNetworkReply = waniKaniNetworkReply("radicals/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
+    QNetworkReply *kanjiNetworkReply = waniKaniNetworkReply("kanji/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
+    QNetworkReply *vocabularyNetworkReply = waniKaniNetworkReply("vocabulary/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60");
+
+    mNbOfReplies = 0;
+
+    QObject::connect(studyQueueNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::studyQueueReply);
+    QObject::connect(studyQueueNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::checkNbOfReplies);
+
+    QObject::connect(levelProgressionNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::levelProgressionReply);
+    QObject::connect(levelProgressionNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::checkNbOfReplies);
+
+    QObject::connect(srsDistributionNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::srsDistributionReply);
+    QObject::connect(srsDistributionNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::checkNbOfReplies);
+
+    QObject::connect(radicalsNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::radicalsReply);
+    QObject::connect(radicalsNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::checkNbOfReplies);
+
+    QObject::connect(kanjiNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::kanjiReply);
+    QObject::connect(kanjiNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::checkNbOfReplies);
+
+    QObject::connect(vocabularyNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::vocabularyReply);
+    QObject::connect(vocabularyNetworkReply, &QNetworkReply::finished,
+                     this, &WaniKani::checkNbOfReplies);
 }
 
 //==============================================================================

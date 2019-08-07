@@ -250,11 +250,18 @@ typedef QList<Vocabulary> Vocabularies;
 
 //==============================================================================
 
+class QNetworkAccessManager;
+class QNetworkReply;
+
+//==============================================================================
+
 class WaniKani : public QObject
 {
     Q_OBJECT
 
 public:
+    explicit WaniKani();
+    ~WaniKani();
 
     void setApiKey(const QString &pApiKey);
 
@@ -299,7 +306,21 @@ private:
     Kanjis mKanjis;
     Vocabularies mVocabularies;
 
-    QJsonDocument waniKaniRequest(const QString &pRequest);
+    QNetworkAccessManager *mNetworkAccessManager;
+
+    QJsonDocument mStudyQueueResponse;
+    QJsonDocument mLevelProgressionResponse;
+    QJsonDocument mSrsDistributionResponse;
+    QJsonDocument mRadicalsResponse;
+    QJsonDocument mKanjiResponse;
+    QJsonDocument mVocabularyResponse;
+
+    int mNbOfReplies = 0;
+
+    QNetworkReply * waniKaniNetworkReply(const QString &pRequest);
+    QJsonDocument waniKaniJsonResponse(QNetworkReply *pNetworkReply);
+
+    bool validJsonDocument(const QJsonDocument &pJsonDocument);
 
     void updateSrsDistribution(const QString &pName,
                                const QVariantMap &pVariantMap,
@@ -311,6 +332,16 @@ signals:
 
 public slots:
     void update();
+
+private slots:
+    void studyQueueReply();
+    void levelProgressionReply();
+    void srsDistributionReply();
+    void radicalsReply();
+    void kanjiReply();
+    void vocabularyReply();
+
+    void checkNbOfReplies();
 };
 
 //==============================================================================
