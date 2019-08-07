@@ -36,17 +36,6 @@ limitations under the License.
 
 //==============================================================================
 
-StudyQueue::StudyQueue() :
-    mLessonsAvailable(0),
-    mReviewsAvailable(0),
-    mNextReviewDate(0),
-    mReviewsAvailableNextHour(0),
-    mReviewsAvailableNextDay(0)
-{
-}
-
-//==============================================================================
-
 int StudyQueue::lessonsAvailable() const
 {
     // Return our number of lessons available
@@ -92,16 +81,6 @@ int StudyQueue::reviewsAvailableNextDay() const
 
 //==============================================================================
 
-LevelProgression::LevelProgression() :
-    mRadicalsProgress(0),
-    mRadicalsTotal(0),
-    mKanjiProgress(0),
-    mKanjiTotal(0)
-{
-}
-
-//==============================================================================
-
 int LevelProgression::radicalsProgress() const
 {
     // Return our radicals progress
@@ -134,17 +113,6 @@ int LevelProgression::kanjiTotal() const
     // Return our total number of Kanji
 
     return mKanjiTotal;
-}
-
-//==============================================================================
-
-SrsDistributionInformation::SrsDistributionInformation() :
-    mName(QString()),
-    mRadicals(QString()),
-    mKanji(QString()),
-    mVocabulary(QString()),
-    mTotal(QString())
-{
 }
 
 //==============================================================================
@@ -194,17 +162,6 @@ QString SrsDistributionInformation::total() const
 
 //==============================================================================
 
-SrsDistribution::SrsDistribution() :
-    mApprentice(SrsDistributionInformation()),
-    mGuru(SrsDistributionInformation()),
-    mMaster(SrsDistributionInformation()),
-    mEnlightened(SrsDistributionInformation()),
-    mBurned(SrsDistributionInformation())
-{
-}
-
-//==============================================================================
-
 SrsDistributionInformation SrsDistribution::apprentice() const
 {
     // Return our apprentice SRS distribution
@@ -250,15 +207,6 @@ SrsDistributionInformation SrsDistribution::burned() const
 
 //==============================================================================
 
-Item::Item() :
-    mCharacter(QChar()),
-    mMeaning(QString()),
-    mLevel(0)
-{
-}
-
-//==============================================================================
-
 QChar Item::character() const
 {
     // Return our character
@@ -282,28 +230,6 @@ int Item::level() const
     // Return our level
 
     return mLevel;
-}
-
-//==============================================================================
-
-UserSpecific::UserSpecific() :
-    mSrs(QString()),
-    mSrsNumeric(0),
-    mUnlockedDate(0),
-    mAvailableDate(0),
-    mBurned(false),
-    mBurnedDate(0),
-    mMeaningCorrect(0),
-    mMeaningIncorrect(0),
-    mMeaningMaxStreak(0),
-    mMeaningCurrentStreak(0),
-    mReadingCorrect(0),
-    mReadingIncorrect(0),
-    mReadingMaxStreak(0),
-    mReadingCurrentStreak(0),
-    mMeaningNote(QString()),
-    mUserSynonyms(QString())
-{
 }
 
 //==============================================================================
@@ -452,15 +378,6 @@ QString UserSpecific::userSynonyms() const
 
 //==============================================================================
 
-Radical::Radical() :
-    Item(),
-    mImage(QString()),
-    mUserSpecific(UserSpecific())
-{
-}
-
-//==============================================================================
-
 QString Radical::image() const
 {
     // Return our image
@@ -479,31 +396,11 @@ UserSpecific Radical::userSpecific() const
 
 //==============================================================================
 
-ExtraUserSpecific::ExtraUserSpecific() :
-    UserSpecific(),
-    mReadingNote(QString())
-{
-}
-
-//==============================================================================
-
 QString ExtraUserSpecific::readingNote() const
 {
     // Return our reading note
 
     return mReadingNote;
-}
-
-//==============================================================================
-
-Kanji::Kanji() :
-    Item(),
-    mOnyomi(QString()),
-    mKunyomi(QString()),
-    mNanori(QString()),
-    mImportantReading(QString()),
-    mUserSpecific(ExtraUserSpecific())
-{
 }
 
 //==============================================================================
@@ -553,15 +450,6 @@ ExtraUserSpecific Kanji::userSpecific() const
 
 //==============================================================================
 
-Vocabulary::Vocabulary() :
-    Item(),
-    mKana(QString()),
-    mUserSpecific(ExtraUserSpecific())
-{
-}
-
-//==============================================================================
-
 QString Vocabulary::kana() const
 {
     // Return our Kana reading
@@ -576,28 +464,6 @@ ExtraUserSpecific Vocabulary::userSpecific() const
     // Return our user specific information
 
     return mUserSpecific;
-}
-
-//==============================================================================
-
-WaniKani::WaniKani() :
-    mApiKey(QString()),
-    mUserName(QString()),
-    mGravatar(QString()),
-    mLevel(0),
-    mTitle(QString()),
-    mAbout(QString()),
-    mWebsite(QString()),
-    mTwitter(QString()),
-    mTopicsCount(0),
-    mPostsCount(0),
-    mCreationDate(0),
-    mVacationDate(0),
-    mSrsDistribution(SrsDistribution()),
-    mRadicals(Radicals()),
-    mKanjis(Kanjis()),
-    mVocabularies(Vocabularies())
-{
 }
 
 //==============================================================================

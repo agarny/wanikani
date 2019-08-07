@@ -37,8 +37,6 @@ class StudyQueue
     friend class WaniKani;
 
 public:
-    explicit StudyQueue();
-
     int lessonsAvailable() const;
     int reviewsAvailable() const;
     uint nextReviewDate() const;
@@ -46,11 +44,11 @@ public:
     int reviewsAvailableNextDay() const;
 
 private:
-    int mLessonsAvailable;
-    int mReviewsAvailable;
-    uint mNextReviewDate;
-    int mReviewsAvailableNextHour;
-    int mReviewsAvailableNextDay;
+    int mLessonsAvailable = 0;
+    int mReviewsAvailable = 0;
+    uint mNextReviewDate = 0;
+    int mReviewsAvailableNextHour = 0;
+    int mReviewsAvailableNextDay = 0;
 };
 
 //==============================================================================
@@ -60,18 +58,16 @@ class LevelProgression
     friend class WaniKani;
 
 public:
-    explicit LevelProgression();
-
     int radicalsProgress() const;
     int radicalsTotal() const;
     int kanjiProgress() const;
     int kanjiTotal() const;
 
 private:
-    int mRadicalsProgress;
-    int mRadicalsTotal;
-    int mKanjiProgress;
-    int mKanjiTotal;
+    int mRadicalsProgress = 0;
+    int mRadicalsTotal = 0;
+    int mKanjiProgress = 0;
+    int mKanjiTotal = 0;
 };
 
 //==============================================================================
@@ -81,8 +77,6 @@ class SrsDistributionInformation
     friend class WaniKani;
 
 public:
-    explicit SrsDistributionInformation();
-
     QString name() const;
     QString radicals() const;
     QString kanji() const;
@@ -104,8 +98,6 @@ class SrsDistribution
     friend class WaniKani;
 
 public:
-    explicit SrsDistribution();
-
     SrsDistributionInformation apprentice() const;
     SrsDistributionInformation guru() const;
     SrsDistributionInformation master() const;
@@ -127,8 +119,6 @@ class Item
     friend class WaniKani;
 
 public:
-    explicit Item();
-
     QChar character() const;
     QString meaning() const;
     int level() const;
@@ -136,7 +126,7 @@ public:
 private:
     QChar mCharacter;
     QString mMeaning;
-    int mLevel;
+    int mLevel = 0;
 };
 
 //==============================================================================
@@ -146,8 +136,6 @@ class UserSpecific
     friend class WaniKani;
 
 public:
-    explicit UserSpecific();
-
     QString srs() const;
     int srsNumeric() const;
     uint unlockedDate() const;
@@ -167,19 +155,19 @@ public:
 
 private:
     QString mSrs;
-    int mSrsNumeric;
-    uint mUnlockedDate;
-    uint mAvailableDate;
-    bool mBurned;
-    uint mBurnedDate;
-    int mMeaningCorrect;
-    int mMeaningIncorrect;
-    int mMeaningMaxStreak;
-    int mMeaningCurrentStreak;
-    int mReadingCorrect;
-    int mReadingIncorrect;
-    int mReadingMaxStreak;
-    int mReadingCurrentStreak;
+    int mSrsNumeric = 0;
+    uint mUnlockedDate = 0;
+    uint mAvailableDate = 0;
+    bool mBurned = false;
+    uint mBurnedDate = 0;
+    int mMeaningCorrect = 0;
+    int mMeaningIncorrect = 0;
+    int mMeaningMaxStreak = 0;
+    int mMeaningCurrentStreak = 0;
+    int mReadingCorrect = 0;
+    int mReadingIncorrect = 0;
+    int mReadingMaxStreak = 0;
+    int mReadingCurrentStreak = 0;
     QString mMeaningNote;
     QString mUserSynonyms;
 };
@@ -191,8 +179,6 @@ class Radical : public Item
     friend class WaniKani;
 
 public:
-    explicit Radical();
-
     QString image() const;
     UserSpecific userSpecific() const;
 
@@ -212,8 +198,6 @@ class ExtraUserSpecific : public UserSpecific
     friend class WaniKani;
 
 public:
-    explicit ExtraUserSpecific();
-
     QString readingNote() const;
 
 private:
@@ -227,8 +211,6 @@ class Kanji : public Item
     friend class WaniKani;
 
 public:
-    explicit Kanji();
-
     QString onyomi() const;
     QString kunyomi() const;
     QString nanori() const;
@@ -254,8 +236,6 @@ class Vocabulary : public Item
     friend class WaniKani;
 
 public:
-    explicit Vocabulary();
-
     QString kana() const;
     ExtraUserSpecific userSpecific() const;
 
@@ -275,7 +255,6 @@ class WaniKani : public QObject
     Q_OBJECT
 
 public:
-    explicit WaniKani();
 
     void setApiKey(const QString &pApiKey);
 
@@ -303,15 +282,15 @@ private:
 
     QString mUserName;
     QString mGravatar;
-    int mLevel;
+    int mLevel = 0;
     QString mTitle;
     QString mAbout;
     QString mWebsite;
     QString mTwitter;
-    int mTopicsCount;
-    int mPostsCount;
-    uint mCreationDate;
-    uint mVacationDate;
+    int mTopicsCount = 0;
+    int mPostsCount = 0;
+    uint mCreationDate = 0;
+    uint mVacationDate = 0;
 
     StudyQueue mStudyQueue;
     LevelProgression mLevelProgression;
