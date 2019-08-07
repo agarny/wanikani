@@ -736,8 +736,13 @@ Widget::Widget() :
 
     connect(&mWaniKani, &WaniKani::updated,
             this, &Widget::waniKaniUpdated);
+    connect(&mWaniKani, &WaniKani::updated,
+            this, &Widget::updateTimeRelatedInformation);
+
     connect(&mWaniKani, &WaniKani::error,
             this, &Widget::waniKaniError);
+    connect(&mWaniKani, &WaniKani::error,
+            this, &Widget::updateTimeRelatedInformation);
 
     // Retrieve our settings
 
@@ -1687,10 +1692,6 @@ void Widget::waniKaniUpdated()
                                                           .arg(kanjiTotal)
                                                           .arg(int(100*currentKanjiValue)));
 
-    // Update our time-related information
-
-    updateTimeRelatedInformation();
-
     // Update our wallpaper
 
     updateWallpaper();
@@ -1705,10 +1706,6 @@ void Widget::waniKaniError()
     updateGravatar(QPixmap(":/warning"));
 
     resetInternals(false);
-
-    // Update our time-related information
-
-    updateTimeRelatedInformation();
 }
 
 //==============================================================================
