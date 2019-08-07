@@ -632,8 +632,8 @@ QJsonDocument WaniKani::waniKaniRequest(const QString &pRequest)
     QNetworkReply *networkReply = networkAccessManager.get(networkRequest);
     QEventLoop eventLoop;
 
-    QObject::connect(networkReply, SIGNAL(finished()),
-                     &eventLoop, SLOT(quit()));
+    QObject::connect(networkReply, &QNetworkReply::finished,
+                     &eventLoop, &QEventLoop::quit);
 
     eventLoop.exec();
 
