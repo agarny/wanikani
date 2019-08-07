@@ -577,10 +577,12 @@ bool WaniKani::validJsonDocument(const QJsonDocument &pJsonDocument)
 
 void WaniKani::studyQueueReply()
 {
+    // Retrieve, if available, some of the user's information, the user's study
+    // queu and the user's gravatar
+
     mStudyQueueResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
     if (validJsonDocument(mStudyQueueResponse)) {
-        // Retrieve some of the user's information
 
         QVariantMap userInformationMap = mStudyQueueResponse.object().toVariantMap()["user_information"].toMap();
 
@@ -595,8 +597,6 @@ void WaniKani::studyQueueReply()
         mPostsCount = userInformationMap["posts_count"].toInt();
         mCreationDate = userInformationMap["creation_date"].toUInt();
         mVacationDate = userInformationMap["vacation_date"].toUInt();
-
-        // Retrieve the user's study queue
 
         QVariantMap studyQueueMap = mStudyQueueResponse.object().toVariantMap()["requested_information"].toMap();
 
@@ -614,11 +614,11 @@ void WaniKani::studyQueueReply()
 
 void WaniKani::levelProgressionReply()
 {
+    // Retrieve, if available, the user's level progression
+
     mLevelProgressionResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
     if (validJsonDocument(mLevelProgressionResponse)) {
-        // Retrieve the user's level progression
-
         QVariantMap levelProgressionResponseMap = mLevelProgressionResponse.object().toVariantMap()["requested_information"].toMap();
 
         mLevelProgression.mRadicalsProgress = levelProgressionResponseMap["radicals_progress"].toInt();
@@ -634,11 +634,11 @@ void WaniKani::levelProgressionReply()
 
 void WaniKani::srsDistributionReply()
 {
+    // Retrieve, if available, the user's SRS distribution
+
     mSrsDistributionResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
     if (validJsonDocument(mSrsDistributionResponse)) {
-        // Retrieve the user's SRS distribution
-
         QVariantMap srsDistributionMap = mSrsDistributionResponse.object().toVariantMap()["requested_information"].toMap();
 
         updateSrsDistribution("Apprentice", srsDistributionMap["apprentice"].toMap(), mSrsDistribution.mApprentice);
@@ -655,11 +655,11 @@ void WaniKani::srsDistributionReply()
 
 void WaniKani::radicalsReply()
 {
+    // Retrieve, if available, the radicals and their information
+
     mRadicalsResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
     if (validJsonDocument(mRadicalsResponse)) {
-        // Retrieve the radicals and their information
-
         mRadicals = Radicals();
 
         for (const auto &radicalInformation : mRadicalsResponse.object().toVariantMap()["requested_information"].toList()) {
@@ -701,11 +701,11 @@ void WaniKani::radicalsReply()
 
 void WaniKani::kanjiReply()
 {
+    // Retrieve, if available, the Kanji and their information
+
     mKanjiResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
     if (validJsonDocument(mKanjiResponse)) {
-        // Retrieve the Kanji and their information
-
         mKanjis = Kanjis();
 
         for (const auto &kanjiInformation : mKanjiResponse.object().toVariantMap()["requested_information"].toList()) {
@@ -751,11 +751,11 @@ void WaniKani::kanjiReply()
 
 void WaniKani::vocabularyReply()
 {
+    // Retrieve, if available, the vocabularies and their information
+
     mVocabularyResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
     if (validJsonDocument(mVocabularyResponse)) {
-        // Retrieve the vocabularies and their information
-
         mVocabularies = Vocabularies();
 
         for (const auto &vocabularyInformation : mVocabularyResponse.object().toVariantMap()["requested_information"].toList()) {
