@@ -772,7 +772,10 @@ Widget::Widget() :
             this, &Widget::trayIconActivated);
 #endif
 
-    mTrayIcon.show();
+    connect(&mWaniKani, &WaniKani::updated,
+            &mTrayIcon, &QSystemTrayIcon::show);
+    connect(&mWaniKani, &WaniKani::error,
+            &mTrayIcon, &QSystemTrayIcon::show);
 
     mInitializing = false;
 }
