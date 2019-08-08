@@ -583,7 +583,6 @@ void WaniKani::studyQueueReply()
     mStudyQueueResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
     if (validJsonDocument(mStudyQueueResponse)) {
-
         QVariantMap userInformationMap = mStudyQueueResponse.object().toVariantMap()["user_information"].toMap();
 
         mUserName = userInformationMap["username"].toString();
