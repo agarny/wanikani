@@ -1355,7 +1355,7 @@ void Widget::setWallpaper()
 
 QColor Widget::color(int pRow, int pColumn) const
 {
-    // Return whether our font is to be in italics
+    // Return the colour at the given row and column
 
     QRgb rgba = mColors.value(qobject_cast<QPushButton *>(qobject_cast<QGridLayout *>(mGui->colorsLayout)->itemAtPosition(pRow, pColumn)->widget()));
 
