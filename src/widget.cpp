@@ -800,16 +800,16 @@ Widget::Widget() :
 
 bool Widget::event(QEvent *pEvent)
 {
-//    if (pEvent->type() == QEvent::WindowDeactivate) {
-//        // We are not active anymore, so handle the event and then hide
-//        // ourselves
+    if (pEvent->type() == QEvent::WindowDeactivate) {
+        // We are not active anymore, so handle the event and then hide
+        // ourselves
 
-//        QWidget::event(pEvent);
+        QWidget::event(pEvent);
 
-//        hide();
+        hide();
 
-//        return true;
-//    }
+        return true;
+    }
 
     // Default handling of the event
 
