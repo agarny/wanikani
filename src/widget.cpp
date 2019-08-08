@@ -2037,20 +2037,24 @@ void Widget::setPushButtonColor(QPushButton *pPushButton, QRgb pColor)
 
     static const QString PushButtonStyle = "QPushButton#%1 {"
                                            "    border: 1px solid gray;"
-                                           "    background-color: rgba(%2, %3, %4, %5);"
+                                           "    background-color: rgb(%2, %3, %4);"
                                            "}";
 
     mColors.insert(pPushButton, pColor);
 
+    double a = qAlpha(pColor)/255.0;
+    QRgb solidColor = qRgb((1.0-a)*224+a*qRed(pColor),
+                            (1.0-a)*224+a*qGreen(pColor),
+                            (1.0-a)*224+a*qBlue(pColor));
+
     pPushButton->setStyleSheet(PushButtonStyle.arg(pPushButton->objectName())
-                                              .arg(qRed(pColor))
-                                              .arg(qGreen(pColor))
-                                              .arg(qBlue(pColor))
-                                              .arg(qAlpha(pColor)));
+                                              .arg(qRed(solidColor))
+                                              .arg(qGreen(solidColor))
+                                              .arg(qBlue(solidColor)));
 
     QColor color;
 
-    color.setRgba(pColor);
+    color.setRgba(solidColor);
 
     if (pPushButton == mGui->enlightenedBackgroundPushButton) {
         mGui->currentRadicalsProgress->setColor(color);
