@@ -20,6 +20,8 @@ limitations under the License.
 // macOS
 //==============================================================================
 
+bool isDarkMode();
+
 const char *macosWallpaper();
 void setMacosWallpaper(const char *pWallpaperFileName);
 

@@ -525,7 +525,11 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
         painter.drawLine(QPointF(0.0, y), QPointF(canvasWidth-1.0, y));
 
+#ifdef Q_OS_MAC
+        pen.setColor(isDarkMode()?Qt::white:Qt::black);
+#else
         pen.setColor(Qt::black);
+#endif
 
         painter.setPen(pen);
 
@@ -549,7 +553,13 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
             painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1.0));
 
-            pen.setColor(dayHour?Qt::black:Qt::red);
+#ifdef Q_OS_MAC
+            pen.setColor(isDarkMode()?
+                             dayHour?Qt::white:Qt::red:
+                             dayHour?Qt::black:Qt::darkRed);
+#else
+            pen.setColor(dayHour?Qt::black:Qt::darkRed);
+#endif
 
             painter.setPen(pen);
 
@@ -616,7 +626,13 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                 xWidth, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight),
                          (data.currentRadicals || data.currentKanji || data.currentVocabulary)?
                              Qt::white:
+#ifdef Q_OS_MAC
+                             isDarkMode()?
+                                 QColor(qRgb(96, 96, 96)):
+                                 QColor(qRgb(224, 224, 224)));
+#else
                              QColor(qRgb(224, 224, 224)));
+#endif
 
         painter.fillRect(QRectF(x, canvasHeight-radicalsReviewsHeight-kanjiReviewsHeight-vocabularyReviewsHeight,
                                 xWidth, radicalsReviewsHeight+kanjiReviewsHeight+vocabularyReviewsHeight),
@@ -784,21 +800,38 @@ Widget::Widget() :
 
 bool Widget::event(QEvent *pEvent)
 {
-    if (pEvent->type() == QEvent::WindowDeactivate) {
-        // We are not active anymore, so handle the event and then hide
-        // ourselves
+//    if (pEvent->type() == QEvent::WindowDeactivate) {
+//        // We are not active anymore, so handle the event and then hide
+//        // ourselves
 
-        QWidget::event(pEvent);
+//        QWidget::event(pEvent);
 
-        hide();
+//        hide();
 
-        return true;
-    }
+//        return true;
+//    }
 
     // Default handling of the event
 
     return QWidget::event(pEvent);
 }
+
+//==============================================================================
+
+#ifdef Q_OS_MAC
+void Widget::changeEvent(QEvent *pEvent)
+{
+    // Default handling of the event
+
+    QWidget::changeEvent(pEvent);
+
+    // Do a few more things for some changes
+
+    if (pEvent->type() == QEvent::PaletteChange) {
+        update();
+    }
+}
+#endif
 
 //==============================================================================
 

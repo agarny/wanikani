@@ -28,8 +28,26 @@ limitations under the License.
 
 //==============================================================================
 
+#import <AppKit/NSApplication.h>
 #import <AppKit/NSScreen.h>
 #import <AppKit/NSWorkspace.h>
+
+//==============================================================================
+
+bool isDarkMode()
+{
+    // Return whether we are in Dark mode
+
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_14_AND_LATER
+    if (__builtin_available(macOS 10.14, *)) {
+        auto appearance = [NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua, NSAppearanceNameDarkAqua]];
+
+        return [appearance isEqualToString:NSAppearanceNameDarkAqua] != 0;
+    }
+#endif
+
+    return false;
+}
 
 //==============================================================================
 

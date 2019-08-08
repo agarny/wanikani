@@ -59,7 +59,7 @@ public:
     explicit LabelWidget(QWidget *pParent);
 
 protected:
-    virtual void mouseMoveEvent(QMouseEvent *pEvent);
+    void mouseMoveEvent(QMouseEvent *pEvent) override;
 };
 
 //==============================================================================
@@ -75,8 +75,8 @@ public:
     void setColor(const QColor &pColor);
 
 protected:
-    virtual void mouseMoveEvent(QMouseEvent *pEvent);
-    virtual void paintEvent(QPaintEvent *pEvent);
+    void mouseMoveEvent(QMouseEvent *pEvent) override;
+    void paintEvent(QPaintEvent *pEvent) override;
 
 private:
     double mValue;
@@ -122,8 +122,8 @@ public:
     void setVocabularyColor(const QColor &pVocabularyColor);
 
 protected:
-    virtual void mouseMoveEvent(QMouseEvent *pEvent);
-    virtual void paintEvent(QPaintEvent *pEvent);
+    void mouseMoveEvent(QMouseEvent *pEvent) override;
+    void paintEvent(QPaintEvent *pEvent) override;
 
 private:
     Widget *mWidget;
@@ -162,12 +162,13 @@ public:
     Reviews allVocabularyReviews() const;
 
 protected:
-    virtual bool event(QEvent *pEvent);
+    bool event(QEvent *pEvent) override;
 #ifdef Q_OS_MAC
-    virtual void closeEvent(QCloseEvent *pEvent);
+    void changeEvent(QEvent *pEvent) override;
+    void closeEvent(QCloseEvent *pEvent) override;
 #endif
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
-    virtual void keyPressEvent(QKeyEvent *pEvent);
+    void keyPressEvent(QKeyEvent *pEvent) override;
 #endif
 
 private:
