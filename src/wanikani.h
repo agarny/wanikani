@@ -32,6 +32,25 @@ limitations under the License.
 
 //==============================================================================
 
+class User
+{
+    friend class WaniKani;
+
+public:
+    uint currentVacationStartedAt() const;
+    int level() const;
+    QString profileUrl() const;
+    QString userName() const;
+
+private:
+    uint mCurrentVacationStartedAt = 0;
+    int mLevel = 0;
+    QString mProfileUrl;
+    QString mUserName;
+};
+
+//==============================================================================
+
 class StudyQueue
 {
     friend class WaniKani;
@@ -268,19 +287,9 @@ public:
     ~WaniKani();
 
     void setApiKey(const QString &pApiKey);
+    void setApiToken(const QString &pApiToken);
 
-    QString userName() const;
-    QPixmap gravatar() const;
-    int level() const;
-    QString title() const;
-    QString about() const;
-    QString website() const;
-    QString twitter() const;
-    int topicsCount() const;
-    int postsCount() const;
-    uint creationDate() const;
-    uint vacationDate() const;
-
+    User user() const;
     StudyQueue studyQueue() const;
     LevelProgression levelProgression() const;
     SrsDistribution srsDistribution() const;
@@ -290,19 +299,9 @@ public:
 
 private:
     QString mApiKey;
+    QString mApiToken;
 
-    QString mUserName;
-    QPixmap mGravatar;
-    int mLevel = 0;
-    QString mTitle;
-    QString mAbout;
-    QString mWebsite;
-    QString mTwitter;
-    int mTopicsCount = 0;
-    int mPostsCount = 0;
-    uint mCreationDate = 0;
-    uint mVacationDate = 0;
-
+    User mUser;
     StudyQueue mStudyQueue;
     LevelProgression mLevelProgression;
     SrsDistribution mSrsDistribution;
@@ -312,6 +311,7 @@ private:
 
     QNetworkAccessManager *mNetworkAccessManager;
 
+    QJsonDocument mUserResponse;
     QJsonDocument mStudyQueueResponse;
     QJsonDocument mLevelProgressionResponse;
     QJsonDocument mSrsDistributionResponse;
@@ -320,9 +320,10 @@ private:
     QJsonDocument mVocabularyResponse;
 
     int mNbOfReplies = 0;
-    int mNbOfNeededReplies = 6;
+    int mNbOfNeededReplies = 7;
 
     QNetworkReply * waniKaniNetworkReply(const QString &pRequest);
+    QNetworkReply * waniKaniV2NetworkReply(const QString &pRequest);
     QJsonDocument waniKaniJsonResponse(QNetworkReply *pNetworkReply);
 
     bool validJsonDocument(const QJsonDocument &pJsonDocument);
@@ -341,14 +342,14 @@ public slots:
     void update();
 
 private slots:
+    void userReply();
+
     void studyQueueReply();
     void levelProgressionReply();
     void srsDistributionReply();
     void radicalsReply();
     void kanjiReply();
     void vocabularyReply();
-
-    void gravatarReply();
 };
 
 //==============================================================================

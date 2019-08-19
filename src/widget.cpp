@@ -286,29 +286,29 @@ void ReviewsTimeLineWidget::mouseMoveEvent(QMouseEvent *pEvent)
                                           "<table>\n"
                                           "    <thead>\n"
                                           "        <tr>\n"
-                                          "            <td colspan=\"5\" align=center><span style=\"font-weight: bold;\">%2 (%3) %4</span><br/>%5</td>\n"
+                                          "            <td colspan=\"5\" align=center><span style=\"font-weight: bold\">%2 (%3) %4</span><br/>%5</td>\n"
                                           "        </tr>\n"
                                           "    </thead>\n"
                                           "    <tbody>\n"
                                           "        <tr>\n"
                                           "            <td>Radicals:</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>%6</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>(%7)</td>\n"
                                           "        </tr>\n"
                                           "        <tr>\n"
                                           "            <td>Kanji:</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>%8</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>(%9)</td>\n"
                                           "        </tr>\n"
                                           "        <tr>\n"
                                           "            <td>Vocabulary:</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>%10</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>(%11)</td>\n"
                                           "        </tr>\n"
                                           "    </tbody>\n"
@@ -666,6 +666,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
 static const auto SettingsFileName        = QStringLiteral("FileName");
 static const auto SettingsApiKey          = QStringLiteral("ApiKey");
+static const auto SettingsApiToken        = QStringLiteral("ApiToken");
 static const auto SettingsCurrentKanji    = QStringLiteral("CurrentKanji");
 static const auto SettingsInterval        = QStringLiteral("Interval");
 static const auto SettingsFontName        = QStringLiteral("FontName");
@@ -676,7 +677,7 @@ static const auto SettingsReviewsTimeLine = QStringLiteral("ReviewsTimeLine");
 
 //==============================================================================
 
-static const auto LinkStyle = " style=\"color: rgb(103, 103, 103); outline: 0px; text-decoration: none;\"";
+static const auto LinkStyle = " style=\"color: rgb(103, 103, 103); outline: 0px; text-decoration: none\"";
 
 //==============================================================================
 
@@ -704,7 +705,7 @@ Widget::Widget() :
 
     mGui->setupUi(this);
 
-    setMinimumSize(1440, 900);
+    setMinimumSize(1360, 850);
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
     setWindowFlags(Qt::FramelessWindowHint);
@@ -734,7 +735,7 @@ Widget::Widget() :
 
     // Some about information
 
-    static const QString About = "<span style=\"font-weight: bold; font-size: 19px;\"><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> %1</span><br/>"
+    static const QString About = "<span style=\"font-size: 19px; font-weight: bold\"><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> %1</span><br/>"
                                  "© 2016-%2 <a href=\"https://github.com/agarny\""+QString(LinkStyle)+">Alan Garny</a>";
 
     QFile versionFile(":/version");
@@ -931,13 +932,16 @@ void Widget::retrieveSettings(bool pResetSettings)
 
     QSettings settings;
     bool setWaniKaniApiKey = false;
+    bool setWaniKaniApiToken = false;
 
     if (mInitializing) {
         mFileName = settings.value(SettingsFileName).toString();
 
         mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
+        mGui->apiTokenValue->setText(settings.value(SettingsApiToken).toString());
 
         setWaniKaniApiKey = true;
+        setWaniKaniApiToken = true;
     }
 
     if (pResetSettings) {
@@ -994,6 +998,10 @@ void Widget::retrieveSettings(bool pResetSettings)
         mWaniKani.setApiKey(mGui->apiKeyValue->text());
     }
 
+    if (setWaniKaniApiToken) {
+        mWaniKani.setApiToken(mGui->apiTokenValue->text());
+    }
+
     if (pResetSettings) {
         mInitializing = false;
 
@@ -1036,17 +1044,6 @@ QString Widget::iconDataUri(const QString &pIcon, int pWidth, int pHeight,
                 pMode).save(&buffer, "PNG");
 
     return QString("data:image/png;base64,%1").arg(QString(data.toBase64()));
-}
-
-//==============================================================================
-
-void Widget::updateGravatar(const QPixmap &pGravatar)
-{
-    // Update our gravatar
-
-    mGui->gravatarValue->setPixmap(pGravatar.scaled(GravatarSize, GravatarSize,
-                                                    Qt::KeepAspectRatio,
-                                                    Qt::SmoothTransformation));
 }
 
 //==============================================================================
@@ -1095,23 +1092,23 @@ void Widget::updateSrsDistributionInformation(QLabel *pLabel,
     pLabel->setToolTip("<table>\n"
                        "    <thead>\n"
                        "        <tr>\n"
-                       "            <td colspan=\"3\" align=center style=\"font-weight: bold;\">"+pInformation.name()+"</td>\n"
+                       "            <td colspan=\"3\" align=center style=\"font-weight: bold\">"+pInformation.name()+"</td>\n"
                        "        </tr>\n"
                        "    </thead>\n"
                        "    <tbody>\n"
                        "        <tr>\n"
                        "            <td>Radicals:</td>\n"
-                       "            <td style=\"width: 4px;\"></td>\n"
+                       "            <td style=\"width: 4px\"></td>\n"
                        "            <td align=center>"+pInformation.radicals()+"</td>\n"
                        "        </tr>\n"
                        "        <tr>\n"
                        "            <td>Kanji:</td>\n"
-                       "            <td style=\"width: 4px;\"></td>\n"
+                       "            <td style=\"width: 4px\"></td>\n"
                        "            <td align=center>"+pInformation.kanji()+"</td>\n"
                        "        </tr>\n"
                        "        <tr>\n"
                        "            <td>Vocabulary:</td>\n"
-                       "            <td style=\"width: 4px;\"></td>\n"
+                       "            <td style=\"width: 4px\"></td>\n"
                        "            <td align=center>"+pInformation.vocabulary()+"</td>\n"
                        "        </tr>\n"
                        "    </tbody>\n"
@@ -1373,6 +1370,15 @@ void Widget::on_apiKeyValue_returnPressed()
 
 //==============================================================================
 
+void Widget::on_apiTokenValue_returnPressed()
+{
+    // Set our WaniKani API token
+
+    mWaniKani.setApiToken(mGui->apiTokenValue->text());
+}
+
+//==============================================================================
+
 void Widget::on_intervalSpinBox_valueChanged(int pInterval)
 {
     // Update our timer's interval
@@ -1467,6 +1473,7 @@ void Widget::on_closeToolButton_clicked()
 
     settings.setValue(SettingsFileName, mFileName);
     settings.setValue(SettingsApiKey, mGui->apiKeyValue->text());
+    settings.setValue(SettingsApiToken, mGui->apiTokenValue->text());
     settings.setValue(SettingsCurrentKanji, mGui->currentKanjiRadioButton->isChecked());
     settings.setValue(SettingsInterval, mGui->intervalSpinBox->value());
     settings.setValue(SettingsFontName, mGui->fontComboBox->currentText());
@@ -1544,7 +1551,7 @@ qint64 Widget::guruTime(int pSrsLevel, qint64 pNextReview)
     qint64 res = pSrsLevel?pNextReview:0;
 
     for (int i = pSrsLevel; i < 4; ++i) {
-        res += (pSrsLevel <= i)*SrsIntervals[mWaniKani.level() > 2][i]*3600;
+        res += (pSrsLevel <= i)*SrsIntervals[mWaniKani.user().level() > 2][i]*3600;
     }
 
     return res;
@@ -1594,12 +1601,11 @@ void Widget::waniKaniUpdated()
 {
     // Update the GUI based on our WaniKani information
 
-    updateGravatar(mWaniKani.gravatar());
     updateSrsDistributionPalettes();
 
     mGui->userInformationValue->setText("<center>\n"
-                                        "    <span style=\"font-size: 15px;\"><span style=\"font-weight: bold;\"><a href=\"https://www.wanikani.com/community/people/"+mWaniKani.userName()+"\""+QString(LinkStyle)+">"+mWaniKani.userName()+"</a></span> of Sect <span style=\"font-weight: bold;\">"+mWaniKani.title()+"</span></span><br/>\n"
-                                        "    <span style=\"font-weight: bold; font-size: 11px;\">Level "+QString::number(mWaniKani.level())+"</span>\n"
+                                        "    <span style=\"font-size: 29px; font-weight: bold\"><a href=\""+mWaniKani.user().profileUrl()+"\""+QString(LinkStyle)+">"+mWaniKani.user().userName()+"</a></span><br/>\n"
+                                        "    <span style=\"font-size: 17px; font-weight: bold\">Level "+QString::number(mWaniKani.user().level())+"</span>\n"
                                         "</center>\n");
 
     updateSrsDistributionInformation(mGui->apprenticeValue, ":/apprentice", mWaniKani.srsDistribution().apprentice());
@@ -1620,7 +1626,7 @@ void Widget::waniKaniUpdated()
     mRadicalGuruTimes.clear();
 
     for (const auto &radical : mWaniKani.radicals()) {
-        if (radical.level() == mWaniKani.level()) {
+        if (radical.level() == mWaniKani.user().level()) {
             // A radical from our current level, so determine how soon it can
             // reach Guru level
 
@@ -1639,7 +1645,7 @@ void Widget::waniKaniUpdated()
         if (radical.userSpecific().availableDate()) {
             QDateTime dateTime = QDateTime::fromTime_t(radical.userSpecific().availableDate());
 
-            if (radical.level() == mWaniKani.level()) {
+            if (radical.level() == mWaniKani.user().level()) {
                 mCurrentRadicalsReviews.insert(dateTime, mCurrentRadicalsReviews.value(dateTime)+1);
             }
 
@@ -1652,7 +1658,7 @@ void Widget::waniKaniUpdated()
     mKanjiGuruTimes.clear();
 
     for (const auto &kanji : mWaniKani.kanjis()) {
-        if (kanji.level() == mWaniKani.level()) {
+        if (kanji.level() == mWaniKani.user().level()) {
             // A Kanji from our current level, so determine how soon it can
             // reach Guru level
 
@@ -1660,7 +1666,7 @@ void Widget::waniKaniUpdated()
                                         kanji.userSpecific().availableDate()-nowTime);
         }
 
-        if (kanji.level() <= mWaniKani.level())
+        if (kanji.level() <= mWaniKani.user().level())
             mCurrentKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
 
         mAllKanjiState.insert(kanji.character(), kanji.userSpecific().srs());
@@ -1668,7 +1674,7 @@ void Widget::waniKaniUpdated()
         if (kanji.userSpecific().availableDate()) {
             QDateTime dateTime = QDateTime::fromTime_t(kanji.userSpecific().availableDate());
 
-            if (kanji.level() == mWaniKani.level()) {
+            if (kanji.level() == mWaniKani.user().level()) {
                 mCurrentKanjiReviews.insert(dateTime, mCurrentKanjiReviews.value(dateTime)+1);
             }
 
@@ -1685,7 +1691,7 @@ void Widget::waniKaniUpdated()
         if (vocabulary.userSpecific().availableDate()) {
             QDateTime dateTime = QDateTime::fromTime_t(vocabulary.userSpecific().availableDate());
 
-            if (vocabulary.level() == mWaniKani.level()) {
+            if (vocabulary.level() == mWaniKani.user().level()) {
                 mCurrentVocabularyReviews.insert(dateTime, mCurrentVocabularyReviews.value(dateTime)+1);
             }
 
@@ -1698,7 +1704,7 @@ void Widget::waniKaniUpdated()
     static const QString ProgressToolTip = "<table>\n"
                                            "    <thead>\n"
                                            "        <tr>\n"
-                                           "            <td align=center style=\"font-weight: bold;\">%1</td>\n"
+                                           "            <td align=center style=\"font-weight: bold\">%1</td>\n"
                                            "        </tr>\n"
                                            "    </thead>\n"
                                            "    <tbody>\n"
@@ -1738,8 +1744,6 @@ void Widget::waniKaniUpdated()
 void Widget::waniKaniError()
 {
     // Something went wrong, so hide a few things
-
-    updateGravatar(QPixmap(":/warning"));
 
     resetInternals(false);
 }
@@ -1824,21 +1828,21 @@ void Widget::updateTimeRelatedInformation()
     qint64 nowTime = mNow.toTime_t();
 
     static const QString LevelStatisticsText = "<center>\n"
-                                               "    <table style=\"font-size: 11px;\">\n"
+                                               "    <table style=\"font-size: 11px\">\n"
                                                "        <tbody>\n"
                                                "            <tr>\n"
-                                               "                <td align=right style=\"font-weight: bold;\">Start:</td>\n"
-                                               "                <td style=\"width: 4px;\"></td>\n"
+                                               "                <td align=right style=\"font-weight: bold\">Start:</td>\n"
+                                               "                <td style=\"width: 4px\"></td>\n"
                                                "                <td>%1</td>\n"
                                                "            </tr>\n"
                                                "            <tr>\n"
-                                               "                <td align=right style=\"font-weight: bold;\">Finish:</td>\n"
-                                               "                <td style=\"width: 4px;\"></td>\n"
+                                               "                <td align=right style=\"font-weight: bold\">Finish:</td>\n"
+                                               "                <td style=\"width: 4px\"></td>\n"
                                                "                <td>%2</td>\n"
                                                "            </tr>\n"
                                                "            <tr>\n"
-                                               "                <td align=right style=\"font-weight: bold;\">Total:</td>\n"
-                                               "                <td style=\"width: 4px;\"></td>\n"
+                                               "                <td align=right style=\"font-weight: bold\">Total:</td>\n"
+                                               "                <td style=\"width: 4px\"></td>\n"
                                                "                <td>%3</td>\n"
                                                "            </tr>\n"
                                                "        </tbody>\n"
@@ -1864,8 +1868,8 @@ void Widget::updateTimeRelatedInformation()
     mGui->reviewsTimeLine->update(nbOfHours);
 
     static const QString ReviewsTimeLineText = "<center>\n"
-                                               "    <span style=\"font-weight: bold; font-size: 11px;\">%1</span><br/>\n"
-                                               "    <span style=\"font-size: 11px;\">within the next %2</span>\n"
+                                               "    <span style=\"font-size: 11px; font-weight: bold\">%1</span><br/>\n"
+                                               "    <span style=\"font-size: 11px\">within the next %2</span>\n"
                                                "</center>";
 
     int nbOfReviews = 0;
@@ -1926,33 +1930,33 @@ void Widget::updateTimeRelatedInformation()
     }
 
     static const QString LessonsText = "<center>\n"
-                                       "    <span style=\"font-weight: bold; font-size: 15px;\">%1</span><br/>\n"
+                                       "    <span style=\"font-size: 15px; font-weight: bold\">%1</span><br/>\n"
                                        "</center>\n";
     static const QString ReviewsText = "<center>\n"
-                                       "    <span style=\"font-weight: bold; font-size: 15px;\">%1</span><br/>\n"
-                                       "    <span style=\"font-size: 11px;\">%2</span>\n"
+                                       "    <span style=\"font-size: 15px; font-weight: bold\">%1</span><br/>\n"
+                                       "    <span style=\"font-size: 11px\">%2</span>\n"
                                        "</center>\n";
     static const QString ReviewsToolTip = "<table>\n"
                                           "    <tbody>\n"
                                           "        <tr>\n"
                                           "            <td>Radicals:</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>%1</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>(%2)</td>\n"
                                           "        </tr>\n"
                                           "        <tr>\n"
                                           "            <td>Kanji:</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>%3</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>(%4)</td>\n"
                                           "        </tr>\n"
                                           "        <tr>\n"
                                           "            <td>Vocabulary:</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>%5</td>\n"
-                                          "            <td style=\"width: 4px;\"></td>\n"
+                                          "            <td style=\"width: 4px\"></td>\n"
                                           "            <td align=center>(%6)</td>\n"
                                           "        </tr>\n"
                                           "    </tbody>\n"
@@ -1974,7 +1978,7 @@ void Widget::updateTimeRelatedInformation()
                                                             QString(ReviewsLink.arg(Reviews)).arg(nbOfReviews).arg(nbOfCurrentReviews):
                                                             Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
                                                         NoReviews)
-                                               .arg(mWaniKani.vacationDate()?
+                                               .arg(mWaniKani.user().currentVacationStartedAt()?
                                                         QString():
                                                         (diff <= 0)?
                                                             ReviewsLink.arg("now"):

@@ -36,6 +36,42 @@ limitations under the License.
 
 //==============================================================================
 
+uint User::currentVacationStartedAt() const
+{
+    // Return our current vacation start at
+
+    return mCurrentVacationStartedAt;
+}
+
+//==============================================================================
+
+int User::level() const
+{
+    // Return our level
+
+    return mLevel;
+}
+
+//==============================================================================
+
+QString User::profileUrl() const
+{
+    // Return our profile URL
+
+    return mProfileUrl;
+}
+
+//==============================================================================
+
+QString User::userName() const
+{
+    // Return our user name
+
+    return mUserName;
+}
+
+//==============================================================================
+
 int StudyQueue::lessonsAvailable() const
 {
     // Return our number of lessons available
@@ -493,6 +529,17 @@ void WaniKani::setApiKey(const QString &pApiKey)
 
 //==============================================================================
 
+void WaniKani::setApiToken(const QString &pApiToken)
+{
+    // Set our API token and update our information
+
+    mApiToken = pApiToken;
+
+    update();
+}
+
+//==============================================================================
+
 QNetworkReply * WaniKani::waniKaniNetworkReply(const QString &pRequest)
 {
     // Send a request to WaniKani, asking for its response to be compressed, and
@@ -502,6 +549,22 @@ QNetworkReply * WaniKani::waniKaniNetworkReply(const QString &pRequest)
     QNetworkRequest networkRequest(QString("https://www.wanikani.com/api/v1.4/user/%1/%2").arg(mApiKey, pRequest));
 
     networkRequest.setRawHeader("Accept-Encoding", "gzip");
+
+    return mNetworkAccessManager->get(networkRequest);;
+}
+
+//==============================================================================
+
+QNetworkReply * WaniKani::waniKaniV2NetworkReply(const QString &pRequest)
+{
+    // Send a request to WaniKani, asking for its response to be compressed, and
+    // then convert its response to a JSON document, if possible and after
+    // having uncompressed it
+
+    QNetworkRequest networkRequest(QString("https://api.wanikani.com/v2/%1").arg(pRequest));
+
+    networkRequest.setRawHeader("Accept-Encoding", "gzip");
+    networkRequest.setRawHeader("Authorization", QString("Bearer %1").arg(mApiToken).toUtf8());
 
     return mNetworkAccessManager->get(networkRequest);;
 }
@@ -575,6 +638,26 @@ bool WaniKani::validJsonDocument(const QJsonDocument &pJsonDocument)
 
 //==============================================================================
 
+void WaniKani::userReply()
+{
+    // Retrieve, if available, the user's information
+
+    mUserResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
+
+    if (validJsonDocument(mUserResponse)) {
+        QVariantMap userResponseMap = mUserResponse.object().toVariantMap()["data"].toMap();
+
+        mUser.mCurrentVacationStartedAt = userResponseMap["current_vacation_started_at"].toUInt();
+        mUser.mLevel = userResponseMap["level"].toInt();
+        mUser.mProfileUrl = userResponseMap["profile_url"].toString();
+        mUser.mUserName = userResponseMap["username"].toString();
+    }
+
+    checkNbOfReplies();
+}
+
+//==============================================================================
+
 void WaniKani::studyQueueReply()
 {
     // Retrieve, if available, some of the user's information, the user's study
@@ -583,19 +666,6 @@ void WaniKani::studyQueueReply()
     mStudyQueueResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
     if (validJsonDocument(mStudyQueueResponse)) {
-        QVariantMap userInformationMap = mStudyQueueResponse.object().toVariantMap()["user_information"].toMap();
-
-        mUserName = userInformationMap["username"].toString();
-        mLevel = userInformationMap["level"].toInt();
-        mTitle = userInformationMap["title"].toString();
-        mAbout = userInformationMap["about"].toString();
-        mWebsite = userInformationMap["website"].toString();
-        mTwitter = userInformationMap["twitter"].toString();
-        mTopicsCount = userInformationMap["topics_count"].toInt();
-        mPostsCount = userInformationMap["posts_count"].toInt();
-        mCreationDate = userInformationMap["creation_date"].toUInt();
-        mVacationDate = userInformationMap["vacation_date"].toUInt();
-
         QVariantMap studyQueueMap = mStudyQueueResponse.object().toVariantMap()["requested_information"].toMap();
 
         mStudyQueue.mLessonsAvailable = studyQueueMap["lessons_available"].toInt();
@@ -603,12 +673,6 @@ void WaniKani::studyQueueReply()
         mStudyQueue.mNextReviewDate = studyQueueMap["next_review_date"].toUInt();
         mStudyQueue.mReviewsAvailableNextHour = studyQueueMap["reviews_available_next_hour"].toInt();
         mStudyQueue.mReviewsAvailableNextDay = studyQueueMap["reviews_available_next_day"].toInt();
-
-        ++mNbOfNeededReplies;
-
-        QObject::connect(mNetworkAccessManager->get(QNetworkRequest(QString("https://www.gravatar.com/avatar/%1?s=%2&d=404").arg(userInformationMap["gravatar"].toString())
-                                                                                                                            .arg(GravatarSize))), &QNetworkReply::finished,
-                         this, &WaniKani::gravatarReply);
     }
 
     checkNbOfReplies();
@@ -800,30 +864,6 @@ void WaniKani::vocabularyReply()
 
 //==============================================================================
 
-void WaniKani::gravatarReply()
-{
-    // Retrieve, if available, a pixmap version of the gravatar
-
-    QByteArray gravatarData = QByteArray();
-    QNetworkReply *networkReply = qobject_cast<QNetworkReply *>(sender());
-
-    if (networkReply->error() == QNetworkReply::NoError) {
-        gravatarData = networkReply->readAll();
-    }
-
-    networkReply->deleteLater();
-
-    if (gravatarData.isEmpty()) {
-        mGravatar = QPixmap(":/face");
-    } else {
-        mGravatar.loadFromData(gravatarData);
-    }
-
-    checkNbOfReplies();
-}
-
-//==============================================================================
-
 void WaniKani::checkNbOfReplies()
 {
     // Increase our number of replies and, if we have got the number we are
@@ -867,7 +907,10 @@ void WaniKani::update()
     //  - the user's list of vocabulary (and their information)
 
     mNbOfReplies = 0;
-    mNbOfNeededReplies = 6;
+    mNbOfNeededReplies = 7;
+
+    QObject::connect(waniKaniV2NetworkReply("user"), &QNetworkReply::finished,
+                     this, &WaniKani::userReply);
 
     QObject::connect(waniKaniNetworkReply("study-queue"), &QNetworkReply::finished,
                      this, &WaniKani::studyQueueReply);
@@ -900,101 +943,11 @@ void WaniKani::updateSrsDistribution(const QString &pName,
 
 //==============================================================================
 
-QString WaniKani::userName() const
+User WaniKani::user() const
 {
-    // Return our user name
+    // Return our user
 
-    return mUserName;
-}
-
-//==============================================================================
-
-QPixmap WaniKani::gravatar() const
-{
-    // Return our gravatar
-
-    return mGravatar;
-}
-
-//==============================================================================
-
-int WaniKani::level() const
-{
-    // Return our level
-
-    return mLevel;
-}
-
-//==============================================================================
-
-QString WaniKani::title() const
-{
-    // Return our title
-
-    return mTitle;
-}
-
-//==============================================================================
-
-QString WaniKani::about() const
-{
-    // Return our about information
-
-    return mAbout;
-}
-
-//==============================================================================
-
-QString WaniKani::website() const
-{
-    // Return our website
-
-    return mWebsite;
-}
-
-//==============================================================================
-
-QString WaniKani::twitter() const
-{
-    // Return our Twitter account
-
-    return mTwitter;
-}
-
-//==============================================================================
-
-int WaniKani::topicsCount() const
-{
-    // Return the number of topics we have created
-
-    return mTopicsCount;
-}
-
-//==============================================================================
-
-int WaniKani::postsCount() const
-{
-    // Return the number of posts we have made
-
-    return mPostsCount;
-}
-
-//==============================================================================
-
-uint WaniKani::creationDate() const
-{
-    // Return our creation date
-
-    return mCreationDate;
-}
-
-//==============================================================================
-
-uint WaniKani::vacationDate() const
-{
-    // Return our vacation date
-
-    return mVacationDate;
+    return mUser;
 }
 
 //==============================================================================

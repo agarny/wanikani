@@ -218,7 +218,6 @@ private:
     QString iconDataUri(const QString &pIcon, int pWidth = -1, int pHeight = -1,
                         QIcon::Mode pMode = QIcon::Normal);
 
-    void updateGravatar(const QPixmap &pGravatar);
     void updateSrsDistributionPalettes();
     void updateSrsDistributionInformation(QLabel *pLabel, const QString &pIcon,
                                           const SrsDistributionInformation &pInformation);
@@ -237,6 +236,7 @@ private:
 
 private slots:
     void on_apiKeyValue_returnPressed();
+    void on_apiTokenValue_returnPressed();
 
     void on_intervalSpinBox_valueChanged(int pInterval);
     void on_forceUpdateButton_clicked();
