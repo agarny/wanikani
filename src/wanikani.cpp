@@ -573,6 +573,7 @@ QNetworkReply * WaniKani::waniKaniV2NetworkReply(const QString &pRequest)
     QNetworkRequest networkRequest(QString("https://api.wanikani.com/v2/%1").arg(pRequest));
 
     networkRequest.setRawHeader("Accept-Encoding", "gzip");
+    networkRequest.setRawHeader("Wanikani-Revision", "20170710");
     networkRequest.setRawHeader("Authorization", QString("Bearer %1").arg(mApiToken).toUtf8());
 
     return mNetworkAccessManager->get(networkRequest);;
