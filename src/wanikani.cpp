@@ -895,7 +895,7 @@ void WaniKani::update()
 {
     // Make sure that we have an API key
 
-    if (mApiKey.isEmpty()) {
+    if (mApiKey.isEmpty() || mApiToken.isEmpty()) {
         return;
     }
 
