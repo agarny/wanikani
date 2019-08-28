@@ -1394,7 +1394,7 @@ void Widget::on_forceUpdateButton_clicked()
 {
     // Update our WaniKani object
 
-    mWaniKani.update();
+    mWaniKani.forceUpdate();
 }
 
 //==============================================================================

@@ -33,7 +33,18 @@ limitations under the License.
 
 //==============================================================================
 
-class User
+class Common
+{
+public:
+    void reset();
+
+protected:
+    bool mHasData = false;
+};
+
+//==============================================================================
+
+class User : public Common
 {
     friend class WaniKani;
 
@@ -298,6 +309,8 @@ public:
     Kanjis kanjis() const;
     Vocabularies vocabularies() const;
 
+    void forceUpdate();
+
 private:
     QString mApiKey;
     QString mApiToken;
@@ -330,6 +343,8 @@ private:
     bool validJsonDocument(const QJsonDocument &pJsonDocument);
 
     void checkNbOfReplies();
+
+    void doUpdate(bool pForce = false);
 
     void updateSrsDistribution(const QString &pName,
                                const QVariantMap &pVariantMap,
