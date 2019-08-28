@@ -1978,7 +1978,7 @@ void Widget::updateTimeRelatedInformation()
                                                             QString(ReviewsLink.arg(Reviews)).arg(nbOfReviews).arg(nbOfCurrentReviews):
                                                             Reviews.arg(nbOfReviews).arg(nbOfCurrentReviews):
                                                         NoReviews)
-                                               .arg(mWaniKani.user().currentVacationStartedAt()?
+                                               .arg(mWaniKani.user().currentVacationStartedAt().isValid()?
                                                         QString():
                                                         (diff <= 0)?
                                                             ReviewsLink.arg("now"):

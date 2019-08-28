@@ -36,7 +36,7 @@ limitations under the License.
 
 //==============================================================================
 
-uint User::currentVacationStartedAt() const
+QDateTime User::currentVacationStartedAt() const
 {
     // Return our current vacation start at
 
@@ -647,7 +647,7 @@ void WaniKani::userReply()
     if (validJsonDocument(mUserResponse)) {
         QVariantMap userResponseMap = mUserResponse.object().toVariantMap()["data"].toMap();
 
-        mUser.mCurrentVacationStartedAt = userResponseMap["current_vacation_started_at"].toUInt();
+        mUser.mCurrentVacationStartedAt = QDateTime::fromString(userResponseMap["current_vacation_started_at"].toString(), Qt::ISODate);
         mUser.mLevel = userResponseMap["level"].toInt();
         mUser.mProfileUrl = userResponseMap["profile_url"].toString();
         mUser.mUserName = userResponseMap["username"].toString();

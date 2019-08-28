@@ -24,6 +24,7 @@ limitations under the License.
 
 //==============================================================================
 
+#include <QDateTime>
 #include <QJsonDocument>
 #include <QList>
 #include <QObject>
@@ -37,13 +38,13 @@ class User
     friend class WaniKani;
 
 public:
-    uint currentVacationStartedAt() const;
+    QDateTime currentVacationStartedAt() const;
     int level() const;
     QString profileUrl() const;
     QString userName() const;
 
 private:
-    uint mCurrentVacationStartedAt = 0;
+    QDateTime mCurrentVacationStartedAt;
     int mLevel = 0;
     QString mProfileUrl;
     QString mUserName;
