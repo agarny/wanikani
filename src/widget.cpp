@@ -749,6 +749,23 @@ Widget::Widget() :
 
     mGui->aboutValue->setText(About.arg(version).arg(QDate::currentDate().year()));
 
+    // Create our system tray icon
+    // Note: activation of the tray icon doesn't (currently) work on Linux, so
+    //       we achieve the same result through a 'fake' context menu...
+
+    mTrayIcon.setIcon(QIcon(":/icon"));
+    mTrayIcon.setToolTip("WaniKani");
+
+#ifdef Q_OS_LINUX
+    mTrayIcon.setContextMenu(new QMenu());
+
+    connect(mTrayIcon.contextMenu(), &QMenu::aboutToShow,
+            this, &Widget::trayIconActivated);
+#else
+    connect(&mTrayIcon, &QSystemTrayIcon::activated,
+            this, &Widget::trayIconActivated);
+#endif
+
     // Handle signals from our WaniKani object
 
     connect(&mWaniKani, &WaniKani::updated,
@@ -776,23 +793,6 @@ Widget::Widget() :
             &mWaniKani, &WaniKani::update);
 
     updateInterval(mGui->intervalSpinBox->value());
-
-    // Create and show our system tray icon
-    // Note: activation of the tray icon doesn't (currently) work on Linux, so
-    //       we achieve the same result through a 'fake' context menu...
-
-    mTrayIcon.setIcon(QIcon(":/icon"));
-    mTrayIcon.setToolTip("WaniKani");
-
-#ifdef Q_OS_LINUX
-    mTrayIcon.setContextMenu(new QMenu());
-
-    connect(mTrayIcon.contextMenu(), &QMenu::aboutToShow,
-            this, &Widget::trayIconActivated);
-#else
-    connect(&mTrayIcon, &QSystemTrayIcon::activated,
-            this, &Widget::trayIconActivated);
-#endif
 
     mInitializing = false;
 }
