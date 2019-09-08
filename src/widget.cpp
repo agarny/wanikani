@@ -1752,6 +1752,10 @@ void Widget::waniKaniError()
 
 void Widget::trayIconActivated()
 {
+    // Make sure that our data is up to date
+
+    on_forceUpdateButton_clicked();
+
     // Make sure that we are in the centre of the screen
 
     QRect availableGeometry = QGuiApplication::primaryScreen()->availableGeometry();
