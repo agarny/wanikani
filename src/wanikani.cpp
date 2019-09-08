@@ -559,7 +559,7 @@ QNetworkReply * WaniKani::waniKaniNetworkReply(const QString &pRequest)
 
     networkRequest.setRawHeader("Accept-Encoding", "gzip");
 
-    return mNetworkAccessManager->get(networkRequest);;
+    return mNetworkAccessManager->get(networkRequest);
 }
 
 //==============================================================================
@@ -576,7 +576,7 @@ QNetworkReply * WaniKani::waniKaniV2NetworkReply(const QString &pRequest)
     networkRequest.setRawHeader("Wanikani-Revision", "20170710");
     networkRequest.setRawHeader("Authorization", QString("Bearer %1").arg(mApiToken).toUtf8());
 
-    return mNetworkAccessManager->get(networkRequest);;
+    return mNetworkAccessManager->get(networkRequest);
 }
 
 //==============================================================================
