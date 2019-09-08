@@ -1982,7 +1982,7 @@ void Widget::updateTimeRelatedInformation()
                                                         QString():
                                                         (diff <= 0)?
                                                             ReviewsLink.arg("now"):
-                                                            (diff != std::numeric_limits<qint64>::max())?
+                                                            (diff != LLONG_MAX)?
                                                                 InSomeTime.arg(timeToString(diff)):
                                                                 ""));
     mGui->nextReviewsValue->setToolTip(ReviewsToolTip.arg(nbOfRadicalsReviews[1]).arg(nbOfRadicalsReviews[0])
