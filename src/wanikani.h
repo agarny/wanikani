@@ -294,8 +294,7 @@ public:
     explicit WaniKani();
     ~WaniKani();
 
-    void setApiKey(const QString &pApiKey);
-    void setApiToken(const QString &pApiToken);
+    void setApiKeyAndToken(const QString &pApiKey, const QString &pApiToken);
 
     User user() const;
     StudyQueue studyQueue() const;

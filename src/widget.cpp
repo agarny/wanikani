@@ -931,8 +931,7 @@ void Widget::retrieveSettings(bool pResetSettings)
     // requested
 
     QSettings settings;
-    bool setWaniKaniApiKey = false;
-    bool setWaniKaniApiToken = false;
+    bool setWaniKaniApiKeyAndToken = false;
 
     if (mInitializing) {
         mFileName = settings.value(SettingsFileName).toString();
@@ -940,8 +939,7 @@ void Widget::retrieveSettings(bool pResetSettings)
         mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
         mGui->apiTokenValue->setText(settings.value(SettingsApiToken).toString());
 
-        setWaniKaniApiKey = true;
-        setWaniKaniApiToken = true;
+        setWaniKaniApiKeyAndToken = true;
     }
 
     if (pResetSettings) {
@@ -994,12 +992,9 @@ void Widget::retrieveSettings(bool pResetSettings)
 #endif
     }
 
-    if (setWaniKaniApiKey) {
-        mWaniKani.setApiKey(mGui->apiKeyValue->text());
-    }
-
-    if (setWaniKaniApiToken) {
-        mWaniKani.setApiToken(mGui->apiTokenValue->text());
+    if (setWaniKaniApiKeyAndToken) {
+        mWaniKani.setApiKeyAndToken(mGui->apiKeyValue->text(),
+                                    mGui->apiTokenValue->text());
     }
 
     if (pResetSettings) {
@@ -1363,18 +1358,20 @@ QColor Widget::color(int pRow, int pColumn) const
 
 void Widget::on_apiKeyValue_returnPressed()
 {
-    // Set our WaniKani API key
+    // Set our WaniKani API key (and token)
 
-    mWaniKani.setApiKey(mGui->apiKeyValue->text());
+    mWaniKani.setApiKeyAndToken(mGui->apiKeyValue->text(),
+                                mGui->apiTokenValue->text());
 }
 
 //==============================================================================
 
 void Widget::on_apiTokenValue_returnPressed()
 {
-    // Set our WaniKani API token
+    // Set our WaniKani API (key and) token
 
-    mWaniKani.setApiToken(mGui->apiTokenValue->text());
+    mWaniKani.setApiKeyAndToken(mGui->apiKeyValue->text(),
+                                mGui->apiTokenValue->text());
 }
 
 //==============================================================================

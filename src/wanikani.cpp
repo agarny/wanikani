@@ -527,21 +527,12 @@ WaniKani::~WaniKani()
 
 //==============================================================================
 
-void WaniKani::setApiKey(const QString &pApiKey)
+void WaniKani::setApiKeyAndToken(const QString &pApiKey,
+                                 const QString &pApiToken)
 {
-    // Set our API key and update our information
+    // Set our API key and token, and update our information
 
     mApiKey = pApiKey;
-
-    update();
-}
-
-//==============================================================================
-
-void WaniKani::setApiToken(const QString &pApiToken)
-{
-    // Set our API token and update our information
-
     mApiToken = pApiToken;
 
     update();
