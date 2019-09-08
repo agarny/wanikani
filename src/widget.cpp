@@ -1401,7 +1401,7 @@ void Widget::on_forceUpdateButton_clicked()
 
 void Widget::on_fontComboBox_currentTextChanged(const QString &pFontName)
 {
-    Q_UNUSED(pFontName);
+    Q_UNUSED(pFontName)
 
     // Force the update of our wallpaper
 
@@ -2047,9 +2047,9 @@ void Widget::setPushButtonColor(QPushButton *pPushButton, QRgb pColor)
     mColors.insert(pPushButton, pColor);
 
     double a = qAlpha(pColor)/255.0;
-    QRgb solidColor = qRgb((1.0-a)*224+a*qRed(pColor),
-                            (1.0-a)*224+a*qGreen(pColor),
-                            (1.0-a)*224+a*qBlue(pColor));
+    QRgb solidColor = qRgb(int((1.0-a)*224+a*qRed(pColor)),
+                           int((1.0-a)*224+a*qGreen(pColor)),
+                           int((1.0-a)*224+a*qBlue(pColor)));
 
     pPushButton->setStyleSheet(PushButtonStyle.arg(pPushButton->objectName())
                                               .arg(qRed(solidColor))
