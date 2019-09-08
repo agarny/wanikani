@@ -907,6 +907,8 @@ void WaniKani::doUpdate(bool pForce)
     // Make sure that we have an API key
 
     if (mApiKey.isEmpty() || mApiToken.isEmpty()) {
+        emit error();
+
         return;
     }
 

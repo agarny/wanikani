@@ -752,6 +752,11 @@ Widget::Widget() :
     // Handle signals from our WaniKani object
 
     connect(&mWaniKani, &WaniKani::updated,
+            &mTrayIcon, &QSystemTrayIcon::show);
+    connect(&mWaniKani, &WaniKani::error,
+            &mTrayIcon, &QSystemTrayIcon::show);
+
+    connect(&mWaniKani, &WaniKani::updated,
             this, &Widget::waniKaniUpdated);
     connect(&mWaniKani, &WaniKani::updated,
             this, &Widget::updateTimeRelatedInformation);
@@ -788,11 +793,6 @@ Widget::Widget() :
     connect(&mTrayIcon, &QSystemTrayIcon::activated,
             this, &Widget::trayIconActivated);
 #endif
-
-    connect(&mWaniKani, &WaniKani::updated,
-            &mTrayIcon, &QSystemTrayIcon::show);
-    connect(&mWaniKani, &WaniKani::error,
-            &mTrayIcon, &QSystemTrayIcon::show);
 
     mInitializing = false;
 }
