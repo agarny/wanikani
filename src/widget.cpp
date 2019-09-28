@@ -494,8 +494,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     painter.setPen(pen);
 
-    int startTimeHour = startTime.time().hour();
-    double startTimeHourAndMinutes = startTimeHour+startTime.time().minute()/60.0;
+    double startTimeHourAndMinutes = startTime.time().hour()+startTime.time().minute()/60.0;
     double xDayShift = -startTimeHourAndMinutes/mRange*(canvasWidth-1);
 
     for (double i = 0.0, iMax = mRange+startTimeHourAndMinutes; i <= iMax; i += timeMinorStep) {
@@ -541,7 +540,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     pen.setStyle(Qt::SolidLine);
 
-    for (double i = 0.0, iMax = mRange+startTimeHour; i <= iMax; i += timeMajorStep) {
+    for (double i = 0.0, iMax = mRange+startTime.time().hour(); i <= iMax; i += timeMajorStep) {
         double x = xDayShift+i*canvasWidthOverRange;
 
         if (x >= 0) {
