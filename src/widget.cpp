@@ -572,7 +572,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     // Paint the various reviews for the different time slots
 
-    double timeMultiplier = canvasWidthOverRange*mRange/(endTime.toTime_t()-startTime.toTime_t());
+    double timeMultiplier = canvasWidthOverRange*mRange/(endTime.toSecsSinceEpoch()-startTime.toSecsSinceEpoch());
 
     mData = QList<ReviewsTimeLineData>();
 
@@ -581,8 +581,8 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     //       using it with QPainter::fillRect()...
 
     for (const auto &dateTime : allRadicalsReviews.keys()) {
-        qint64 timeDiff = dateTime.toTime_t()-mWidget->now().toTime_t();
-        double x = (dateTime.toTime_t()-startTime.toTime_t())*timeMultiplier;
+        qint64 timeDiff = dateTime.toSecsSinceEpoch()-mWidget->now().toSecsSinceEpoch();
+        double x = (dateTime.toSecsSinceEpoch()-startTime.toSecsSinceEpoch())*timeMultiplier;
         double xWidth = 900.0*timeMultiplier;
 
         ReviewsTimeLineData data;
@@ -1617,7 +1617,7 @@ void Widget::waniKaniUpdated()
 
     // Retrieve various information about our radicals
 
-    qint64 nowTime = mNow.toTime_t();
+    qint64 nowTime = mNow.toSecsSinceEpoch();
 
     mLevelStartTime = 0;
     mRadicalGuruTimes.clear();
@@ -1829,7 +1829,7 @@ void Widget::updateTimeRelatedInformation()
 
     mNow = QDateTime::currentDateTime();
 
-    qint64 nowTime = mNow.toTime_t();
+    qint64 nowTime = mNow.toSecsSinceEpoch();
 
     static const QString LevelStatisticsText = "<center>\n"
                                                "    <table style=\"font-size: 11px\">\n"
