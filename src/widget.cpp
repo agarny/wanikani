@@ -375,7 +375,10 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                                                          (mWidget->now().time().minute() < 45)?
                                                                              30:
                                                                              45));
-    QDateTime endTime = startTime.addSecs(mRange*3600);
+    QDateTime endTime;
+
+    endTime.setSecsSinceEpoch(startTime.toSecsSinceEpoch()+mRange*3600);
+
     int currentRadicalsReviewsBeforeStartTime = 0;
     int allRadicalsReviewsBeforeStartTime = 0;
     int currentKanjiReviewsBeforeStartTime = 0;
@@ -484,6 +487,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     painter.fillRect(0, 0, width(), height(), QPalette().button());
 
     // Paint the minor time lines
+    // Note: +1 when computing iMax in case of daylight saving...
 
     painter.translate(xShift, yShift);
 
@@ -494,10 +498,10 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
     painter.setPen(pen);
 
-    double startTimeHourAndMinutes = startTime.time().hour()+startTime.time().minute()/60.0;
-    double xDayShift = -startTimeHourAndMinutes/mRange*(canvasWidth-1);
+    double startTimeMinutes = startTime.time().minute()/60.0;
+    double xDayShift = -startTimeMinutes/mRange*(canvasWidth-1);
 
-    for (double i = 0.0, iMax = mRange+startTimeHourAndMinutes; i <= iMax; i += timeMinorStep) {
+    for (double i = 0.0, iMax = mRange+1; i <= iMax; i += timeMinorStep) {
         double x = xDayShift+i*canvasWidthOverRange;
 
         if (x >= 0) {
@@ -537,14 +541,19 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     }
 
     // Paint the major time lines
+    // Note: +1 when computing iMax in case of daylight saving...
+
+    QDateTime testTime;
 
     pen.setStyle(Qt::SolidLine);
 
-    for (double i = 0.0, iMax = mRange+startTime.time().hour(); i <= iMax; i += timeMajorStep) {
+    for (double i = 0.0, iMax = mRange+1; i <= iMax; ++i) {
         double x = xDayShift+i*canvasWidthOverRange;
 
-        if (x >= 0) {
-            int dayHour = int(fmod(i, 24.0));
+        testTime.setSecsSinceEpoch(startTime.toSecsSinceEpoch()+qint64(i*3600)-startTime.time().minute()*60);
+
+        if ((fmod(testTime.time().hour(), timeMajorStep) == 0.0) && (x >= 0)) {
+            int dayHour = int(fmod(testTime.time().hour(), 24.0));
 
             pen.setColor(dayHour?Qt::lightGray:Qt::red);
 
@@ -564,8 +573,8 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 
             painter.drawText(QPointF(x+Space, -Space),
                              dayHour?
-                                 QTime(dayHour, 0).toString("hap"):
-                                 startTime.addDays(qint64(qFuzzyIsNull(i)?0:i/24)).toString("ddd"));
+                                 testTime.toString("hap"):
+                                 testTime.toString("ddd"));
         }
     }
 
