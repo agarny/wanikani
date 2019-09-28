@@ -375,7 +375,7 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                                                                          (mWidget->now().time().minute() < 45)?
                                                                              30:
                                                                              45));
-    QDateTime endTime = startTime.addSecs(3600*mRange);
+    QDateTime endTime = startTime.addSecs(mRange*3600);
     int currentRadicalsReviewsBeforeStartTime = 0;
     int allRadicalsReviewsBeforeStartTime = 0;
     int currentKanjiReviewsBeforeStartTime = 0;
