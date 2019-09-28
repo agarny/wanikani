@@ -792,8 +792,6 @@ Widget::Widget() :
     connect(&mWaniKaniTimer, &QTimer::timeout,
             &mWaniKani, &WaniKani::update);
 
-    updateInterval(mGui->intervalSpinBox->value());
-
     mInitializing = false;
 }
 
@@ -806,6 +804,8 @@ bool Widget::event(QEvent *pEvent)
         // ourselves
 
         QWidget::event(pEvent);
+
+        mWaniKaniTimer.stop();
 
         hide();
 
@@ -1749,9 +1749,12 @@ void Widget::waniKaniError()
 
 void Widget::trayIconActivated()
 {
-    // Make sure that our data is up to date
+    // Make sure that our data is up to date and restart our timer by updating
+    // its interval
 
     on_forceUpdateButton_clicked();
+
+    updateInterval(mGui->intervalSpinBox->value());
 
     // Make sure that we are in the centre of the screen
 
