@@ -540,44 +540,6 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
                          QString::number(j), textOption);
     }
 
-    // Paint the major time lines
-    // Note: +1 when computing iMax in case of daylight saving...
-
-    QDateTime testTime;
-
-    pen.setStyle(Qt::SolidLine);
-
-    for (double i = 0.0, iMax = mRange+1; i <= iMax; ++i) {
-        double x = xDayShift+i*canvasWidthOverRange;
-
-        testTime.setSecsSinceEpoch(startTime.toSecsSinceEpoch()+qint64(i*3600)-startTime.time().minute()*60);
-
-        if ((fmod(testTime.time().hour(), timeMajorStep) == 0.0) && (x >= 0)) {
-            int dayHour = int(fmod(testTime.time().hour(), 24.0));
-
-            pen.setColor(dayHour?Qt::lightGray:Qt::red);
-
-            painter.setPen(pen);
-
-            painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1.0));
-
-#ifdef Q_OS_MAC
-            pen.setColor(isDarkMode()?
-                             dayHour?Qt::white:Qt::red:
-                             dayHour?Qt::black:Qt::darkRed);
-#else
-            pen.setColor(dayHour?Qt::black:Qt::darkRed);
-#endif
-
-            painter.setPen(pen);
-
-            painter.drawText(QPointF(x+Space, -Space),
-                             dayHour?
-                                 testTime.toString("hap"):
-                                 testTime.toString("ddd"));
-        }
-    }
-
     // Paint the various reviews for the different time slots
 
     double timeMultiplier = canvasWidthOverRange*mRange/(endTime.toSecsSinceEpoch()-startTime.toSecsSinceEpoch());
@@ -660,10 +622,47 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
     // Paint our border
 
     pen.setColor(Qt::lightGray);
+    pen.setStyle(Qt::SolidLine);
 
     painter.setPen(pen);
 
     painter.drawRect(0, 0, canvasWidth-1, canvasHeight-1);
+
+    // Paint the major time lines
+    // Note: +1 when computing iMax in case of daylight saving...
+
+    QDateTime testTime;
+
+    for (double i = 0.0, iMax = mRange+1; i <= iMax; ++i) {
+        double x = xDayShift+i*canvasWidthOverRange;
+
+        testTime.setSecsSinceEpoch(startTime.toSecsSinceEpoch()+qint64(i*3600)-startTime.time().minute()*60);
+
+        if ((fmod(testTime.time().hour(), timeMajorStep) == 0.0) && (x >= 0)) {
+            int dayHour = int(fmod(testTime.time().hour(), 24.0));
+
+            pen.setColor(dayHour?Qt::lightGray:Qt::red);
+
+            painter.setPen(pen);
+
+            painter.drawLine(QPointF(x, -yShift), QPointF(x, canvasHeight-1.0));
+
+#ifdef Q_OS_MAC
+            pen.setColor(isDarkMode()?
+                             dayHour?Qt::white:Qt::red:
+                             dayHour?Qt::black:Qt::darkRed);
+#else
+            pen.setColor(dayHour?Qt::black:Qt::darkRed);
+#endif
+
+            painter.setPen(pen);
+
+            painter.drawText(QPointF(x+Space, -Space),
+                             dayHour?
+                                 testTime.toString("hap"):
+                                 testTime.toString("ddd"));
+        }
+    }
 
     // Accept the event
 
