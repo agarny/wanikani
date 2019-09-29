@@ -650,9 +650,9 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 #ifdef Q_OS_MAC
             pen.setColor(isDarkMode()?
                              dayHour?Qt::white:Qt::red:
-                             dayHour?Qt::black:Qt::darkRed);
+                             dayHour?Qt::black:Qt::red);
 #else
-            pen.setColor(dayHour?Qt::black:Qt::darkRed);
+            pen.setColor(dayHour?Qt::black:Qt::red);
 #endif
 
             painter.setPen(pen);
