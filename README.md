@@ -1,4 +1,4 @@
-This is a simple program that takes advantage of the [WaniKani](https://www.wanikani.com/) [API](https://www.wanikani.com/api) to retrieve various user information. It works on <a href="https://en.wikipedia.org/wiki/Microsoft_Windows">Windows</a>, <a href="https://en.wikipedia.org/wiki/Linux">Linux</a> or <a href="https://en.wikipedia.org/wiki/MacOS">macOS</a>.
+This is a simple program that takes advantage of the [WaniKani](https://www.wanikani.com/) [API](https://www.wanikani.com/api) to retrieve various user information. It works on <a href="https://en.wikipedia.org/wiki/Microsoft_Windows">Windows</a>, <a href="https://en.wikipedia.org/wiki/Linux">Linux</a> and <a href="https://en.wikipedia.org/wiki/MacOS">macOS</a>.
 
 No binaries are currently provided, so you need to compile the program yourself using [Qt](https://www.qt.io/).
 
