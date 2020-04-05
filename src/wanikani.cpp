@@ -434,7 +434,7 @@ QString Radical::image() const
 
 UserSpecific Radical::userSpecific() const
 {
-    // Return our user specific information
+    // Return our user specific data
 
     return mUserSpecific;
 }
@@ -488,7 +488,7 @@ QString Kanji::imporantReading() const
 
 ExtraUserSpecific Kanji::userSpecific() const
 {
-    // Return our user specific information
+    // Return our user specific data
 
     return mUserSpecific;
 }
@@ -506,7 +506,7 @@ QString Vocabulary::kana() const
 
 ExtraUserSpecific Vocabulary::userSpecific() const
 {
-    // Return our user specific information
+    // Return our user specific data
 
     return mUserSpecific;
 }
@@ -527,30 +527,13 @@ WaniKani::~WaniKani()
 
 //==============================================================================
 
-void WaniKani::setApiKeyAndToken(const QString &pApiKey,
-                                 const QString &pApiToken)
+void WaniKani::setApiToken(const QString &pApiToken)
 {
-    // Set our API key and token, and update our information
+    // Set our API token, and force update our data
 
-    mApiKey = pApiKey;
     mApiToken = pApiToken;
 
-    update();
-}
-
-//==============================================================================
-
-QNetworkReply * WaniKani::waniKaniNetworkReply(const QString &pRequest)
-{
-    // Send a request to WaniKani, asking for its response to be compressed, and
-    // then convert its response to a JSON document, if possible and after
-    // having uncompressed it
-
-    QNetworkRequest networkRequest(QString("https://www.wanikani.com/api/v1.4/user/%1/%2").arg(mApiKey, pRequest));
-
-    networkRequest.setRawHeader("Accept-Encoding", "gzip");
-
-    return mNetworkAccessManager->get(networkRequest);
+    forceUpdate();
 }
 
 //==============================================================================
@@ -641,7 +624,7 @@ bool WaniKani::validJsonDocument(const QJsonDocument &pJsonDocument)
 
 void WaniKani::userReply()
 {
-    // Retrieve, if available, the user's information
+    // Retrieve, if available, the user's data
 
     mUserResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
@@ -662,8 +645,8 @@ void WaniKani::userReply()
 
 void WaniKani::studyQueueReply()
 {
-    // Retrieve, if available, some of the user's information, the user's study
-    // queu and the user's gravatar
+    // Retrieve, if available, some of the user's data, the user's study queue
+    // and the user's gravatar
 
     mStudyQueueResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
@@ -725,7 +708,7 @@ void WaniKani::srsDistributionReply()
 
 void WaniKani::radicalsReply()
 {
-    // Retrieve, if available, the radicals and their information
+    // Retrieve, if available, the radicals and their data
 
     mRadicalsResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
@@ -771,7 +754,7 @@ void WaniKani::radicalsReply()
 
 void WaniKani::kanjiReply()
 {
-    // Retrieve, if available, the Kanji and their information
+    // Retrieve, if available, the Kanji and their data
 
     mKanjiResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
@@ -821,7 +804,7 @@ void WaniKani::kanjiReply()
 
 void WaniKani::vocabularyReply()
 {
-    // Retrieve, if available, the vocabularies and their information
+    // Retrieve, if available, the vocabularies and their data
 
     mVocabularyResponse = waniKaniJsonResponse(qobject_cast<QNetworkReply *>(sender()));
 
@@ -896,48 +879,24 @@ void WaniKani::checkNbOfReplies()
 
 void WaniKani::doUpdate(bool pForce)
 {
-    // Make sure that we have an API key
+    // Make sure that we have an API token
 
-    bool hasApiKey = !mApiKey.isEmpty();
-    bool hasApiToken = !mApiToken.isEmpty();
-
-    if (!hasApiKey && !hasApiToken) {
+    if (mApiToken.isEmpty()) {
         emit error();
 
         return;
     }
 
-    // Retrieve
-    //  - the user's information and study queue
-    //  - the user's SRS distribution
-    //  - the user's list of radicals (and their information)
-    //  - the user's list of Kanji (and their information)
-    //  - the user's list of vocabulary (and their information)
+    // Get/update our data
 
-    bool retrieveData = !mApiKey.isEmpty();
-    bool retrieveV2Data = !mApiToken.isEmpty() && (pForce || !mUser.mHasData);
+    bool retrieveV2Data = pForce || !mUser.mHasData;
 
     mNbOfReplies = 0;
-    mNbOfNeededReplies = 6*int(retrieveData)+int(retrieveV2Data);
+    mNbOfNeededReplies = int(retrieveV2Data);
 
     if (retrieveV2Data) {
         QObject::connect(waniKaniV2NetworkReply("user"), &QNetworkReply::finished,
                          this, &WaniKani::userReply);
-    }
-
-    if (retrieveData) {
-        QObject::connect(waniKaniNetworkReply("study-queue"), &QNetworkReply::finished,
-                         this, &WaniKani::studyQueueReply);
-        QObject::connect(waniKaniNetworkReply("level-progression"), &QNetworkReply::finished,
-                         this, &WaniKani::levelProgressionReply);
-        QObject::connect(waniKaniNetworkReply("srs-distribution"), &QNetworkReply::finished,
-                         this, &WaniKani::srsDistributionReply);
-        QObject::connect(waniKaniNetworkReply("radicals/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60"), &QNetworkReply::finished,
-                         this, &WaniKani::radicalsReply);
-        QObject::connect(waniKaniNetworkReply("kanji/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60"), &QNetworkReply::finished,
-                         this, &WaniKani::kanjiReply);
-        QObject::connect(waniKaniNetworkReply("vocabulary/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60"), &QNetworkReply::finished,
-                         this, &WaniKani::vocabularyReply);
     }
 }
 
@@ -965,7 +924,7 @@ void WaniKani::updateSrsDistribution(const QString &pName,
                                      const QVariantMap &pVariantMap,
                                      SrsDistributionInformation &pSrsDistributionInformation)
 {
-    // Update the given SRS distribution information using the given variant map
+    // Update the given SRS distribution data using the given variant map
 
     pSrsDistributionInformation.mName = pName;
     pSrsDistributionInformation.mRadicals = pVariantMap["radicals"].toString();

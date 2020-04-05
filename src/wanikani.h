@@ -294,7 +294,7 @@ public:
     explicit WaniKani();
     ~WaniKani();
 
-    void setApiKeyAndToken(const QString &pApiKey, const QString &pApiToken);
+    void setApiToken(const QString &pApiToken);
 
     User user() const;
     StudyQueue studyQueue() const;
@@ -307,7 +307,6 @@ public:
     void forceUpdate();
 
 private:
-    QString mApiKey;
     QString mApiToken;
 
     User mUser;
@@ -331,7 +330,6 @@ private:
     int mNbOfReplies = 0;
     int mNbOfNeededReplies = 7;
 
-    QNetworkReply * waniKaniNetworkReply(const QString &pRequest);
     QNetworkReply * waniKaniV2NetworkReply(const QString &pRequest);
     QJsonDocument waniKaniJsonResponse(QNetworkReply *pNetworkReply);
 

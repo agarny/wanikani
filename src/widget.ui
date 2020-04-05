@@ -211,20 +211,6 @@
              <number>4</number>
             </property>
             <item>
-             <layout class="QHBoxLayout" name="apiKeyLayout">
-              <item>
-               <widget class="QLabel" name="apiKeyLabel">
-                <property name="text">
-                 <string>API key:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="apiKeyValue"/>
-              </item>
-             </layout>
-            </item>
-            <item>
              <layout class="QHBoxLayout" name="apiTokenLayout">
               <item>
                <widget class="QLabel" name="apiTokenLabel">

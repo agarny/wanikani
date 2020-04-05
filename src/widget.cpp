@@ -672,7 +672,6 @@ void ReviewsTimeLineWidget::paintEvent(QPaintEvent *pEvent)
 //==============================================================================
 
 static const auto SettingsFileName        = QStringLiteral("FileName");
-static const auto SettingsApiKey          = QStringLiteral("ApiKey");
 static const auto SettingsApiToken        = QStringLiteral("ApiToken");
 static const auto SettingsCurrentKanji    = QStringLiteral("CurrentKanji");
 static const auto SettingsInterval        = QStringLiteral("Interval");
@@ -736,7 +735,6 @@ Widget::Widget() :
             this, &Widget::updateTimeRelatedInformation);
 
 #ifdef Q_OS_MAC
-    mGui->apiKeyValue->setAttribute(Qt::WA_MacShowFocusRect, false);
     mGui->intervalSpinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
 #endif
 
@@ -938,15 +936,14 @@ void Widget::retrieveSettings(bool pResetSettings)
     // requested
 
     QSettings settings;
-    bool setWaniKaniApiKeyAndToken = false;
+    bool setWaniKaniApiToken = false;
 
     if (mInitializing) {
         mFileName = settings.value(SettingsFileName).toString();
 
-        mGui->apiKeyValue->setText(settings.value(SettingsApiKey).toString());
         mGui->apiTokenValue->setText(settings.value(SettingsApiToken).toString());
 
-        setWaniKaniApiKeyAndToken = true;
+        setWaniKaniApiToken = true;
     }
 
     if (pResetSettings) {
@@ -999,9 +996,8 @@ void Widget::retrieveSettings(bool pResetSettings)
 #endif
     }
 
-    if (setWaniKaniApiKeyAndToken) {
-        mWaniKani.setApiKeyAndToken(mGui->apiKeyValue->text(),
-                                    mGui->apiTokenValue->text());
+    if (setWaniKaniApiToken) {
+        mWaniKani.setApiToken(mGui->apiTokenValue->text());
     }
 
     if (pResetSettings) {
@@ -1363,22 +1359,11 @@ QColor Widget::color(int pRow, int pColumn) const
 
 //==============================================================================
 
-void Widget::on_apiKeyValue_returnPressed()
-{
-    // Set our WaniKani API key (and token)
-
-    mWaniKani.setApiKeyAndToken(mGui->apiKeyValue->text(),
-                                mGui->apiTokenValue->text());
-}
-
-//==============================================================================
-
 void Widget::on_apiTokenValue_returnPressed()
 {
-    // Set our WaniKani API (key and) token
+    // Set our WaniKani API token
 
-    mWaniKani.setApiKeyAndToken(mGui->apiKeyValue->text(),
-                                mGui->apiTokenValue->text());
+    mWaniKani.setApiToken(mGui->apiTokenValue->text());
 }
 
 //==============================================================================
@@ -1476,7 +1461,6 @@ void Widget::on_closeToolButton_clicked()
     QSettings settings;
 
     settings.setValue(SettingsFileName, mFileName);
-    settings.setValue(SettingsApiKey, mGui->apiKeyValue->text());
     settings.setValue(SettingsApiToken, mGui->apiTokenValue->text());
     settings.setValue(SettingsCurrentKanji, mGui->currentKanjiRadioButton->isChecked());
     settings.setValue(SettingsInterval, mGui->intervalSpinBox->value());

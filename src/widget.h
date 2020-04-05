@@ -235,7 +235,6 @@ private:
     void resetInternals(bool pVisible = true);
 
 private slots:
-    void on_apiKeyValue_returnPressed();
     void on_apiTokenValue_returnPressed();
 
     void on_intervalSpinBox_valueChanged(int pInterval);
