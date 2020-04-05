@@ -734,10 +734,6 @@ Widget::Widget() :
     connect(mGui->reviewsTimeLineSlider, &QSlider::valueChanged,
             this, &Widget::updateTimeRelatedInformation);
 
-#ifdef Q_OS_MAC
-    mGui->intervalSpinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-#endif
-
     // Some about information
 
     static const QString About = "<span style=\"font-size: 19px; font-weight: bold\"><a href=\"https://github.com/agarny/wanikani\""+QString(LinkStyle)+">WaniKani</a> %1</span><br/>"
